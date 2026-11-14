@@ -18,7 +18,7 @@ let activeCodeLanguage = selectedCodeLanguage();
 try {
 	const createDemoEditor = async (value, codeLanguage) => {
 		const instance = await createEditor(document.querySelector('#editor'), {
-			language: selectedLanguage(), codeLanguage, value, fontSize: 18,
+			language: selectedLanguage(), codeLanguage, value, fontSize: 18, fontFamily: 'Inconsolata, monospace',
 			...extensionSettings(),
 		});
 		instance.setSettings(extensionSettings());
