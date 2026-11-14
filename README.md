@@ -100,6 +100,7 @@ Use `setDefinitions` to change additional definitions after initialization.
 | `lineWrapping` | `false` | Line wrapping |
 | `structureHighlight` | `true` | Canvas highlighting for functions, classes, branches, and loops |
 | `declarationHighlight` | `true` | Canvas highlighting for variable declarations |
+| `referenceHighlight` | `true` | Canvas highlighting for variable references |
 | `syntaxHighlight` | `true` | Syntax coloring for comments, keywords, literals, and related tokens |
 | `semanticHighlight` | `true` | Semantic highlighting for definitions and variable references |
 | `functionLineNumbers` | `false` | Per-function line numbers; ordinary line numbers when analysis is disabled |
@@ -236,7 +237,7 @@ view.dispatch({ effects: setStructure.of([{
 ```
 
 Positions are zero-based `{line, ch}` with UTF-16 columns and exclusive ends.
-Supply ranges as above or tokens as `{kind: 'token', from, to, fill, stroke}`.
+Supply ranges as above or tokens as `{kind: 'token', appearance: 'declaration', from, to, fill, stroke}`. Use `appearance: 'reference'` for reference-style tokens.
 Colors can use `var(--property, fallback)` and are resolved against the editor
 when the canvas is repainted. An optional `opacity` sets the canvas alpha
 (default `1`). JavaScript and Java class ranges use `--croq-mirror-l-red` at
@@ -377,11 +378,8 @@ retained code and fresh comments.
 
 Removing the highlighting extension removes the source's decorations. Local
 reference color can be customized with `--croq-syntax-local-variable-color`.
-The background, shadow, and radius of variable references can be customized with
-`--croq-syntax-reference-background`, `--croq-syntax-reference-shadow`, and
-`--croq-syntax-reference-radius`. Comments, keywords/operators, definitions,
-and literals are bold by default. Literals also have a text shadow; both literal
-text shadows and variable-reference backgrounds/shadows are hidden on the
+Variable-reference backgrounds are drawn by the structure view. Comments, keywords/operators, definitions,
+and literals are bold by default. Literals also have a text shadow, hidden on the
 active line. Font weights and literal shadows can be customized with
 `--croq-syntax-comment-font-weight`, `--croq-syntax-keyword-font-weight`,
 `--croq-syntax-definition-font-weight`, `--croq-syntax-literal-font-weight`, and
@@ -440,7 +438,7 @@ ancestor to change its appearance without affecting other editors:
 | Function highlighting | `--croq-function-alternate-background`, `--croq-function-alternate-content`, `--croq-function-alternate-position`, `--croq-function-alternate-inset`, `--croq-function-alternate-z-index`, `--croq-function-alternate-pointer-events`, `--croq-function-lint-gutter-width` (component), `--croq-mirror-lint-gutter-width` (standalone) |
 | Function scroll markers | `--croq-function-scroll-marker-track-width`, `--croq-function-scroll-track-position`, `--croq-function-scroll-track-right`, `--croq-function-scroll-track-pointer-events`, `--croq-function-scroll-marker-inset`, `--croq-function-scroll-marker-radius`, `--croq-function-scroll-marker-color`, `--croq-function-scroll-marker-position`, `--croq-function-scroll-marker-aspect-ratio`, `--croq-function-scroll-marker-z-index` |
 | Gutter selection | `--croq-gutter-cursor`, `--croq-gutter-line-selection-cursor` (complete CSS `cursor` values) |
-| Syntax highlighting | `--croq-syntax-comment-color`, `--croq-syntax-comment-font-weight`, `--croq-syntax-keyword-color`, `--croq-syntax-keyword-font-weight`, `--croq-syntax-type-color`, `--croq-syntax-function-color`, `--croq-syntax-definition-color`, `--croq-syntax-definition-font-weight`, `--croq-syntax-property-color`, `--croq-syntax-variable-color`, `--croq-syntax-local-variable-color`, `--croq-syntax-reference-background`, `--croq-syntax-reference-shadow`, `--croq-syntax-reference-radius`, `--croq-syntax-literal-color`, `--croq-syntax-literal-font-weight`, `--croq-syntax-literal-text-shadow`, `--croq-syntax-invalid-decoration` |
+| Syntax highlighting | `--croq-syntax-comment-color`, `--croq-syntax-comment-font-weight`, `--croq-syntax-keyword-color`, `--croq-syntax-keyword-font-weight`, `--croq-syntax-type-color`, `--croq-syntax-function-color`, `--croq-syntax-definition-color`, `--croq-syntax-definition-font-weight`, `--croq-syntax-property-color`, `--croq-syntax-variable-color`, `--croq-syntax-local-variable-color`, `--croq-syntax-literal-color`, `--croq-syntax-literal-font-weight`, `--croq-syntax-literal-text-shadow`, `--croq-syntax-invalid-decoration` |
 | Indentation rulers | `--croq-indent-ruler-column` (unitless character column), `--croq-indent-ruler-width`, `--croq-indent-ruler-style`, `--croq-indent-ruler-color`, `--croq-indent-ruler-scroller-z-index`, `--croq-indent-ruler-content-z-index`, `--croq-indent-ruler-overlay-position`, `--croq-indent-ruler-overlay-z-index`, `--croq-indent-ruler-overlay-overflow`, `--croq-indent-ruler-pointer-events`, `--croq-indent-ruler-container-position`, `--croq-indent-ruler-container-right`, `--croq-indent-ruler-position`, `--croq-indent-ruler-inset-block` |
 
 Defaults are specified in each extension's `style.css`, including fallbacks to

@@ -5,7 +5,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1">
 	<title>croq-mirror - standalone example</title>
-	<link rel="stylesheet" href="./croq-mirror.min.css">
+	<link rel="stylesheet" href="./croq-mirror.min.css">
   <script type="module" crossorigin src="./assets/index-k8iru6RF.js"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-CSppUR0J.css">
 </head>
@@ -28,6 +28,7 @@
 			<legend>Editor extensions</legend>
 			<label><input type="checkbox" name="structureHighlight" checked> Structure highlighting</label>
 			<label><input type="checkbox" name="declarationHighlight" checked> Declaration highlighting</label>
+			<label><input type="checkbox" name="referenceHighlight" checked> Reference highlighting</label>
 			<label><input type="checkbox" name="syntaxHighlight" checked> Syntax highlighting</label>
 			<label><input type="checkbox" name="semanticHighlight" checked> Semantic highlighting</label>
 			<label><input type="checkbox" name="functionLineNumbers" checked> Per-function line numbers</label>
@@ -47,7 +48,7 @@
 		<button id="disabled">Disable interaction</button>
 		<button id="recreate">Destroy and recreate</button>
 	</main>
-	<pre id="status" aria-live="polite">Loading...</pre>
+	<pre id="status" aria-live="polite">Loading...</pre>
 </body>
 
 </html>

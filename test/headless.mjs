@@ -123,7 +123,7 @@ try {
 				for (let i = 0; i < 100 && !classPainted(); i++) await new Promise(resolve => setTimeout(resolve, 20));
 				assert(classPainted(), 'JavaScript sample class must be painted in translucent theme red');
 				const extensions = [
-					[['structureHighlight', 'declarationHighlight'], '.code-structure-view'],
+					[['structureHighlight', 'declarationHighlight', 'referenceHighlight'], '.code-structure-view'],
 					[['syntaxHighlight', 'semanticHighlight'], '.cm-editor.cm-syntax-highlighting'],
 					[['functionLineNumbers'], '.cm-editor.cm-function-line-numbers'],
 					[['functionScrollMarkers'], '.cm-editor.cm-function-scroll-markers'],

@@ -123,13 +123,13 @@ export async function runLanguageContractTests(assert) {
 		standalone.dispatch({ effects: setStructure.of([]) });
 		assert(await waitForPaint(false), 'standalone structure extension clears explicitly');
 		standalone.dispatch({ effects: setStructure.of([{
-			kind: 'token', from: { line: 1, ch: 2 }, to: { line: 1, ch: 6 }, fill: '#00ff00', stroke: '#000000',
+			kind: 'token', appearance: 'declaration', from: { line: 1, ch: 2 }, to: { line: 1, ch: 6 }, fill: '#00ff00', stroke: '#000000',
 		}]) });
 		assert(await waitForPaint(true), 'standalone structure extension draws externally supplied tokens');
 		standalone.dispatch({ changes: { from: 0, insert: ' ' } });
 		assert(await waitForPaint(false), 'document edits clear stale standalone structure');
 		standalone.dispatch({ effects: setStructure.of([{
-			kind: 'token', from: { line: 0, ch: 1 }, to: { line: 0, ch: 3 }, fill: '#00ff00', stroke: '#000000',
+			kind: 'token', appearance: 'declaration', from: { line: 0, ch: 1 }, to: { line: 0, ch: 3 }, fill: '#00ff00', stroke: '#000000',
 		}]) });
 		assert(await waitForPaint(true), 'standalone structure can be supplied again after editing');
 		standalone.dispatch({ userEvent: 'load' });
@@ -140,7 +140,7 @@ export async function runLanguageContractTests(assert) {
 			effects: compartment.reconfigure([structureView, retainStructureOnEdit]),
 		});
 		const token = (line, fill) => ({
-			kind: 'token', from: { line, ch: 0 }, to: { line, ch: 5 }, fill, stroke: fill,
+			kind: 'token', appearance: 'declaration', from: { line, ch: 0 }, to: { line, ch: 5 }, fill, stroke: fill,
 		});
 		standalone.dispatch({ effects: setStructure.of([
 			token(0, '#ff0000'), token(1, '#00ff00'), token(3, '#ffff00'), token(4, '#0000ff'),

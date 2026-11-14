@@ -134,7 +134,7 @@ export class Editor {
 				this.options.wrapping.of([]),
 				this.options.structure.of([
 					structureView,
-					structureViewOptions({ structures: true, declarations: true }),
+					structureViewOptions({ structures: true, declarations: true, references: true }),
 				]),
 				this.options.syntax.of([
 					syntaxHighlightingExtension,
@@ -252,12 +252,13 @@ export class Editor {
 			effects.push(this.options.numbers.reconfigure(this.sectionNumbers ? functionLineNumbers : absoluteLineNumbers));
 		}
 		if (previous.structureHighlight !== settings.structureHighlight ||
-			previous.declarationHighlight !== settings.declarationHighlight) {
-			effects.push(this.options.structure.reconfigure(settings.structureHighlight || settings.declarationHighlight ? [
+			previous.declarationHighlight !== settings.declarationHighlight || previous.referenceHighlight !== settings.referenceHighlight) {
+			effects.push(this.options.structure.reconfigure(settings.structureHighlight || settings.declarationHighlight || settings.referenceHighlight ? [
 				structureView,
 				structureViewOptions({
 					structures: settings.structureHighlight,
 					declarations: settings.declarationHighlight,
+					references: settings.referenceHighlight,
 				}),
 			] : []));
 		}
@@ -325,6 +326,7 @@ export class Editor {
 			sectionNumbers      : this.sectionNumbers,
 			structureHighlight  : settings.structureHighlight,
 			declarationHighlight: settings.declarationHighlight,
+			referenceHighlight  : settings.referenceHighlight,
 			syntaxHighlight     : settings.syntaxHighlight,
 			semanticHighlight   : settings.semanticHighlight,
 			functionMarkers     : this.functionMarkers,

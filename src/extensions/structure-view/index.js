@@ -6,12 +6,12 @@ import css from './style.css';
 
 export const setStructure = StateEffect.define();
 const retainOnEditFacet = Facet.define({ combine: values => values.some(Boolean) });
-const displayOptions = Facet.define({ combine: values => values.at(-1) ?? { structures: true, declarations: true } });
+const displayOptions = Facet.define({ combine: values => values.at(-1) ?? { structures: true, declarations: true, references: true } });
 export const retainStructureOnEdit = retainOnEditFacet.of(true);
 
 export function structureViewOptions(options) {
-	if (!options || typeof options.structures !== 'boolean' || typeof options.declarations !== 'boolean') {
-		throw new TypeError('Structure view options must specify structures and declarations');
+	if (!options || typeof options.structures !== 'boolean' || typeof options.declarations !== 'boolean' || typeof options.references !== 'boolean') {
+		throw new TypeError('Structure view options must specify structures, declarations and references');
 	}
 	return displayOptions.of(options);
 }
@@ -127,6 +127,7 @@ const structurePlugin = ViewPlugin.fromClass(class {
 			Boolean(before) !== Boolean(after) ||
 			(options.structures && before?.structures !== after?.structures) ||
 			(options.declarations && before?.declarations !== after?.declarations) ||
+			(options.references && before?.references !== after?.references) ||
 			(!after && update.startState.field(structureField) !== update.state.field(structureField)) ||
 			update.startState.facet(displayOptions) !== options
 		) {
@@ -153,7 +154,7 @@ const structurePlugin = ViewPlugin.fromClass(class {
 		const linePadding = parseFloat(window.getComputedStyle(view.contentDOM)
 			.getPropertyValue('--croq-mirror-line-padding')) || 0;
 		const left   = Math.max(frame.left, content.left);
-		const width  = Math.max(0, Math.min(view.defaultCharacterWidth * 64, frame.left + scroller.clientWidth - left));
+		const width  = Math.max(0, frame.left + scroller.clientWidth - left);
 		const height = scroller.clientHeight;
 		const { doc, tabSize } = view.state;
 		const coords = (pos, side = 1) => {
@@ -215,7 +216,7 @@ const structurePlugin = ViewPlugin.fromClass(class {
 			item.kind === 'range'
 				? [item.kind, item.fill, item.opacity, item.start, item.end.y, item.spine,
 					item.from.line === item.to.line, item.branchWidth, item.branchRows]
-				: [item.kind, item.fill, item.stroke, item.start, item.end])]);
+				: [item.kind, item.appearance, item.fill, item.stroke, item.start, item.end])]);
 		if (drawing === this.lastDrawing) return;
 		drawStructure(this.canvas, data, scale);
 		this.lastDrawing = drawing;
@@ -264,9 +265,16 @@ function commonDecorations(analysis, doc, options) {
 					? ['hsla(240, 75%, 97%, 1)', 'hsla(240, 75%, 65%, 0.75)']
 					: ['hsla(205, 100%, 97%, 1)', 'hsla(205, 100%, 52%, 0.75)'];
 			decorations.push({
-				kind: 'token', from: position(item.from), to: position(item.to),
+				kind: 'token', appearance: 'declaration', from: position(item.from), to: position(item.to),
 				fill: colors[0], stroke: colors[1],
 			});
+		}
+	}
+	if (options.references) {
+		for (const item of analysis.references) {
+			if (item.role !== 'reference') continue;
+			decorations.push({ kind: 'token', appearance: 'reference', from: position(item.from), to: position(item.to),
+				fill: 'rgba(253, 253, 253, 0.95)', stroke: 'rgba(46, 68, 154, 0.30)' });
 		}
 	}
 	return decorations;
@@ -297,14 +305,24 @@ function drawStructure(canvas, { width, height, charWidth, lineHeight, decoratio
 			const top    = start.y + padding;
 			const bottom = end.y + padding;
 			fill(ctx, left, top, spine, bottom - top + band, [band / 2, 0, 0, band / 2]);
-			fill(ctx, left + spine, top, width / 2, band, [0, band / 2, band / 2, 0]);
+			const capWidth = Math.min(width, charWidth * 64) / 2;
+			fill(ctx, left + spine, top, capWidth, band, [0, band / 2, band / 2, 0]);
 			if (item.from.line !== item.to.line) {
-				fill(ctx, left + spine, bottom, width / 2, band, [0, band / 2, band / 2, 0]);
+				fill(ctx, left + spine, bottom, capWidth, band, [0, band / 2, band / 2, 0]);
 			}
 			for (const row of item.branchRows) {
 				fill(ctx, left + spine, row + padding, Math.max(1, item.branchWidth - 4), band, [0, band / 2, band / 2, 0]);
 			}
-		} else {
+		} else if (item.appearance === 'reference') {
+			const x = start.x, h = charWidth * 1.9;
+			const y = start.y + (lineHeight - h) / 2;
+			ctx.save();
+			ctx.shadowColor = item.stroke;
+			ctx.shadowBlur = 6;
+			ctx.shadowOffsetY = 1;
+			fill(ctx, x, y, end.x - x, h, [0, lineHeight / 4, lineHeight / 4, 0]);
+			ctx.restore();
+		} else if (item.appearance === 'declaration') {
 			const x = start.x - 2;
 			const tokenHeight = charWidth * 1.9;
 			const y = start.y + (lineHeight - tokenHeight) / 2;

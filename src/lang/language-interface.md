@@ -26,7 +26,7 @@ change at runtime.
   publishes analysis through `setCommonAnalysis`; display extensions do not
   call a language module or inspect a parser tree.
 - `structure-view` renders shared structures and declarations on a canvas.
-  `structureViewOptions` independently enables either category.
+  `structureViewOptions` independently enables structures, declarations, and references.
 - `syntax-highlighting` consumes common syntax and references while allowing
   the reconciled syntax state.
 - `function-line-numbers` and `function-scroll-markers` independently consume

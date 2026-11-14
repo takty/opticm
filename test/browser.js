@@ -227,7 +227,7 @@ try {
 		shadow: jsReferenceStyle.boxShadow,
 		radius: jsReferenceStyle.borderRadius,
 	};
-	assert(jsReferenceAppearance.shadow !== 'none', 'JavaScript reference has a background and shadow');
+	assert(jsReferenceAppearance.shadow === 'none', 'JavaScript reference background is drawn on canvas');
 	a.moveTo({ line: 1, ch: 0 }, { focus: false });
 	assert(getComputedStyle(jsReference()).boxShadow === 'none',
 		'JavaScript reference shadow is hidden on the active line');
@@ -575,10 +575,6 @@ try {
 			'Java reference background, shadow and radius match JavaScript');
 		assert(!javaRoot.querySelector('.cm-line:nth-child(4) .cm-syntax-variable-reference'),
 			'Java variable declarations are not decorated as references');
-		javaRoot.style.setProperty('--croq-syntax-reference-background', '#123456');
-		assert(getComputedStyle(javaReference()).backgroundColor === 'rgb(18, 52, 86)',
-			'Java reference background accepts a CSS custom property');
-		javaRoot.style.removeProperty('--croq-syntax-reference-background');
 		javaEditor.moveTo({ line: 4, ch: 0 }, { focus: false });
 		assert(getComputedStyle(javaReference()).boxShadow === 'none' &&
 			getComputedStyle(javaReference()).backgroundColor === 'rgba(0, 0, 0, 0)',
@@ -634,7 +630,7 @@ try {
 			const jsStyle = getComputedStyle(jsToken), style = getComputedStyle(javaToken);
 			assert(jsStyle.fontWeight === (jsKind === 'variable-reference' ? '400' : '700') &&
 				(jsStyle.textShadow !== 'none') === (jsKind === 'literal') &&
-				(jsStyle.boxShadow !== 'none') === (jsKind === 'variable-reference'),
+				jsStyle.boxShadow === 'none',
 				`JavaScript retains expected syntax weight and shadows: ${text}`);
 			assert(style.fontWeight === jsStyle.fontWeight && style.textShadow === jsStyle.textShadow &&
 				style.boxShadow === jsStyle.boxShadow,

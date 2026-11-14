@@ -110,7 +110,7 @@ export function analyzeJava(source, rootNode) {
 			scope,
 		});
 		decorations.push({
-			kind: 'token', from: positionAt(from), to: positionAt(to),
+			kind: 'token', appearance: 'declaration', from: positionAt(from), to: positionAt(to),
 			fill: isFinal ? 'hsla(240, 75%, 97%, 1)' : 'hsla(205, 100%, 97%, 1)',
 			stroke: isFinal ? 'hsla(240, 75%, 65%, 0.75)' : 'hsla(205, 100%, 52%, 0.75)',
 		});

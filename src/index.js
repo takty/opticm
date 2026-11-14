@@ -21,6 +21,7 @@ const DEFAULT_SETTINGS = {
 	lineWrapping        : false,
 	structureHighlight  : true,
 	declarationHighlight: true,
+	referenceHighlight  : true,
 	syntaxHighlight     : true,
 	semanticHighlight   : true,
 	functionLineNumbers : false,
