@@ -29,11 +29,14 @@ export async function runLanguageContractTests(assert) {
 		const inactiveSpace = lines[1].querySelector('.cm-highlightSpace');
 		const activeTab = lines[0].querySelector('.cm-highlightTab');
 		const inactiveTab = lines[1].querySelector('.cm-highlightTab');
+		const activeTabShadow = activeTab ? getComputedStyle(activeTab, '::before').textShadow : '';
+		const inactiveTabShadow = inactiveTab ? getComputedStyle(inactiveTab, '::before').textShadow : '';
 		assert(activeSpace && inactiveSpace && activeTab && inactiveTab &&
 			getComputedStyle(activeSpace).backgroundImage.includes('linear-gradient') &&
 			getComputedStyle(inactiveSpace).backgroundImage === 'none' &&
 			getComputedStyle(activeTab, '::before').color === 'rgb(246, 176, 197)' &&
-			getComputedStyle(inactiveTab, '::before').color === 'rgb(251, 221, 230)',
+			getComputedStyle(inactiveTab, '::before').color === 'rgb(251, 221, 230)' &&
+			activeTabShadow.includes('0px 0px 6px') && inactiveTabShadow.includes('0px 0px 6px'),
 			'standalone whitespace extension styles active and inactive lines');
 		whitespaceHost.style.setProperty('--croq-whitespace-active-color', '#123456');
 		whitespaceHost.style.setProperty('--croq-whitespace-tab-color', '#654321');

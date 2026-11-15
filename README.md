@@ -308,7 +308,9 @@ install `highlightActiveLine()`; include the latter separately to mark active
 lines. Each space has a separate underline with a gap between adjacent spaces:
 2px thick for ordinary spaces and 4px for ideographic spaces, with the latter
 lightened by mixing the active color with 20% white. Without an active line,
-spaces are hidden and tabs use the inactive color.
+spaces are hidden and tabs use the inactive color. Tab arrows have a white
+text-shadow halo on active and inactive lines to remain visible over structure
+highlights.
 
 ```js
 import { highlightActiveLine } from '@codemirror/view';

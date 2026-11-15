@@ -20,7 +20,7 @@
 	transform-origin: left;
 	color: var(--croq-whitespace-tab-color, var(--croq-mirror-l-red-15, #fbdde6));
 	font-weight: normal;
-	text-shadow: #fff 0 0 4px;
+	text-shadow: #fff 0 0 2px, #fff 0 0 6px;
 	pointer-events: none;
 	overflow: hidden;
 	white-space: nowrap;
@@ -38,5 +38,4 @@
 .cm-editor.cm-croq-whitespace .cm-activeLine .cm-highlightTab::before,
 .cm-editor.cm-croq-whitespace .cm-activeLine .cm-highlightTab::after {
 	color: var(--croq-whitespace-active-color, var(--croq-mirror-l-red-35, #f6b0c5));
-	text-shadow: none;
 }
