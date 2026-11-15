@@ -23,16 +23,16 @@ function extensionStyles(css) {
 }
 
 // .build/extensions/whitespace/style.css
-var style_default = ".cm-editor.cm-croq-whitespace .cm-highlightSpace { background-image: none; }\n.cm-editor.cm-croq-whitespace .cm-activeLine .cm-croq-space {\n	background-image: linear-gradient(var(--croq-whitespace-active-color, var(--croq-mirror-l-red-35, #f6b0c5)), var(--croq-whitespace-active-color, var(--croq-mirror-l-red-35, #f6b0c5)));\n	background-size: calc(100% - 2px) 2px;\n	background-position: center bottom;\n	background-repeat: no-repeat;\n}\n.cm-editor.cm-croq-whitespace .cm-activeLine .cm-croq-full-width-space {\n	background-image: linear-gradient(color-mix(in srgb, var(--croq-whitespace-active-color, var(--croq-mirror-l-red-35, #f6b0c5)) 80%, white), color-mix(in srgb, var(--croq-whitespace-active-color, var(--croq-mirror-l-red-35, #f6b0c5)) 80%, white));\n	background-size: calc(100% - 2px) 4px;\n}\n.cm-editor.cm-croq-whitespace .cm-highlightTab {\n	position: relative;\n	background-image: none;\n}\n.cm-editor.cm-croq-whitespace .cm-highlightTab::before,\n.cm-editor.cm-croq-whitespace .cm-highlightTab::after {\n	position: absolute;\n	transform: scaleX(0.8);\n	transform-origin: left;\n	color: var(--croq-whitespace-tab-color, var(--croq-mirror-l-red-15, #fbdde6));\n	font-weight: normal;\n	text-shadow: #fff 0 0 2px, #fff 0 0 6px;\n	pointer-events: none;\n	overflow: hidden;\n	white-space: nowrap;\n}\n.cm-editor.cm-croq-whitespace .cm-highlightTab::before {\n	content: '-';\n	left: 5%;\n	right: 0;\n}\n.cm-editor.cm-croq-whitespace .cm-highlightTab::after {\n	content: '>';\n	left: min(0.8ch, max(0px, calc(100% - 0.8ch)));\n	right: 0;\n}\n.cm-editor.cm-croq-whitespace .cm-activeLine .cm-highlightTab::before,\n.cm-editor.cm-croq-whitespace .cm-activeLine .cm-highlightTab::after {\n	color: var(--croq-whitespace-active-color, var(--croq-mirror-l-red-35, #f6b0c5));\n}\n";
+var style_default = ".cm-editor.cm-opticm-whitespace .cm-highlightSpace { background-image: none; }\r\n.cm-editor.cm-opticm-whitespace .cm-activeLine .cm-opticm-space {\r\n	background-image: linear-gradient(var(--opticm-whitespace-active-color, var(--opticm-l-red-35, #f6b0c5)), var(--opticm-whitespace-active-color, var(--opticm-l-red-35, #f6b0c5)));\r\n	background-size: calc(100% - 2px) 2px;\r\n	background-position: center bottom;\r\n	background-repeat: no-repeat;\r\n}\r\n.cm-editor.cm-opticm-whitespace .cm-activeLine .cm-opticm-full-width-space {\r\n	background-image: linear-gradient(color-mix(in srgb, var(--opticm-whitespace-active-color, var(--opticm-l-red-35, #f6b0c5)) 80%, white), color-mix(in srgb, var(--opticm-whitespace-active-color, var(--opticm-l-red-35, #f6b0c5)) 80%, white));\r\n	background-size: calc(100% - 2px) 4px;\r\n}\r\n.cm-editor.cm-opticm-whitespace .cm-highlightTab {\r\n	position: relative;\r\n	background-image: none;\r\n}\r\n.cm-editor.cm-opticm-whitespace .cm-highlightTab::before,\r\n.cm-editor.cm-opticm-whitespace .cm-highlightTab::after {\r\n	position: absolute;\r\n	transform: scaleX(0.8);\r\n	transform-origin: left;\r\n	color: var(--opticm-whitespace-tab-color, var(--opticm-l-red-15, #fbdde6));\r\n	font-weight: normal;\r\n	text-shadow: #fff 0 0 2px, #fff 0 0 6px;\r\n	pointer-events: none;\r\n	overflow: hidden;\r\n	white-space: nowrap;\r\n}\r\n.cm-editor.cm-opticm-whitespace .cm-highlightTab::before {\r\n	content: '-';\r\n	left: 5%;\r\n	right: 0;\r\n}\r\n.cm-editor.cm-opticm-whitespace .cm-highlightTab::after {\r\n	content: '>';\r\n	left: min(0.8ch, max(0px, calc(100% - 0.8ch)));\r\n	right: 0;\r\n}\r\n.cm-editor.cm-opticm-whitespace .cm-activeLine .cm-highlightTab::before,\r\n.cm-editor.cm-opticm-whitespace .cm-activeLine .cm-highlightTab::after {\r\n	color: var(--opticm-whitespace-active-color, var(--opticm-l-red-35, #f6b0c5));\r\n}\r\n";
 
 // .build/extensions/whitespace/index.js
 var spaceMarks = [
-  Decoration.mark({ class: "cm-croq-space cm-croq-space-even" }),
-  Decoration.mark({ class: "cm-croq-space cm-croq-space-odd" })
+  Decoration.mark({ class: "cm-opticm-space cm-opticm-space-even" }),
+  Decoration.mark({ class: "cm-opticm-space cm-opticm-space-odd" })
 ];
 var fullWidthSpaceMarks = [
-  Decoration.mark({ class: "cm-highlightSpace cm-croq-space cm-croq-full-width-space cm-croq-space-even" }),
-  Decoration.mark({ class: "cm-highlightSpace cm-croq-space cm-croq-full-width-space cm-croq-space-odd" })
+  Decoration.mark({ class: "cm-highlightSpace cm-opticm-space cm-opticm-full-width-space cm-opticm-space-even" }),
+  Decoration.mark({ class: "cm-highlightSpace cm-opticm-space cm-opticm-full-width-space cm-opticm-space-odd" })
 ];
 var spaces = new MatchDecorator({
   regexp: /[ \u3000]+/g,
@@ -56,7 +56,7 @@ function whitespaceHighlighting() {
   return [
     highlightWhitespace(),
     highlightSpaces,
-    EditorView2.editorAttributes.of({ class: "cm-croq-whitespace" }),
+    EditorView2.editorAttributes.of({ class: "cm-opticm-whitespace" }),
     extensionStyles(style_default)
   ];
 }

@@ -1,41 +1,41 @@
-.cm-editor.cm-croq-whitespace .cm-highlightSpace { background-image: none; }
-.cm-editor.cm-croq-whitespace .cm-activeLine .cm-croq-space {
-	background-image: linear-gradient(var(--croq-whitespace-active-color, var(--croq-mirror-l-red-35, #f6b0c5)), var(--croq-whitespace-active-color, var(--croq-mirror-l-red-35, #f6b0c5)));
+.cm-editor.cm-opticm-whitespace .cm-highlightSpace { background-image: none; }
+.cm-editor.cm-opticm-whitespace .cm-activeLine .cm-opticm-space {
+	background-image: linear-gradient(var(--opticm-whitespace-active-color, var(--opticm-l-red-35, #f6b0c5)), var(--opticm-whitespace-active-color, var(--opticm-l-red-35, #f6b0c5)));
 	background-size: calc(100% - 2px) 2px;
 	background-position: center bottom;
 	background-repeat: no-repeat;
 }
-.cm-editor.cm-croq-whitespace .cm-activeLine .cm-croq-full-width-space {
-	background-image: linear-gradient(color-mix(in srgb, var(--croq-whitespace-active-color, var(--croq-mirror-l-red-35, #f6b0c5)) 80%, white), color-mix(in srgb, var(--croq-whitespace-active-color, var(--croq-mirror-l-red-35, #f6b0c5)) 80%, white));
+.cm-editor.cm-opticm-whitespace .cm-activeLine .cm-opticm-full-width-space {
+	background-image: linear-gradient(color-mix(in srgb, var(--opticm-whitespace-active-color, var(--opticm-l-red-35, #f6b0c5)) 80%, white), color-mix(in srgb, var(--opticm-whitespace-active-color, var(--opticm-l-red-35, #f6b0c5)) 80%, white));
 	background-size: calc(100% - 2px) 4px;
 }
-.cm-editor.cm-croq-whitespace .cm-highlightTab {
+.cm-editor.cm-opticm-whitespace .cm-highlightTab {
 	position: relative;
 	background-image: none;
 }
-.cm-editor.cm-croq-whitespace .cm-highlightTab::before,
-.cm-editor.cm-croq-whitespace .cm-highlightTab::after {
+.cm-editor.cm-opticm-whitespace .cm-highlightTab::before,
+.cm-editor.cm-opticm-whitespace .cm-highlightTab::after {
 	position: absolute;
 	transform: scaleX(0.8);
 	transform-origin: left;
-	color: var(--croq-whitespace-tab-color, var(--croq-mirror-l-red-15, #fbdde6));
+	color: var(--opticm-whitespace-tab-color, var(--opticm-l-red-15, #fbdde6));
 	font-weight: normal;
 	text-shadow: #fff 0 0 2px, #fff 0 0 6px;
 	pointer-events: none;
 	overflow: hidden;
 	white-space: nowrap;
 }
-.cm-editor.cm-croq-whitespace .cm-highlightTab::before {
+.cm-editor.cm-opticm-whitespace .cm-highlightTab::before {
 	content: '-';
 	left: 5%;
 	right: 0;
 }
-.cm-editor.cm-croq-whitespace .cm-highlightTab::after {
+.cm-editor.cm-opticm-whitespace .cm-highlightTab::after {
 	content: '>';
 	left: min(0.8ch, max(0px, calc(100% - 0.8ch)));
 	right: 0;
 }
-.cm-editor.cm-croq-whitespace .cm-activeLine .cm-highlightTab::before,
-.cm-editor.cm-croq-whitespace .cm-activeLine .cm-highlightTab::after {
-	color: var(--croq-whitespace-active-color, var(--croq-mirror-l-red-35, #f6b0c5));
+.cm-editor.cm-opticm-whitespace .cm-activeLine .cm-highlightTab::before,
+.cm-editor.cm-opticm-whitespace .cm-activeLine .cm-highlightTab::after {
+	color: var(--opticm-whitespace-active-color, var(--opticm-l-red-35, #f6b0c5));
 }

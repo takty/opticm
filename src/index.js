@@ -101,7 +101,7 @@ export async function createEditor(container, { value = '', definitions = [], ..
 	}
 	mounted.add(container);
 	const root = document.createElement('div');
-	root.className = 'croq-mirror';
+	root.className = 'opticm';
 	container.append(root);
 	const language = options.codeLanguage === null ? plainLanguage : options.codeLanguage === 'java' ? javaLanguage : javascriptLanguage;
 	let view, client, observer, timer, destroyed = false;
@@ -127,7 +127,7 @@ export async function createEditor(container, { value = '', definitions = [], ..
 			try {
 				listener(structuredClone(data));
 			} catch (error) {
-				console.error('croq-mirror event listener failed', error);
+				console.error('opticm event listener failed', error);
 			}
 		}
 	}

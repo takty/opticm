@@ -23,7 +23,7 @@ function extensionStyles(css) {
 }
 
 // .build/extensions/full-line-selection/style.css
-var style_default = ".cm-editor.cm-full-line-selection > .cm-scroller > .cm-selectionLayer .cm-selectionBackground {\n	display: none;\n}\n\n.cm-editor.cm-full-line-selection > .cm-scroller > .cm-full-line-selectionLayer {\n	z-index: var(--croq-selection-layer-z-index, 2) !important;\n	pointer-events: none;\n	mix-blend-mode: var(--croq-selection-layer-blend-mode, multiply);\n}\n";
+var style_default = ".cm-editor.cm-full-line-selection > .cm-scroller > .cm-selectionLayer .cm-selectionBackground {\r\n	display: none;\r\n}\r\n\r\n.cm-editor.cm-full-line-selection > .cm-scroller > .cm-full-line-selectionLayer {\r\n	z-index: var(--opticm-selection-layer-z-index, 2) !important;\r\n	pointer-events: none;\r\n	mix-blend-mode: var(--opticm-selection-layer-blend-mode, multiply);\r\n}\r\n";
 
 // .build/extensions/full-line-selection/index.js
 var EPSILON = 0.01;

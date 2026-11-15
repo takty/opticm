@@ -24,7 +24,7 @@
 	right: -0.75em;
 	bottom: -0.45em;
 	border-radius: 50%;
-	border: 0.5em solid color-mix(in srgb, var(--croq-mirror-l-yellow) 65%, transparent);
+	border: 0.5em solid color-mix(in srgb, var(--opticm-l-yellow) 65%, transparent);
 }
 
 .cm-editor.cm-bracket-matching .cm-activeLine .cm-matchingBracket::before {
@@ -34,7 +34,7 @@
 	bottom: 0;
 	border-radius: 0.25em;
 	border: none;
-	background-color: color-mix(in srgb, var(--croq-mirror-l-yellow) 65%, transparent);
+	background-color: color-mix(in srgb, var(--opticm-l-yellow) 65%, transparent);
 }
 
 .cm-editor.cm-bracket-matching :is(

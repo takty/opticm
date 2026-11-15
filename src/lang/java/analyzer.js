@@ -138,7 +138,7 @@ export function analyzeJava(source, rootNode) {
 			}
 		}
 		if (node.type === 'class_declaration') {
-			addRange(node, 'class', 'var(--croq-mirror-l-red, #e61e58)', [], 0.12);
+			addRange(node, 'class', 'var(--opticm-l-red, #e61e58)', [], 0.12);
 		} else if (FUNCTION_NODES.has(node.type)) {
 			const start = toOffset(node.startIndex);
 			if (start !== undefined) {
@@ -154,7 +154,7 @@ export function analyzeJava(source, rootNode) {
 		} else if (LOOP_NODES.has(node.type)) {
 			addRange(node, 'loop', 'hsla(190, 90%, 50%, 0.20)');
 		} else if (LOOP2_NODES.has(node.type)) {
-			addRange(node, 'loop2', 'var(--croq-mirror-l-purple, #9a74a3)', [], 0.20);
+			addRange(node, 'loop2', 'var(--opticm-l-purple, #9a74a3)', [], 0.20);
 		}
 		if (node.type.includes('comment')) {
 			add(node, 'comment');

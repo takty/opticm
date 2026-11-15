@@ -6,73 +6,73 @@
 
 @import "./variables.css";
 
-.croq-mirror {
+.opticm {
 	position: relative;
 	width: 100%;
 	height: 100%;
 	min-width: 0;
 }
 
-.croq-mirror[aria-disabled="true"] {
+.opticm[aria-disabled="true"] {
 	pointer-events: none;
 }
 
-.croq-mirror .cm-editor {
-	--croq-mirror-line-padding: 4px;
-	--croq-mirror-lint-gutter-width: var(--croq-function-lint-gutter-width, 24px);
+.opticm .cm-editor {
+	--opticm-line-padding: 4px;
+	--opticm-lint-gutter-width: var(--opticm-function-lint-gutter-width, 24px);
 	width: 100%;
 	height: 100%;
 	max-height: 100%;
-	background-color: var(--croq-mirror-color-editor);
-	color: var(--croq-mirror-color-text);
+	background-color: var(--opticm-color-editor);
+	color: var(--opticm-color-text);
 }
 
-.croq-mirror .cm-editor.cm-focused { outline: none; }
-.croq-mirror .cm-editor .cm-scroller {
+.opticm .cm-editor.cm-focused { outline: none; }
+.opticm .cm-editor .cm-scroller {
 	font-family: inherit;
 	line-height: inherit;
 	/* Let the text layer stack above the structure canvas in the editor. */
 	z-index: auto;
 }
-.croq-mirror .cm-editor .cm-line {
-	padding-inline: var(--croq-mirror-line-padding);
+.opticm .cm-editor .cm-line {
+	padding-inline: var(--opticm-line-padding);
 	font-variant-ligatures: contextual;
 }
-.croq-mirror .cm-editor .cm-content { z-index: 1; }
+.opticm .cm-editor .cm-content { z-index: 1; }
 /* CodeMirror assigns inline z-index values to its drawing layers. */
-.croq-mirror .cm-editor .cm-selectionLayer {
+.opticm .cm-editor .cm-selectionLayer {
 	z-index: 2 !important;
 	pointer-events: none;
 	mix-blend-mode: multiply;
 }
-.croq-mirror .cm-editor .cm-cursorLayer { z-index: 3 !important; }
-.croq-mirror .cm-editor .cm-gutters { z-index: 4; }
-.croq-mirror .cm-editor .cm-panels,
-.croq-mirror .cm-editor .cm-tooltip { z-index: 5; }
+.opticm .cm-editor .cm-cursorLayer { z-index: 3 !important; }
+.opticm .cm-editor .cm-gutters { z-index: 4; }
+.opticm .cm-editor .cm-panels,
+.opticm .cm-editor .cm-tooltip { z-index: 5; }
 
-.croq-mirror .cm-editor .cm-selectionBackground,
-.croq-mirror .cm-editor.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground {
-	background: color-mix(in srgb, var(--croq-mirror-l-aqua-60) 50%, transparent);
+.opticm .cm-editor .cm-selectionBackground,
+.opticm .cm-editor.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground {
+	background: color-mix(in srgb, var(--opticm-l-aqua-60) 50%, transparent);
 	/* Keep the previous selected color when multiplying over the new default gray. */
-	background: rgb(from var(--croq-mirror-l-aqua-60)
+	background: rgb(from var(--opticm-l-aqua-60)
 		calc((r + 253 - 252.76) * 255 / 252.76)
 		calc((g + 253 - 252.76) * 255 / 252.76)
 		calc((b + 249 - 252.76) * 255 / 252.76) / 50%);
 }
 
-.croq-mirror .cm-editor .cm-activeLine { background: transparent; }
-.croq-mirror .cm-editor.cm-focused .cm-activeLine {
+.opticm .cm-editor .cm-activeLine { background: transparent; }
+.opticm .cm-editor.cm-focused .cm-activeLine {
 	background: rgb(255 255 255 / 65%);
 	box-shadow: 0 0 4px rgb(0 0 0 / 15%), 0 2px 4px rgb(0 0 0 / 10%);
 }
-.croq-mirror .cm-editor.cm-has-selection .cm-activeLine { box-shadow: none; }
-.croq-mirror .cm-editor .cm-line.error-line { background: hsl(350 100% 50% / 20%); }
+.opticm .cm-editor.cm-has-selection .cm-activeLine { box-shadow: none; }
+.opticm .cm-editor .cm-line.error-line { background: hsl(350 100% 50% / 20%); }
 
-.croq-mirror .cm-editor .cm-cursor {
+.opticm .cm-editor .cm-cursor {
 	border: 0;
 	width: 6px;
 }
-.croq-mirror .cm-editor .cm-cursor::before {
+.opticm .cm-editor .cm-cursor::before {
 	content: '';
 	position: absolute;
 	top: 50%;
@@ -80,88 +80,88 @@
 	width: 100%;
 	height: 1lh;
 	transform: translateY(-50%);
-	border-left: 2px solid color-mix(in srgb, var(--croq-mirror-l-brown) 60%, transparent);
-	border-bottom: 2px solid color-mix(in srgb, var(--croq-mirror-l-brown) 35%, transparent);
+	border-left: 2px solid color-mix(in srgb, var(--opticm-l-brown) 60%, transparent);
+	border-bottom: 2px solid color-mix(in srgb, var(--opticm-l-brown) 35%, transparent);
 	border-radius: 0 0 0 2px;
 	box-sizing: border-box;
 }
 
-.croq-mirror .cm-editor.ime .cm-cursor {
+.opticm .cm-editor.ime .cm-cursor {
 	width: 12px;
-	background-color: color-mix(in srgb, var(--croq-mirror-l-brown) 5%, transparent);
+	background-color: color-mix(in srgb, var(--opticm-l-brown) 5%, transparent);
 }
 
-.croq-mirror .cm-editor .cm-gutters {
-	background: var(--croq-mirror-color-window);
-	color: var(--croq-mirror-l-darkgray);
+.opticm .cm-editor .cm-gutters {
+	background: var(--opticm-color-window);
+	color: var(--opticm-l-darkgray);
 	border: 0;
 }
 
-.croq-mirror .cm-gutters::after {
+.opticm .cm-gutters::after {
 	content: '';
-	width: var(--croq-function-gutter-edge-width, 16px);
-	background: color-mix(in srgb, var(--croq-mirror-l-purple) 25%, transparent);
+	width: var(--opticm-function-gutter-edge-width, 16px);
+	background: color-mix(in srgb, var(--opticm-l-purple) 25%, transparent);
 }
 
-.croq-mirror .cm-gutters:hover::after {
-	background-color: color-mix(in srgb, var(--croq-mirror-l-purple) 45%, transparent);
+.opticm .cm-gutters:hover::after {
+	background-color: color-mix(in srgb, var(--opticm-l-purple) 45%, transparent);
 }
 
-.croq-mirror .cm-editor .cm-lineNumbers .cm-gutterElement {
+.opticm .cm-editor .cm-lineNumbers .cm-gutterElement {
 	min-width: 33px;
 	padding: 0;
 	font-variant-numeric: tabular-nums;
 }
 
-.croq-mirror :is(.cm-lineNumbers, .cm-sectionNumbers) .cm-gutterElement:first-child {
+.opticm :is(.cm-lineNumbers, .cm-sectionNumbers) .cm-gutterElement:first-child {
 	font-weight: bold;
 }
 
-.croq-mirror .cm-lineNumbers .cm-croq-line-number {
+.opticm .cm-lineNumbers .cm-opticm-line-number {
 	display: block;
 	padding: 0 7px 0 4px;
 }
 
-.croq-mirror .cm-lineNumbers .cm-croq-line-number { text-align: right; }
-.croq-mirror .cm-editor .cm-activeLineGutter { background: transparent; color: var(--croq-mirror-color-text); font-weight: bold; }
-.croq-mirror .cm-lineNumbers .cm-gutterElement:hover,
-.croq-mirror .cm-sectionNumbers .cm-gutterElement:hover {
-	background: color-mix(in srgb, var(--croq-mirror-l-purple) 25%, transparent);
+.opticm .cm-lineNumbers .cm-opticm-line-number { text-align: right; }
+.opticm .cm-editor .cm-activeLineGutter { background: transparent; color: var(--opticm-color-text); font-weight: bold; }
+.opticm .cm-lineNumbers .cm-gutterElement:hover,
+.opticm .cm-sectionNumbers .cm-gutterElement:hover {
+	background: color-mix(in srgb, var(--opticm-l-purple) 25%, transparent);
 }
 
-.croq-mirror .cm-editor .cm-gutter-lint { width: var(--croq-mirror-lint-gutter-width); }
-.croq-mirror .cm-editor .cm-lint-marker { vertical-align: middle; }
+.opticm .cm-editor .cm-gutter-lint { width: var(--opticm-lint-gutter-width); }
+.opticm .cm-editor .cm-lint-marker { vertical-align: middle; }
 
-.croq-mirror .cm-editor.cm-javascript .cm-syntax-comment { color: var(--croq-syntax-comment-color, var(--croq-mirror-l-gray)); }
-.croq-mirror .cm-editor.cm-javascript .cm-syntax-keyword { color: var(--croq-syntax-keyword-color, var(--croq-mirror-l-bodybrown)); }
-.croq-mirror .cm-editor.cm-javascript .cm-syntax-literal { color: var(--croq-syntax-literal-color, var(--croq-mirror-l-orange)); }
-.croq-mirror .cm-editor.cm-javascript .cm-syntax-definition { color: var(--croq-syntax-definition-color, var(--croq-mirror-color-text)); }
-.croq-mirror .cm-editor.cm-javascript .cm-syntax-property { color: var(--croq-syntax-property-color, var(--croq-mirror-l-blue)); }
-.croq-mirror .cm-editor.cm-javascript .cm-syntax-variable { color: var(--croq-syntax-variable-color, var(--croq-mirror-l-turquoise)); }
-.croq-mirror .cm-editor.cm-javascript :is(.cm-syntax-local-variable, .cm-syntax-local-reference, .cm-syntax-local-reference .cm-syntax-variable) {
-	color: var(--croq-syntax-local-variable-color, hsl(86 60% 30%));
+.opticm .cm-editor.cm-javascript .cm-syntax-comment { color: var(--opticm-syntax-comment-color, var(--opticm-l-gray)); }
+.opticm .cm-editor.cm-javascript .cm-syntax-keyword { color: var(--opticm-syntax-keyword-color, var(--opticm-l-bodybrown)); }
+.opticm .cm-editor.cm-javascript .cm-syntax-literal { color: var(--opticm-syntax-literal-color, var(--opticm-l-orange)); }
+.opticm .cm-editor.cm-javascript .cm-syntax-definition { color: var(--opticm-syntax-definition-color, var(--opticm-color-text)); }
+.opticm .cm-editor.cm-javascript .cm-syntax-property { color: var(--opticm-syntax-property-color, var(--opticm-l-blue)); }
+.opticm .cm-editor.cm-javascript .cm-syntax-variable { color: var(--opticm-syntax-variable-color, var(--opticm-l-turquoise)); }
+.opticm .cm-editor.cm-javascript :is(.cm-syntax-local-variable, .cm-syntax-local-reference, .cm-syntax-local-reference .cm-syntax-variable) {
+	color: var(--opticm-syntax-local-variable-color, hsl(86 60% 30%));
 }
-.croq-mirror .cm-editor.cm-javascript :is(.cm-syntax-function-definition, .cm-syntax-function-definition *, .cm-syntax-class-definition, .cm-syntax-class-definition *) {
-	color: var(--croq-syntax-function-definition-color, var(--croq-mirror-color-text));
-	font-weight: var(--croq-syntax-function-definition-font-weight, bold);
+.opticm .cm-editor.cm-javascript :is(.cm-syntax-function-definition, .cm-syntax-function-definition *, .cm-syntax-class-definition, .cm-syntax-class-definition *) {
+	color: var(--opticm-syntax-function-definition-color, var(--opticm-color-text));
+	font-weight: var(--opticm-syntax-function-definition-font-weight, bold);
 }
-.croq-mirror .cm-editor.cm-javascript :is(.cm-syntax-field-definition, .cm-syntax-field-definition *, .cm-syntax-property-definition, .cm-syntax-property-definition *) {
-	color: var(--croq-syntax-definition-color, var(--croq-mirror-color-text));
-	font-weight: var(--croq-syntax-definition-font-weight, bold);
+.opticm .cm-editor.cm-javascript :is(.cm-syntax-field-definition, .cm-syntax-field-definition *, .cm-syntax-property-definition, .cm-syntax-property-definition *) {
+	color: var(--opticm-syntax-definition-color, var(--opticm-color-text));
+	font-weight: var(--opticm-syntax-definition-font-weight, bold);
 }
-.croq-mirror .cm-editor.cm-java .cm-syntax-variable {
-	color: var(--croq-syntax-variable-color, var(--croq-mirror-l-turquoise));
+.opticm .cm-editor.cm-java .cm-syntax-variable {
+	color: var(--opticm-syntax-variable-color, var(--opticm-l-turquoise));
 }
-.croq-mirror .cm-editor.cm-java :is(.cm-syntax-local-variable, .cm-syntax-local-reference, .cm-syntax-local-reference .cm-syntax-variable) {
-	color: var(--croq-syntax-local-variable-color, hsl(86 60% 30%));
+.opticm .cm-editor.cm-java :is(.cm-syntax-local-variable, .cm-syntax-local-reference, .cm-syntax-local-reference .cm-syntax-variable) {
+	color: var(--opticm-syntax-local-variable-color, hsl(86 60% 30%));
 }
-.croq-mirror .cm-editor.cm-java :is(.cm-syntax-definition, .cm-syntax-definition *) {
-	color: var(--croq-syntax-definition-color, var(--croq-mirror-color-text));
+.opticm .cm-editor.cm-java :is(.cm-syntax-definition, .cm-syntax-definition *) {
+	color: var(--opticm-syntax-definition-color, var(--opticm-color-text));
 }
-.croq-mirror .cm-editor.cm-java :is(.cm-syntax-function-definition, .cm-syntax-function-definition *, .cm-syntax-class-definition, .cm-syntax-class-definition *) {
-	color: var(--croq-syntax-function-definition-color, var(--croq-mirror-color-text));
+.opticm .cm-editor.cm-java :is(.cm-syntax-function-definition, .cm-syntax-function-definition *, .cm-syntax-class-definition, .cm-syntax-class-definition *) {
+	color: var(--opticm-syntax-function-definition-color, var(--opticm-color-text));
 }
-.croq-mirror .cm-editor.cm-analysis-pending .cm-syntax-variable:not(:is(
+.opticm .cm-editor.cm-analysis-pending .cm-syntax-variable:not(:is(
 	.cm-syntax-definition, .cm-syntax-definition *,
 	.cm-syntax-class-definition, .cm-syntax-class-definition *,
 	.cm-syntax-function-definition, .cm-syntax-function-definition *,
@@ -171,36 +171,36 @@
 	.cm-syntax-property, .cm-syntax-property *
 )):not(:has(.cm-syntax-definition, .cm-syntax-class-definition, .cm-syntax-function-definition,
 	.cm-syntax-field-definition, .cm-syntax-property-definition, .cm-syntax-function, .cm-syntax-property)) {
-	color: var(--croq-syntax-local-variable-color, hsl(86 60% 30%));
+	color: var(--opticm-syntax-local-variable-color, hsl(86 60% 30%));
 }
-.croq-mirror .cm-editor.cm-javascript .cm-syntax-invalid { text-decoration: var(--croq-syntax-invalid-decoration, none); border-bottom: 0.15em solid var(--croq-mirror-l-red); }
-.croq-mirror .cm-editor.cm-java .cm-syntax-invalid { text-decoration: var(--croq-syntax-invalid-decoration, none); }
+.opticm .cm-editor.cm-javascript .cm-syntax-invalid { text-decoration: var(--opticm-syntax-invalid-decoration, none); border-bottom: 0.15em solid var(--opticm-l-red); }
+.opticm .cm-editor.cm-java .cm-syntax-invalid { text-decoration: var(--opticm-syntax-invalid-decoration, none); }
 
-.croq-mirror .cm-editor .cm-selectionMatch {
+.opticm .cm-editor .cm-selectionMatch {
 	background: transparent;
-	border-bottom: 2px dotted color-mix(in srgb, var(--croq-mirror-l-aqua) 75%, transparent);
+	border-bottom: 2px dotted color-mix(in srgb, var(--opticm-l-aqua) 75%, transparent);
 }
 
-.croq-mirror .cm-editor .cm-tooltip,
-.croq-mirror .cm-editor .cm-panels {
-	background-color: var(--croq-mirror-color-window);
-	font-family: var(--croq-mirror-font-ui);
-	font-size: var(--croq-mirror-font-size);
+.opticm .cm-editor .cm-tooltip,
+.opticm .cm-editor .cm-panels {
+	background-color: var(--opticm-color-window);
+	font-family: var(--opticm-font-ui);
+	font-size: var(--opticm-font-size);
 	box-shadow: 0 0 2px rgb(0 0 0 / 15%), 0 2px 4px rgb(0 0 0 / 25%);
 }
 
-.croq-mirror .cm-search input { font-family: var(--croq-mirror-font-console); }
-.croq-mirror .cm-tern-arguments { padding: 2px 5px; }
-.croq-mirror .cm-tern-icon::before {
+.opticm .cm-search input { font-family: var(--opticm-font-console); }
+.opticm .cm-tern-arguments { padding: 2px 5px; }
+.opticm .cm-tern-icon::before {
 	display: inline-block;
 	min-width: 1.5em;
-	font-family: var(--croq-mirror-font-console);
+	font-family: var(--opticm-font-console);
 	text-align: center;
 }
-.croq-mirror .cm-tern-unknown::before { content: '?'; }
-.croq-mirror .cm-tern-number::before { content: '#'; }
-.croq-mirror .cm-tern-string::before { content: '""'; }
-.croq-mirror .cm-tern-bool::before { content: '✓'; }
-.croq-mirror .cm-tern-fn::before { content: 'ƒ'; }
-.croq-mirror .cm-tern-array::before { content: '[]'; }
-.croq-mirror .cm-tern-object::before { content: '{}'; }
+.opticm .cm-tern-unknown::before { content: '?'; }
+.opticm .cm-tern-number::before { content: '#'; }
+.opticm .cm-tern-string::before { content: '""'; }
+.opticm .cm-tern-bool::before { content: '✓'; }
+.opticm .cm-tern-fn::before { content: 'ƒ'; }
+.opticm .cm-tern-array::before { content: '[]'; }
+.opticm .cm-tern-object::before { content: '{}'; }

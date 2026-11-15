@@ -1,16 +1,16 @@
-# croq-mirror Editor Component Specification
+# opticm Editor Component Specification
 
 ## 1. Purpose and scope
 
-Extract the editor features in Croqujs into an independent editor component that runs in ordinary browsers.
+Extract the editor features from the host application into an independent editor component that runs in ordinary browsers.
 
 The following describes the original extraction phase. For the current standalone repository layout and build commands, see [README.md](./README.md).
 
-- Create the component in `croqujs/src/croq-mirror`.
-- Do not modify the separate `croq-mirror` repository during that phase.
+- Create the component in its own source directory.
+- Keep the extraction isolated from the host application's repository during that phase.
 - Do not create Git commits.
 - First create the component and browser example inside the new directory.
-- Integrate it into the existing Croqujs application as a separate phase after standalone verification. Changes to existing files belong to that later phase.
+- Integrate it into the host application as a separate phase after standalone verification. Changes to existing files belong to that later phase.
 
 ## 2. Technology and supported environments
 
@@ -49,7 +49,7 @@ UI directly associated with editing, such as completion lists, diagnostics, and 
 
 ## 4. Appearance and settings
 
-- Preserve the current Croqujs design as the default.
+- Preserve the existing editor design as the default.
 - Prevent component styles from affecting other editors or the host page.
 - Allow external configuration of fonts, font size, line height, wrapping, and similar options.
 - Let the host container determine width and height, and respond to container resizing.
@@ -88,7 +88,7 @@ In addition to standard JavaScript and browser definitions, allow the host to su
 
 ### Formatting
 
-Preserve the current Croqujs automatic formatting behavior as the default.
+Preserve the existing automatic formatting behavior as the default.
 
 - Allow automatic formatting to be disabled.
 - Keep explicit API-triggered formatting available when automatic formatting is disabled.
@@ -118,7 +118,7 @@ Results include the document version and parsing success status. Do not treat re
 
 Expose structural information and function names, not the full Acorn AST. Document coordinate conventions and result formats when defining the API.
 
-Croqujs uses this public API to reuse analysis results for operations such as exporting.
+The host application uses this public API to reuse analysis results for operations such as exporting.
 
 ## 8. Public API and lifecycle
 
@@ -141,7 +141,7 @@ Initialization is asynchronous and returns an instance after required setup is c
 
 Provide `destroy()` to release owned DOM elements, events, timers, workers, and completion servers. Allow recreation in the same container.
 
-Provide operations through the croq-mirror API. The underlying editor instance is not exposed as a public API.
+Provide operations through the opticm API. The underlying editor instance is not exposed as a public API.
 
 ## 9. Standalone verification and integration
 
@@ -159,4 +159,4 @@ Use the browser example to verify:
 
 Record verification results by browser and identify unverified environments explicitly.
 
-After standalone verification, connect the component to Croqujs and verify existing feature integration and operation in Electron.
+After standalone verification, connect the component to the host application and verify existing feature integration and operation in Electron.

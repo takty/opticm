@@ -12,7 +12,7 @@ const profile = resolve(here, '.profiles', name);
 await mkdir(profile, { recursive: true });
 // Serve tests and built files unchanged, without development-time transforms.
 const root = resolve(here, '..');
-const fixtures = await mkdtemp(resolve(tmpdir(), 'croq-mirror-browser-'));
+const fixtures = await mkdtemp(resolve(tmpdir(), 'opticm-browser-'));
 await mkdir(resolve(fixtures, 'test'));
 await Promise.all([
 	build({ entryPoints: [resolve(here, 'language-contract.js')], outfile: resolve(fixtures, 'test/language-contract.js'), bundle: true, loader: { '.svg': 'base64', '.css': 'text' }, format: 'esm', platform: 'browser', logLevel: 'silent' }),
@@ -119,7 +119,7 @@ try {
 			await new Promise(resolve => setTimeout(resolve, 300));
 			const content = editor.querySelector('.cm-content');
 			const line = content.querySelector('.cm-line');
-			const rulers = editor.querySelector('.cm-croq-rulers');
+			const rulers = editor.querySelector('.cm-opticm-rulers');
 			const context = document.createElement('canvas').getContext('2d');
 			context.font = getComputedStyle(content).font;
 			return {
@@ -146,7 +146,7 @@ try {
 			document.body.append(host);
 			host.scrollIntoView();
 			window.customFontResult = { ready: false, error: null };
-			import(new URL('croq-mirror.min.js', document.baseURI).href).then(({ createEditor }) =>
+			import(new URL('opticm.min.js', document.baseURI).href).then(({ createEditor }) =>
 				createEditor(host, { codeLanguage: null, fontFamily: 'var(--test-font)', fontSize: 18, value: 'sample text' })
 			).then(editor => {
 				window.customFontEditor = editor;
@@ -189,7 +189,7 @@ try {
 			await new Promise(resolve => setTimeout(resolve, 300));
 			const host = document.querySelector('#custom-font-host');
 			const content = host.querySelector('.cm-content');
-			const ruler = host.querySelector('.cm-croq-rulers');
+			const ruler = host.querySelector('.cm-opticm-rulers');
 			const context = document.createElement('canvas').getContext('2d');
 			context.font = getComputedStyle(content).font;
 			const result = {
@@ -386,7 +386,7 @@ try {
 					[...document.querySelectorAll('.cm-syntax-keyword')].some(node => node.textContent === 'class') &&
 					document.querySelectorAll('.cm-sectionNumbers .cm-function-number').length >= 2 &&
 					structureIsPainted() && classPainted() && count &&
-					javaAnalysis.decorations.some(item => item.fill === 'var(--croq-mirror-l-red, #e61e58)'),
+					javaAnalysis.decorations.some(item => item.fill === 'var(--opticm-l-red, #e61e58)'),
 					'Built docs Java renders syntax, structure, per-method line numbers, and reference highlighting');
 				document.querySelector('#code-language input[value="javascript"]').click();
 				for (let i = 0; i < 100 && !document.querySelector('#status').textContent.includes('Switched to javascript'); i++)

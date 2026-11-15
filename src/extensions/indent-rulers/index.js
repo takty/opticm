@@ -12,7 +12,7 @@ const rulerPlugin = ViewPlugin.fromClass(class {
 		this.overlay.className = 'cm-ruler-overlay';
 		this.overlay.setAttribute('aria-hidden', 'true');
 		this.ruler = document.createElement('div');
-		this.ruler.className = 'cm-croq-rulers';
+		this.ruler.className = 'cm-opticm-rulers';
 		this.ruler.append(...columns.map(column => {
 			const rule = document.createElement('span');
 			rule.style.setProperty('--ruler-column', column);

@@ -107,7 +107,7 @@ Disabling `analysis` clears parser data; changing display settings does not
 schedule another parse. Public `getAnalysis()` and `analysis` event shapes do
 not include the internal common snapshot and remain compatible.
 
-The standalone `croq-mirror/analysis` export provides the state, effect, and
+The standalone `opticm/analysis` export provides the state, effect, and
 validator for composing the shared-data extensions outside the component. Each
 standalone extension resolves this same package subpath so its state-field
 identity remains consistent.

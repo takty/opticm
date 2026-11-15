@@ -1,7 +1,7 @@
 import 'klales/klales.min.css';
 
 // Load the distributed modules unchanged, including the analysis worker.
-const { createEditor } = await import(/* @vite-ignore */ new URL('croq-mirror.min.js', document.baseURI).href);
+const { createEditor } = await import(/* @vite-ignore */ new URL('opticm.min.js', document.baseURI).href);
 const status = document.querySelector('#status');
 const selectedLanguage = () => document.querySelector('input[name="language"]:checked').value;
 const selectedCodeLanguage = () => document.querySelector('input[name="code-language"]:checked').value;
@@ -33,7 +33,7 @@ class Greeter {
 	}
 }
 
-const options = { enabled: true, name: "Croqujs" };
+const options = { enabled: true, name: "Opticm" };
 const { enabled, name } = options;
 const { name: displayName } = options;
 showMessage(displayName);
@@ -72,7 +72,7 @@ class Greeter implements Greeting {
 	}
 
 	public static void main(String[] args) {
-		Person person = new Person("Croqujs", 20);
+		Person person = new Person("Opticm", 20);
 		Mood mood = Mood.HAPPY;
 		boolean enabled = true;
 		for (int index = 0; index < 2; index++) {

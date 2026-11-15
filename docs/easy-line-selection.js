@@ -30,7 +30,7 @@ function extensionStyles(css) {
 }
 
 // .build/extensions/gutter-line-selection/style.css
-var style_default = '.cm-editor.cm-gutter-line-selection :is(.cm-lineNumbers, .cm-sectionNumbers) {\r\n	cursor: var(--croq-gutter-cursor, url("./cursor-right.svg") 22 8, pointer);\r\n}\r\n\r\n.cm-editor.cm-gutter-line-selection.line-selection-mode :is(.cm-lineNumbers, .cm-sectionNumbers) {\r\n	cursor: var(--croq-gutter-line-selection-cursor, url("./cursor-line.svg") 22 8, pointer);\r\n}\r\n';
+var style_default = '.cm-editor.cm-gutter-line-selection :is(.cm-lineNumbers, .cm-sectionNumbers) {\r\n	cursor: var(--opticm-gutter-cursor, url("./cursor-right.svg") 22 8, pointer);\r\n}\r\n\r\n.cm-editor.cm-gutter-line-selection.line-selection-mode :is(.cm-lineNumbers, .cm-sectionNumbers) {\r\n	cursor: var(--opticm-gutter-line-selection-cursor, url("./cursor-line.svg") 22 8, pointer);\r\n}\r\n';
 
 // .build/extensions/gutter-line-selection/index.js
 var setEasyLineSelectionMode = StateEffect.define();

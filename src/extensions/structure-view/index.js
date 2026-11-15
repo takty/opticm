@@ -152,7 +152,7 @@ const structurePlugin = ViewPlugin.fromClass(class {
 			return match ? colors.getPropertyValue(match[1]).trim() || match[2] : value;
 		};
 		const linePadding = parseFloat(window.getComputedStyle(view.contentDOM)
-			.getPropertyValue('--croq-mirror-line-padding')) || 0;
+			.getPropertyValue('--opticm-line-padding')) || 0;
 		const left   = Math.max(frame.left, content.left);
 		const width  = Math.max(0, frame.left + scroller.clientWidth - left);
 		const height = scroller.clientHeight;
@@ -237,11 +237,11 @@ export const structureView = [
 
 function commonDecorations(analysis, doc, options) {
 	const colors = {
-		class      : ['var(--croq-mirror-l-red, #e61e58)', 0.12],
+		class      : ['var(--opticm-l-red, #e61e58)', 0.12],
 		function   : ['hsla(40, 100%, 50%, 0.15)'],
 		conditional: ['hsla(150, 100%, 35%, 0.15)'],
 		loop       : ['hsla(190, 90%, 50%, 0.20)'],
-		loop2      : ['var(--croq-mirror-l-purple, #9a74a3)', 0.20],
+		loop2      : ['var(--opticm-l-purple, #9a74a3)', 0.20],
 	};
 	const position = offset => {
 		const line = doc.lineAt(offset);

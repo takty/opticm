@@ -1,4 +1,4 @@
-import { createEditor } from '../dist/croq-mirror.min.js';
+import { createEditor } from '../dist/opticm.min.js';
 const results = [];
 const assert = (condition, message) => {
 	if (!condition) {
@@ -44,7 +44,7 @@ try {
 	const editorB = document.querySelector('#b .cm-editor');
 	const whitespaceLines = () => [...editorA.querySelectorAll('.cm-content .cm-line')];
 	a.loadDocument('a  \u3000\u3000  b\n"\u3000\u3000" //\u3000');
-	const spaceMarks = line => [...line.querySelectorAll('.cm-croq-space')];
+	const spaceMarks = line => [...line.querySelectorAll('.cm-opticm-space')];
 	const fullWidthMarks = line => spaceMarks(line).filter(mark => mark.textContent === '\u3000');
 	const fullWidth = fullWidthMarks(whitespaceLines()[0]);
 	const ordinary = spaceMarks(whitespaceLines()[0]).find(mark => mark.textContent === ' ');
@@ -68,9 +68,9 @@ try {
 		return base.every((channel, i) => Math.abs(light[i] - (channel * 0.8 + 255 * 0.2)) <= 1);
 	};
 	assert(hasLighterFullWidth(), 'ideographic-space underline is lighter than the ordinary-space underline');
-	editorA.style.setProperty('--croq-whitespace-active-color', '#804020');
+	editorA.style.setProperty('--opticm-whitespace-active-color', '#804020');
 	assert(hasLighterFullWidth(), 'ideographic-space color follows the customized active color');
-	editorA.style.removeProperty('--croq-whitespace-active-color');
+	editorA.style.removeProperty('--opticm-whitespace-active-color');
 	const activeMarks = spaceMarks(whitespaceLines()[0]);
 	assert(activeMarks.map(mark => mark.textContent).join('') === '  \u3000\u3000  ' &&
 		activeMarks.length === 6 && activeMarks.every(mark => {
@@ -101,8 +101,8 @@ try {
 	assert(fullWidthMarks(whitespaceLines()[1]).map(mark => mark.textContent).join('').length === 3,
 		'ideographic space decorations update after deletion');
 	a.loadDocument('a \tb\nc \td');
-	assert(getComputedStyle(whitespaceLines()[0].querySelector('.cm-croq-space')).backgroundImage.includes('linear-gradient') &&
-		getComputedStyle(whitespaceLines()[1].querySelector('.cm-croq-space')).backgroundImage === 'none' &&
+	assert(getComputedStyle(whitespaceLines()[0].querySelector('.cm-opticm-space')).backgroundImage.includes('linear-gradient') &&
+		getComputedStyle(whitespaceLines()[1].querySelector('.cm-opticm-space')).backgroundImage === 'none' &&
 		getComputedStyle(whitespaceLines()[1].querySelector('.cm-highlightTab'), '::before').color === 'rgb(251, 221, 230)',
 		'component preserves active-space and inactive-tab display');
 	a.loadDocument('    let sample = 1;');
@@ -110,7 +110,7 @@ try {
 	const declarationAboveRuler = () => {
 		const rulerOverlay = editorA.querySelector('.cm-ruler-overlay');
 		const structureOverlay = editorA.querySelector('.cm-structure-overlay');
-		const rule = rulerOverlay?.querySelector('.cm-croq-rulers > span:nth-child(2)');
+		const rule = rulerOverlay?.querySelector('.cm-opticm-rulers > span:nth-child(2)');
 		const canvas = structureOverlay?.querySelector('canvas');
 		if (!rule || !canvas?.width || !canvas.height ||
 			getComputedStyle(rulerOverlay).zIndex !== getComputedStyle(structureOverlay).zIndex ||
@@ -293,11 +293,11 @@ try {
 		'legacy option turns off only easy selection');
 	const defaultEditorBackground = 'rgb(253, 253, 253)';
 	assert(getComputedStyle(editorA).backgroundColor === defaultEditorBackground && getComputedStyle(editorA).color === 'rgb(17, 17, 0)', 'default editor background is neutral gray');
-	const themeRoot = editorA.closest('.croq-mirror');
-	themeRoot.style.setProperty('--croq-mirror-color-editor', '#123456');
+	const themeRoot = editorA.closest('.opticm');
+	themeRoot.style.setProperty('--opticm-color-editor', '#123456');
 	assert(getComputedStyle(editorA).backgroundColor === 'rgb(18, 52, 86)', 'theme custom properties update at runtime');
 	assert(getComputedStyle(editorB).backgroundColor === defaultEditorBackground, 'theme custom properties isolated per editor');
-	themeRoot.style.removeProperty('--croq-mirror-color-editor');
+	themeRoot.style.removeProperty('--opticm-color-editor');
 	a.loadDocument('function first() {\n\tvar firstValue = 1; console.log(firstValue);\n}\nfunction second() {\n\tvar secondValue = 2;\n}');
 	await a.analyzeNow();
 	const local = editorA.querySelector('.cm-syntax-local-reference');
@@ -330,23 +330,23 @@ try {
 	a.setSettings({ analysis: true });
 	a.loadDocument('function first() {\n\tvar firstValue = 1; console.log(firstValue);\n}\nfunction second() {\n\tvar secondValue = 2;\n}');
 	await a.analyzeNow();
-	const ruler = editorA.querySelector('.cm-croq-rulers');
+	const ruler = editorA.querySelector('.cm-opticm-rulers');
 	assert([...ruler.children].map(rule => rule.style.getPropertyValue('--ruler-column')).join(',') === '4,8,12' &&
 		[...ruler.children].every(rule => getComputedStyle(rule).borderLeftStyle === 'dashed'),
 		'three dashed rulers mark the original indentation columns');
-	themeRoot.style.setProperty('--croq-indent-ruler-color', '#123456');
+	themeRoot.style.setProperty('--opticm-indent-ruler-color', '#123456');
 	assert(getComputedStyle(ruler.firstElementChild).borderLeftColor === 'rgb(18, 52, 86)' &&
-		getComputedStyle(editorB.querySelector('.cm-croq-rulers > span')).borderLeftColor !== 'rgb(18, 52, 86)',
+		getComputedStyle(editorB.querySelector('.cm-opticm-rulers > span')).borderLeftColor !== 'rgb(18, 52, 86)',
 		'component ruler styling can be customized independently');
-	themeRoot.style.removeProperty('--croq-indent-ruler-color');
+	themeRoot.style.removeProperty('--opticm-indent-ruler-color');
 	a.setSettings({ rulers: false });
 	assert(!editorA.querySelector('.cm-ruler-overlay') && editorB.querySelector('.cm-ruler-overlay'),
 		'ruler setting disables guides only in the selected editor');
 	a.setSettings({ rulers: true });
-	assert(editorA.querySelectorAll('.cm-croq-rulers > span').length === 3,
+	assert(editorA.querySelectorAll('.cm-opticm-rulers > span').length === 3,
 		'ruler setting restores guides');
 	await new Promise(resolve => setTimeout(resolve, 120));
-	const restoredRuler = editorA.querySelector('.cm-croq-rulers');
+	const restoredRuler = editorA.querySelector('.cm-opticm-rulers');
 	const firstLine = editorA.querySelector('.cm-content .cm-line');
 	assert(Math.abs(restoredRuler.firstElementChild.getBoundingClientRect().left -
 		(firstLine.getBoundingClientRect().left + parseFloat(getComputedStyle(firstLine).paddingLeft) +
@@ -375,16 +375,16 @@ try {
 	const textLayer = getComputedStyle(editorA.querySelector('.cm-content'));
 	assert(getComputedStyle(editorA.querySelector('.cm-scroller')).zIndex === 'auto' &&
 		Number(textLayer.zIndex) > Number(structureLayer.zIndex), 'source text is painted above the structure canvas');
-	themeRoot.style.setProperty('--croq-structure-overlay-z-index', '-1');
+	themeRoot.style.setProperty('--opticm-structure-overlay-z-index', '-1');
 	assert(getComputedStyle(editorA.querySelector('.cm-structure-overlay')).zIndex === '-1' &&
 		getComputedStyle(editorB.querySelector('.cm-structure-overlay')).zIndex === '0',
 		'structure layering can be customized independently in the component');
-	themeRoot.style.removeProperty('--croq-structure-overlay-z-index');
-	themeRoot.style.setProperty('--croq-function-number-color', '#123456');
-	themeRoot.style.setProperty('--croq-function-lint-gutter-width', '30px');
+	themeRoot.style.removeProperty('--opticm-structure-overlay-z-index');
+	themeRoot.style.setProperty('--opticm-function-number-color', '#123456');
+	themeRoot.style.setProperty('--opticm-function-lint-gutter-width', '30px');
 	assert(getComputedStyle(editorA.querySelector('.cm-gutter-lint')).width === '30px',
 		'function lint gutter width is customizable from the component container');
-	themeRoot.style.removeProperty('--croq-function-lint-gutter-width');
+	themeRoot.style.removeProperty('--opticm-function-lint-gutter-width');
 	for (const functionLineNumbers of [true, false]) {
 		a.setSettings({ functionLineNumbers });
 		assert(gutterWidth() === normalWidth, 'gutter width is stable when switching line-number modes: ' + functionLineNumbers);
@@ -401,7 +401,7 @@ try {
 			const box = marker.getBoundingClientRect();
 			assert(marker.contains(document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2)), 'lint marker receives pointer over function region: ' + functionLineNumbers + ', line ' + line);
 		}
-		themeRoot.style.removeProperty('--croq-function-number-color');
+		themeRoot.style.removeProperty('--opticm-function-number-color');
 	}
 	a.loadDocument('function longFunction() {\n' + '\n'.repeat(999) + '}');
 	await a.analyzeNow();
@@ -410,7 +410,7 @@ try {
 	const scrollbarStyle = document.createElement('style');
 	scrollbarStyle.textContent = '.cm-scroller::-webkit-scrollbar { width: 24px; }';
 	document.head.append(scrollbarStyle);
-	themeRoot.style.setProperty('--croq-function-scroll-marker-track-width', '10px');
+	themeRoot.style.setProperty('--opticm-function-scroll-marker-track-width', '10px');
 	a.setSettings({ functionLineNumbers: false, functionScrollMarkers: true });
 	await waitFor(() => editorA.querySelectorAll('.cm-function-scroll-markers > span').length > 0,
 		'function scroll markers did not render independently');
@@ -423,7 +423,7 @@ try {
 	assert(scrollbarRight - scrollbarLeft >= 20, 'test scrollbar must be wider than the marker track');
 	assert(Math.abs((markerBounds.left + markerBounds.right - scrollbarLeft - scrollbarRight) / 2) < 1,
 		'function markers are horizontally centered in the scrollbar');
-	themeRoot.style.removeProperty('--croq-function-scroll-marker-track-width');
+	themeRoot.style.removeProperty('--opticm-function-scroll-marker-track-width');
 	scrollbarStyle.remove();
 	a.setSettings({ functionLineNumbers: true });
 	assert(editorA.querySelectorAll('.cm-function-scroll-markers > span').length > 0,
@@ -756,13 +756,13 @@ try {
 				`Java syntax weight and shadows match JavaScript: ${text}`);
 		}
 		for (const root of [jsRoot, javaRoot]) {
-			root.style.setProperty('--croq-syntax-literal-font-weight', '400');
-			root.style.setProperty('--croq-syntax-literal-text-shadow', 'rgb(1, 2, 3) 1px 2px 3px');
+			root.style.setProperty('--opticm-syntax-literal-font-weight', '400');
+			root.style.setProperty('--opticm-syntax-literal-text-shadow', 'rgb(1, 2, 3) 1px 2px 3px');
 			const style = getComputedStyle(syntaxToken(root, 'literal', '10'));
 			assert(style.fontWeight === '400' && style.textShadow.includes('rgb(1, 2, 3)'),
 				'Literal weight and shadow accept CSS custom properties');
-			root.style.removeProperty('--croq-syntax-literal-font-weight');
-			root.style.removeProperty('--croq-syntax-literal-text-shadow');
+			root.style.removeProperty('--opticm-syntax-literal-font-weight');
+			root.style.removeProperty('--opticm-syntax-literal-text-shadow');
 		}
 		a.moveTo({ line: 2, ch: 0 }, { focus: false });
 		javaEditor.moveTo({ line: 2, ch: 0 }, { focus: false });
@@ -888,16 +888,16 @@ try {
 				currentMark.borderTopWidth === '0px' && currentMark.backgroundColor !== 'rgba(0, 0, 0, 0)' &&
 				otherMark.content !== 'none' && otherMark.borderTopWidth === '8px' && otherMark.borderRadius === '50%',
 				'bracket matches use the CM5 active-line background and bold yellow circle');
-			const theme = root.querySelector('.croq-mirror');
+			const theme = root.querySelector('.opticm');
 			const originalBorderColor = otherMark.borderTopColor;
 			assert(getComputedStyle(overlay.firstElementChild, '::before').borderTopColor === originalBorderColor,
 				'gutter overlay uses the same circle color');
-			theme.style.setProperty('--croq-mirror-l-yellow', '#00ff00');
+			theme.style.setProperty('--opticm-l-yellow', '#00ff00');
 			assert(getComputedStyle(matches[1], '::before').borderTopColor !== originalBorderColor &&
 				getComputedStyle(overlay.firstElementChild, '::before').borderTopColor ===
 					getComputedStyle(matches[1], '::before').borderTopColor,
 				'bracket circle uses the theme yellow color');
-			theme.style.removeProperty('--croq-mirror-l-yellow');
+			theme.style.removeProperty('--opticm-l-yellow');
 			editor.loadDocument(source + '\n//' + 'x'.repeat(200));
 			editor.moveTo({ line: 0, ch: source.indexOf('{') });
 			await waitFor(() => overlay.children.length === 1, 'bracket gutter overlay did not update after editing');

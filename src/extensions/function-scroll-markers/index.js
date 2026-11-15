@@ -41,8 +41,8 @@ const scrollMarkers = ViewPlugin.fromClass(class {
 			write: data => {
 				this.dom.style.top    = data.top + 'px';
 				this.dom.style.height = data.height + 'px';
-				this.dom.style.setProperty('--croq-function-scrollbar-center-inset', `${data.centerInset}px`);
-				this.dom.style.setProperty('--croq-function-scrollbar-width', `${data.trackWidth}px`);
+				this.dom.style.setProperty('--opticm-function-scrollbar-center-inset', `${data.centerInset}px`);
+				this.dom.style.setProperty('--opticm-function-scrollbar-width', `${data.trackWidth}px`);
 				this.dom.replaceChildren(...data.markers.map(position => {
 					const marker = this.dom.ownerDocument.createElement('span');
 					marker.style.top = position + '%';

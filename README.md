@@ -1,6 +1,6 @@
-# croq-mirror
+# opticm
 
-A CodeMirror 6 editor component extracted from Croqujs.
+A standalone CodeMirror 6 editor component.
 See [spec.md](./spec.md) for the agreed specification. This repository can be built and used independently.
 
 ## Example
@@ -22,10 +22,10 @@ include `dist/`, the package metadata, README, and the root license.
 Load the CSS in the consuming page. If you configure a Content Security Policy, allow the modules, worker, fonts, and inline styles set by the libraries.
 
 ```html
-<link rel="stylesheet" href="./dist/croq-mirror.min.css">
+<link rel="stylesheet" href="./dist/opticm.min.css">
 <div id="editor" style="height: 480px"></div>
 <script type="module">
-import { createEditor } from './dist/croq-mirror.min.js';
+import { createEditor } from './dist/opticm.min.js';
 const editor = await createEditor(document.querySelector('#editor'), {
     value: 'function greet() { console.log("Hello"); }',
     language: 'en',
@@ -217,14 +217,14 @@ Explicit `analyzeNow()` requests work even when automatic analysis is disabled, 
 ### Structure display extension
 
 The structure canvas is also available independently as a CodeMirror 6 extension.
-The `croq-mirror/structure` entry point imports CodeMirror packages as external
+The `opticm/structure` entry point imports CodeMirror packages as external
 dependencies, so use a bundler or an import map resolving the same CodeMirror
 packages as the host editor. It neither parses the document nor performs analysis.
 
 ```js
 import { EditorState } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
-import { structureView, setStructure } from 'croq-mirror/structure';
+import { structureView, setStructure } from 'opticm/structure';
 
 const view = new EditorView({
     state: EditorState.create({ doc: 'if (x) {\n  work();\n}', extensions: [structureView] }),
@@ -244,7 +244,7 @@ total width of 16 character cells, including the spine.
 Supply ranges as above or tokens as `{kind: 'token', appearance: 'declaration', from, to, fill, stroke}`. Use `appearance: 'reference'` for reference-style tokens.
 Colors can use `var(--property, fallback)` and are resolved against the editor
 when the canvas is repainted. An optional `opacity` sets the canvas alpha
-(default `1`). JavaScript and Java class ranges use `--croq-mirror-l-red` at
+(default `1`). JavaScript and Java class ranges use `--opticm-l-red` at
 12% opacity and are drawn underneath their method decorations.
 The caller supplies current data in drawing order and is responsible for rejecting
 stale asynchronous analysis results. Treat the supplied array and its contents
@@ -265,12 +265,12 @@ extension owns and removes its canvas when the editor or extension is destroyed.
 
 ### Function line-number extension
 
-`croq-mirror/function-line-numbers` provides a standalone CodeMirror extension.
+`opticm/function-line-numbers` provides a standalone CodeMirror extension.
 Like the structure extension, it imports the host's CodeMirror packages as
 external dependencies and does not parse the document.
 
 ```js
-import { functionLineNumbers, setSectionStarts, getSectionLineNumber } from 'croq-mirror/function-line-numbers';
+import { functionLineNumbers, setSectionStarts, getSectionLineNumber } from 'opticm/function-line-numbers';
 
 // Include functionLineNumbers in the editor's extensions, then supply section starts.
 view.dispatch({ effects: setSectionStarts.of([0, 12]) });
@@ -285,15 +285,15 @@ Removing the extension removes its gutter.
 
 ### Function scroll-marker extension
 
-`croq-mirror/function-scroll-markers` renders function start positions beside
+`opticm/function-scroll-markers` renders function start positions beside
 the scrollbar without adding a gutter or depending on the function-number
 extension. In the component, `functionScrollMarkers` controls it independently
 of `functionLineNumbers`. It reads shared analysis sections. Standalone users
 can include the shared state and publish data with:
 
 ```js
-import { commonAnalysisState, setCommonAnalysis } from 'croq-mirror/analysis';
-import { functionScrollMarkers } from 'croq-mirror/function-scroll-markers';
+import { commonAnalysisState, setCommonAnalysis } from 'opticm/analysis';
+import { functionScrollMarkers } from 'opticm/function-scroll-markers';
 
 // Include both in the editor extensions; publish validated common analysis
 // with setCommonAnalysis.of(data) when the document's current analysis arrives.
@@ -301,7 +301,7 @@ import { functionScrollMarkers } from 'croq-mirror/function-scroll-markers';
 
 ### Whitespace highlighting extension
 
-`croq-mirror/whitespace` displays tabs as arrows and both ordinary and ideographic
+`opticm/whitespace` displays tabs as arrows and both ordinary and ideographic
 spaces (U+3000) as underlines on active lines, including inside strings and
 comments. It includes CodeMirror's `highlightWhitespace()` but does not
 install `highlightActiveLine()`; include the latter separately to mark active
@@ -314,26 +314,26 @@ highlights.
 
 ```js
 import { highlightActiveLine } from '@codemirror/view';
-import { whitespaceHighlighting } from 'croq-mirror/whitespace';
+import { whitespaceHighlighting } from 'opticm/whitespace';
 
 const extensions = [highlightActiveLine(), whitespaceHighlighting()];
 ```
 
-Customize the colors with `--croq-whitespace-active-color` (active tabs and
-space underlines) and `--croq-whitespace-tab-color` (inactive tabs). If unset,
+Customize the colors with `--opticm-whitespace-active-color` (active tabs and
+space underlines) and `--opticm-whitespace-tab-color` (inactive tabs). If unset,
 they fall back to the component's pink color variables and then to `#f6b0c5`
 and `#fbdde6`. Do not install `highlightWhitespace()` separately.
 Removing the extension removes its marks and stylesheet.
 
 ### Full-line-height selection extension
 
-`croq-mirror/full-line-selection` provides CodeMirror's custom cursor and
+`opticm/full-line-selection` provides CodeMirror's custom cursor and
 selection drawing while normalizing each selection background to the full
 visual-line height. CodeMirror continues to determine the selection's
 horizontal rectangles; this extension only adjusts their vertical bounds.
 
 ```js
-import { fullLineSelection } from 'croq-mirror/full-line-selection';
+import { fullLineSelection } from 'opticm/full-line-selection';
 
 const view = new EditorView({
     parent: document.querySelector('#editor'),
@@ -352,13 +352,13 @@ or dragging in the gutter. Enable `easyLineSelection` to select a range with
 two ordinary clicks. The first click sets the anchor, and later clicks extend
 the selection from that line.
 
-Standalone editors can use `croq-mirror/easy-line-selection` with a line-number
+Standalone editors can use `opticm/easy-line-selection` with a line-number
 gutter. It exports `easyLineSelection` and `standardGutterLineSelection` for
 editors that only need the standard gestures.
 
 ```js
 import { lineNumbers } from '@codemirror/view';
-import { easyLineSelection, setEasyLineSelectionMode } from 'croq-mirror/easy-line-selection';
+import { easyLineSelection, setEasyLineSelectionMode } from 'opticm/easy-line-selection';
 
 // Include lineNumbers() and easyLineSelection in the editor's extensions.
 view.dispatch({ effects: setEasyLineSelectionMode.of(false) });
@@ -371,17 +371,17 @@ the extension removes its event listeners and cursor styling.
 The legacy `gutterLineSelection` setting remains an alias for
 `easyLineSelection`. If both are supplied in a settings update, the new name
 takes precedence. The old `setLineSelectionMode()` method, extension exports,
-and `croq-mirror/gutter-line-selection` import continue to work.
+and `opticm/gutter-line-selection` import continue to work.
 
 ### Syntax highlighting extension
 
-`croq-mirror/syntax-highlighting` accepts syntax ranges produced by an external
+`opticm/syntax-highlighting` accepts syntax ranges produced by an external
 parser. Ranges use zero-based UTF-16 document offsets and a semantic `kind`;
 the extension does not parse the document. By default, document edits clear
 supplied ranges.
 
 ```js
-import { syntaxHighlightingExtension, setSyntaxHighlights } from 'croq-mirror/syntax-highlighting';
+import { syntaxHighlightingExtension, setSyntaxHighlights } from 'opticm/syntax-highlighting';
 
 // Include syntaxHighlightingExtension in the editor's extensions.
 view.dispatch({ effects: setSyntaxHighlights.of([
@@ -409,15 +409,15 @@ callback may return the parsed region's end to resolve overlaps between
 retained code and fresh comments.
 
 Removing the highlighting extension removes the source's decorations. Local
-reference color can be customized with `--croq-syntax-local-variable-color`.
+reference color can be customized with `--opticm-syntax-local-variable-color`.
 Variable-reference backgrounds are drawn by the structure view. Class, interface, enum, record, function and method declarations use the
-editor text color and bold weight; `--croq-syntax-function-definition-color` and
-`--croq-syntax-function-definition-font-weight` customize them. Comments, keywords/operators, definitions,
+editor text color and bold weight; `--opticm-syntax-function-definition-color` and
+`--opticm-syntax-function-definition-font-weight` customize them. Comments, keywords/operators, definitions,
 and literals are bold by default. Literals also have a text shadow, hidden on the
 active line. Font weights and literal shadows can be customized with
-`--croq-syntax-comment-font-weight`, `--croq-syntax-keyword-font-weight`,
-`--croq-syntax-definition-font-weight`, `--croq-syntax-literal-font-weight`, and
-`--croq-syntax-literal-text-shadow`.
+`--opticm-syntax-comment-font-weight`, `--opticm-syntax-keyword-font-weight`,
+`--opticm-syntax-definition-font-weight`, `--opticm-syntax-literal-font-weight`, and
+`--opticm-syntax-literal-text-shadow`.
 
 The component's `syntaxHighlight` and `semanticHighlight` settings independently
 toggle token coloring and definition/reference decoration.
@@ -426,14 +426,14 @@ the local-reference color. Fresh analysis restores their classified colors.
 
 ### Bracket matching extension
 
-`croq-mirror/bracket-matching` combines CodeMirror's `bracketMatching()` with
+`opticm/bracket-matching` combines CodeMirror's `bracketMatching()` with
 the component's gutter indicators for matching brackets. The `bracketMatching`
 setting toggles both together; it does not scan the whole document for unmatched
 brackets.
 
 ### Indentation ruler extension
 
-`croq-mirror/indent-rulers` provides standalone guides at character columns 4,
+`opticm/indent-rulers` provides standalone guides at character columns 4,
 8, and 12. Include `indentRulers` in the editor's extensions; removing it
 removes the guides and their stylesheet. The guides follow scrolling, editor
 geometry and font metrics, and are clipped to the visible area and an overlay
@@ -443,13 +443,13 @@ the structure canvas is drawn above the guides, including after either extension
 is re-enabled.
 
 ```js
-import { indentRulers } from 'croq-mirror/indent-rulers';
+import { indentRulers } from 'opticm/indent-rulers';
 ```
 
 Individual guide columns can be changed through CSS, for example:
 
 ```css
-#editor .cm-croq-rulers > span:nth-child(1) { --croq-indent-ruler-column: 2; }
+#editor .cm-opticm-rulers > span:nth-child(1) { --opticm-indent-ruler-column: 2; }
 ```
 
 ### Extension styling
@@ -462,22 +462,22 @@ ancestor to change its appearance without affecting other editors:
 
 ```css
 #editor {
-    --croq-function-number-color: #284f9e;
-    --croq-function-scroll-marker-color: #284f9e;
-    --croq-gutter-cursor: crosshair;
+    --opticm-function-number-color: #284f9e;
+    --opticm-function-scroll-marker-color: #284f9e;
+    --opticm-gutter-cursor: crosshair;
 }
 ```
 
 | Extension | Custom properties |
 | --- | --- |
-| Structure | `--croq-structure-scroller-z-index`, `--croq-structure-content-z-index`, `--croq-structure-overlay-z-index`, `--croq-structure-overlay-position`, `--croq-structure-overlay-overflow`, `--croq-structure-overlay-pointer-events`, `--croq-structure-canvas-display`, `--croq-structure-canvas-width`, `--croq-structure-canvas-height` |
-| Function numbers | `--croq-function-number-color`, `--croq-function-active-number-color`, `--croq-function-line-color`, `--croq-function-number-padding`, `--croq-function-number-display`, `--croq-function-number-font-variant`, `--croq-function-line-align`, `--croq-function-gutter-min-width`, `--croq-function-gutter-overflow`, `--croq-function-gutter-item-position`, `--croq-function-gutter-item-padding` |
-| Function gutter edge | `--croq-function-gutter-edge-content`, `--croq-function-gutter-edge-width`, `--croq-function-gutter-edge-color`, `--croq-function-gutter-edge-hover-color`, `--croq-function-gutter-edge-pattern`, `--croq-function-stripe-width`, `--croq-function-stripe-color` |
-| Function highlighting | `--croq-function-alternate-background`, `--croq-function-alternate-content`, `--croq-function-alternate-position`, `--croq-function-alternate-inset`, `--croq-function-alternate-z-index`, `--croq-function-alternate-pointer-events`, `--croq-function-lint-gutter-width` (component), `--croq-mirror-lint-gutter-width` (standalone) |
-| Function scroll markers | `--croq-function-scroll-marker-track-width`, `--croq-function-scroll-track-position`, `--croq-function-scroll-track-right`, `--croq-function-scroll-track-pointer-events`, `--croq-function-scroll-marker-inset`, `--croq-function-scroll-marker-radius`, `--croq-function-scroll-marker-color`, `--croq-function-scroll-marker-position`, `--croq-function-scroll-marker-aspect-ratio`, `--croq-function-scroll-marker-z-index` |
-| Gutter selection | `--croq-gutter-cursor`, `--croq-gutter-line-selection-cursor` (complete CSS `cursor` values) |
-| Syntax highlighting | `--croq-syntax-comment-color`, `--croq-syntax-comment-font-weight`, `--croq-syntax-keyword-color`, `--croq-syntax-keyword-font-weight`, `--croq-syntax-type-color`, `--croq-syntax-function-color`, `--croq-syntax-definition-color`, `--croq-syntax-definition-font-weight`, `--croq-syntax-property-color`, `--croq-syntax-variable-color`, `--croq-syntax-local-variable-color`, `--croq-syntax-literal-color`, `--croq-syntax-literal-font-weight`, `--croq-syntax-literal-text-shadow`, `--croq-syntax-invalid-decoration` |
-| Indentation rulers | `--croq-indent-ruler-column` (unitless character column), `--croq-indent-ruler-width`, `--croq-indent-ruler-style`, `--croq-indent-ruler-color`, `--croq-indent-ruler-scroller-z-index`, `--croq-indent-ruler-content-z-index`, `--croq-indent-ruler-overlay-position`, `--croq-indent-ruler-overlay-z-index`, `--croq-indent-ruler-overlay-overflow`, `--croq-indent-ruler-pointer-events`, `--croq-indent-ruler-container-position`, `--croq-indent-ruler-container-right`, `--croq-indent-ruler-position`, `--croq-indent-ruler-inset-block` |
+| Structure | `--opticm-structure-scroller-z-index`, `--opticm-structure-content-z-index`, `--opticm-structure-overlay-z-index`, `--opticm-structure-overlay-position`, `--opticm-structure-overlay-overflow`, `--opticm-structure-overlay-pointer-events`, `--opticm-structure-canvas-display`, `--opticm-structure-canvas-width`, `--opticm-structure-canvas-height` |
+| Function numbers | `--opticm-function-number-color`, `--opticm-function-active-number-color`, `--opticm-function-line-color`, `--opticm-function-number-padding`, `--opticm-function-number-display`, `--opticm-function-number-font-variant`, `--opticm-function-line-align`, `--opticm-function-gutter-min-width`, `--opticm-function-gutter-overflow`, `--opticm-function-gutter-item-position`, `--opticm-function-gutter-item-padding` |
+| Function gutter edge | `--opticm-function-gutter-edge-content`, `--opticm-function-gutter-edge-width`, `--opticm-function-gutter-edge-color`, `--opticm-function-gutter-edge-hover-color`, `--opticm-function-gutter-edge-pattern`, `--opticm-function-stripe-width`, `--opticm-function-stripe-color` |
+| Function highlighting | `--opticm-function-alternate-background`, `--opticm-function-alternate-content`, `--opticm-function-alternate-position`, `--opticm-function-alternate-inset`, `--opticm-function-alternate-z-index`, `--opticm-function-alternate-pointer-events`, `--opticm-function-lint-gutter-width` (component), `--opticm-lint-gutter-width` (standalone) |
+| Function scroll markers | `--opticm-function-scroll-marker-track-width`, `--opticm-function-scroll-track-position`, `--opticm-function-scroll-track-right`, `--opticm-function-scroll-track-pointer-events`, `--opticm-function-scroll-marker-inset`, `--opticm-function-scroll-marker-radius`, `--opticm-function-scroll-marker-color`, `--opticm-function-scroll-marker-position`, `--opticm-function-scroll-marker-aspect-ratio`, `--opticm-function-scroll-marker-z-index` |
+| Gutter selection | `--opticm-gutter-cursor`, `--opticm-gutter-line-selection-cursor` (complete CSS `cursor` values) |
+| Syntax highlighting | `--opticm-syntax-comment-color`, `--opticm-syntax-comment-font-weight`, `--opticm-syntax-keyword-color`, `--opticm-syntax-keyword-font-weight`, `--opticm-syntax-type-color`, `--opticm-syntax-function-color`, `--opticm-syntax-definition-color`, `--opticm-syntax-definition-font-weight`, `--opticm-syntax-property-color`, `--opticm-syntax-variable-color`, `--opticm-syntax-local-variable-color`, `--opticm-syntax-literal-color`, `--opticm-syntax-literal-font-weight`, `--opticm-syntax-literal-text-shadow`, `--opticm-syntax-invalid-decoration` |
+| Indentation rulers | `--opticm-indent-ruler-column` (unitless character column), `--opticm-indent-ruler-width`, `--opticm-indent-ruler-style`, `--opticm-indent-ruler-color`, `--opticm-indent-ruler-scroller-z-index`, `--opticm-indent-ruler-content-z-index`, `--opticm-indent-ruler-overlay-position`, `--opticm-indent-ruler-overlay-z-index`, `--opticm-indent-ruler-overlay-overflow`, `--opticm-indent-ruler-pointer-events`, `--opticm-indent-ruler-container-position`, `--opticm-indent-ruler-container-right`, `--opticm-indent-ruler-position`, `--opticm-indent-ruler-inset-block` |
 
 Defaults are specified in each extension's `style.css`, including fallbacks to
 the component's existing color variables. These properties can be changed at
@@ -497,16 +497,16 @@ Each component build replaces `dist/` to remove obsolete output files.
 
 The distribution contains:
 
-- `croq-mirror.min.js`: the editor and its dependencies
+- `opticm.min.js`: the editor and its dependencies
 - `analysis-worker.min.js`: the analysis worker and its parser dependencies
 - `analysis-worker-java.min.js`, `web-tree-sitter.wasm`, `tree-sitter-java.wasm`: the Java parser worker and WebAssembly runtimes
-- `croq-mirror.min.css`: the combined, scoped editor styles
+- `opticm.min.css`: the combined, scoped editor styles
 - `analysis.js`, `structure-view.js`, `syntax-highlighting.js`, `function-line-numbers.js`, `function-scroll-markers.js`, `bracket-matching.js`, `whitespace.js`, `full-line-selection.js`, `easy-line-selection.js`, `gutter-line-selection.js` (compatibility entry), `indent-rulers.js`: standalone extensions with external CodeMirror dependencies
 - JavaScript source maps for debugging; these are not required at runtime
 - `licenses/`: third-party licenses
 
 Keep the worker beside the main JavaScript file when deploying. Cursor SVGs remain editable in `src/extensions/gutter-line-selection/` and are embedded as data URLs in the extension's JavaScript; no separate cursor files are distributed.
-No font files or `@font-face` declarations are bundled. The host application can load its own fonts and select them using `fontFamily`; search input fonts can be set with `--croq-mirror-font-console` on `.croq-mirror`.
+No font files or `@font-face` declarations are bundled. The host application can load its own fonts and select them using `fontFamily`; search input fonts can be set with `--opticm-font-console` on `.opticm`.
 English and Japanese JSHint implementations are retained as separate functions. CodeMirror styles and the theme are scoped to the component root.
 Editor UI text is maintained separately in `src/res/lang.en.json` and `src/res/lang.ja.json`.
 Default JSHint and formatting options are stored as data in `src/res/defaults.json`.
@@ -527,7 +527,7 @@ The example uses Klales for base styling, with local CSS for its layout.
 Vite copies `dist/` into `docs/` as public assets. Serve `docs/` alone to include the worker, fonts, and licenses.
 The example loads the distributed modules unchanged. Relative URLs support deployment under a subdirectory.
 Run `node build.mjs` to build only the component.
-There are no references or dependencies on the Croqujs repository.
+The built package has no runtime dependency on a separate application repository.
 
 The original source license is in `LICENSE`, and bundled library licenses are in `dist/licenses/`.
 Fonts and cursors were inherited from the original repository; asset-specific rights still require verification before third-party distribution.

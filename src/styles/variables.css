@@ -5,36 +5,36 @@
  * @version 2026-10-24
  */
 
-.croq-mirror {
-	--croq-mirror-l-red         : #e61e58;
-	--croq-mirror-l-red-35      : #f6b0c5;
-	--croq-mirror-l-red-15      : #fbdde6;
-	--croq-mirror-l-orange      : #f5a200;
-	--croq-mirror-l-orange-b    : #f18400;
-	--croq-mirror-l-orange-50   : #fbd290;
-	--croq-mirror-l-yellow      : #fdde00;
-	--croq-mirror-l-yellow-35   : #fef3a6;
-	--croq-mirror-l-yellowgreen : #7eba2e;
-	--croq-mirror-l-palegreen   : #4db28d;
-	--croq-mirror-l-palegreen-25: #d2ece2;
-	--croq-mirror-l-turquoise   : #005363;
-	--croq-mirror-l-cyan        : #009ddf;
-	--croq-mirror-l-aqua        : #60b3e5;
-	--croq-mirror-l-aqua-60     : #a0d1ef;
-	--croq-mirror-l-blue        : #2e449a;
-	--croq-mirror-l-purple      : #9a74a3;
-	--croq-mirror-l-brown       : #4e4138;
-	--croq-mirror-l-bodybrown   : #7c6a5a;
-	--croq-mirror-l-lightgray   : #e8e8e8;
-	--croq-mirror-l-gray        : #b5b5b6;
-	--croq-mirror-l-darkgray    : #898989;
+.opticm {
+	--opticm-l-red         : #e61e58;
+	--opticm-l-red-35      : #f6b0c5;
+	--opticm-l-red-15      : #fbdde6;
+	--opticm-l-orange      : #f5a200;
+	--opticm-l-orange-b    : #f18400;
+	--opticm-l-orange-50   : #fbd290;
+	--opticm-l-yellow      : #fdde00;
+	--opticm-l-yellow-35   : #fef3a6;
+	--opticm-l-yellowgreen : #7eba2e;
+	--opticm-l-palegreen   : #4db28d;
+	--opticm-l-palegreen-25: #d2ece2;
+	--opticm-l-turquoise   : #005363;
+	--opticm-l-cyan        : #009ddf;
+	--opticm-l-aqua        : #60b3e5;
+	--opticm-l-aqua-60     : #a0d1ef;
+	--opticm-l-blue        : #2e449a;
+	--opticm-l-purple      : #9a74a3;
+	--opticm-l-brown       : #4e4138;
+	--opticm-l-bodybrown   : #7c6a5a;
+	--opticm-l-lightgray   : #e8e8e8;
+	--opticm-l-gray        : #b5b5b6;
+	--opticm-l-darkgray    : #898989;
 
-	--croq-mirror-color-editor: rgb(252.76 252.76 252.76);
-	--croq-mirror-color-text  : #110;
-	--croq-mirror-color-window: #f8f8f8;
+	--opticm-color-editor: rgb(252.76 252.76 252.76);
+	--opticm-color-text  : #110;
+	--opticm-color-window: #f8f8f8;
 
-	--croq-mirror-font-ui     : "Lucida Grande", "Hiragino Sans", "Yu Gothic UI", "Meiryo UI", sans-serif;
-	--croq-mirror-font-console: 'Hiragino Sans', "Yu Gothic UI", "Meiryo UI", monospace;
-	--croq-mirror-font-size   : 14px;
+	--opticm-font-ui     : "Lucida Grande", "Hiragino Sans", "Yu Gothic UI", "Meiryo UI", sans-serif;
+	--opticm-font-console: 'Hiragino Sans', "Yu Gothic UI", "Meiryo UI", monospace;
+	--opticm-font-size   : 14px;
 
 }

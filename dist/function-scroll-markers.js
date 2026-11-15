@@ -1,6 +1,6 @@
 // .build/extensions/function-scroll-markers/index.js
 import { EditorView as EditorView2, ViewPlugin as ViewPlugin2 } from "@codemirror/view";
-import { commonAnalysisState } from "croq-mirror/analysis";
+import { commonAnalysisState } from "opticm/analysis";
 
 // .build/extensions/styles.js
 import { EditorView, ViewPlugin } from "@codemirror/view";
@@ -24,7 +24,7 @@ function extensionStyles(css) {
 }
 
 // .build/extensions/function-scroll-markers/style.css
-var style_default = ".cm-editor.cm-function-scroll-markers .cm-function-scroll-markers {\r\n	position: var(--croq-function-scroll-track-position, absolute);\r\n	--croq-function-scroll-track-width: var(--croq-function-scroll-marker-track-width, var(--croq-function-scrollbar-width, 10px));\r\n	right: var(--croq-function-scroll-track-right, calc(var(--croq-function-scrollbar-center-inset, 5px) - var(--croq-function-scroll-track-width) / 2));\r\n	width: var(--croq-function-scroll-track-width);\r\n	pointer-events: var(--croq-function-scroll-track-pointer-events, none);\r\n	z-index: var(--croq-function-scroll-marker-z-index, 3);\r\n}\r\n\r\n.cm-editor.cm-function-scroll-markers .cm-function-scroll-markers > span {\r\n	position: var(--croq-function-scroll-marker-position, absolute);\r\n	inset-inline: var(--croq-function-scroll-marker-inset, 2px);\r\n	aspect-ratio: var(--croq-function-scroll-marker-aspect-ratio, 1);\r\n	border-radius: var(--croq-function-scroll-marker-radius, 50%);\r\n	background: var(--croq-function-scroll-marker-color, hsl(40 100% 50% / 75%));\r\n}\r\n";
+var style_default = ".cm-editor.cm-function-scroll-markers .cm-function-scroll-markers {\r\n	position: var(--opticm-function-scroll-track-position, absolute);\r\n	--opticm-function-scroll-track-width: var(--opticm-function-scroll-marker-track-width, var(--opticm-function-scrollbar-width, 10px));\r\n	right: var(--opticm-function-scroll-track-right, calc(var(--opticm-function-scrollbar-center-inset, 5px) - var(--opticm-function-scroll-track-width) / 2));\r\n	width: var(--opticm-function-scroll-track-width);\r\n	pointer-events: var(--opticm-function-scroll-track-pointer-events, none);\r\n	z-index: var(--opticm-function-scroll-marker-z-index, 3);\r\n}\r\n\r\n.cm-editor.cm-function-scroll-markers .cm-function-scroll-markers > span {\r\n	position: var(--opticm-function-scroll-marker-position, absolute);\r\n	inset-inline: var(--opticm-function-scroll-marker-inset, 2px);\r\n	aspect-ratio: var(--opticm-function-scroll-marker-aspect-ratio, 1);\r\n	border-radius: var(--opticm-function-scroll-marker-radius, 50%);\r\n	background: var(--opticm-function-scroll-marker-color, hsl(40 100% 50% / 75%));\r\n}\r\n";
 
 // .build/extensions/function-scroll-markers/index.js
 function sectionStarts(state) {
@@ -63,8 +63,8 @@ var scrollMarkers = ViewPlugin2.fromClass(class {
       write: (data) => {
         this.dom.style.top = data.top + "px";
         this.dom.style.height = data.height + "px";
-        this.dom.style.setProperty("--croq-function-scrollbar-center-inset", `${data.centerInset}px`);
-        this.dom.style.setProperty("--croq-function-scrollbar-width", `${data.trackWidth}px`);
+        this.dom.style.setProperty("--opticm-function-scrollbar-center-inset", `${data.centerInset}px`);
+        this.dom.style.setProperty("--opticm-function-scrollbar-width", `${data.trackWidth}px`);
         this.dom.replaceChildren(...data.markers.map((position) => {
           const marker = this.dom.ownerDocument.createElement("span");
           marker.style.top = position + "%";

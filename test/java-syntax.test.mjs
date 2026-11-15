@@ -98,7 +98,7 @@ test('Java while and do-while statements use purple loop2 structures', () => {
 			['loop2', 'do { tick(); } while (ready);'],
 		]);
 		assert.ok(result.decorations.some(item => item.kind === 'range' &&
-			item.fill === 'var(--croq-mirror-l-purple, #9a74a3)' && item.opacity === 0.20));
+			item.fill === 'var(--opticm-l-purple, #9a74a3)' && item.opacity === 0.20));
 	} finally {
 		tree.delete();
 	}
@@ -281,7 +281,7 @@ test('Java emits class ranges before their methods without changing method secti
 	try {
 		const result = analyzeJava(source, tree.rootNode);
 		assert.equal(result.success, true);
-		const classes = result.decorations.filter(item => item.fill === 'var(--croq-mirror-l-red, #e61e58)');
+		const classes = result.decorations.filter(item => item.fill === 'var(--opticm-l-red, #e61e58)');
 		assert.deepEqual(classes.map(item => [item.from.line, item.from.ch, item.to.line, item.to.ch, item.opacity]),
 			[[0, 0, 4, 1, 0.12], [2, 4, 2, 18, 0.12]]);
 		assert.deepEqual(result.sectionStarts, [1]);

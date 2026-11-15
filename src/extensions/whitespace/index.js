@@ -4,12 +4,12 @@ import css from './style.css';
 
 // Alternate classes so adjacent marks remain separate DOM spans.
 const spaceMarks = [
-	Decoration.mark({ class: 'cm-croq-space cm-croq-space-even' }),
-	Decoration.mark({ class: 'cm-croq-space cm-croq-space-odd' }),
+	Decoration.mark({ class: 'cm-opticm-space cm-opticm-space-even' }),
+	Decoration.mark({ class: 'cm-opticm-space cm-opticm-space-odd' }),
 ];
 const fullWidthSpaceMarks = [
-	Decoration.mark({ class: 'cm-highlightSpace cm-croq-space cm-croq-full-width-space cm-croq-space-even' }),
-	Decoration.mark({ class: 'cm-highlightSpace cm-croq-space cm-croq-full-width-space cm-croq-space-odd' }),
+	Decoration.mark({ class: 'cm-highlightSpace cm-opticm-space cm-opticm-full-width-space cm-opticm-space-even' }),
+	Decoration.mark({ class: 'cm-highlightSpace cm-opticm-space cm-opticm-full-width-space cm-opticm-space-odd' }),
 ];
 const spaces = new MatchDecorator({
 	regexp: /[ \u3000]+/g,
@@ -36,7 +36,7 @@ export function whitespaceHighlighting() {
 	return [
 		highlightWhitespace(),
 		highlightSpaces,
-		EditorView.editorAttributes.of({ class: 'cm-croq-whitespace' }),
+		EditorView.editorAttributes.of({ class: 'cm-opticm-whitespace' }),
 		extensionStyles(css),
 	];
 }

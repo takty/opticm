@@ -71,7 +71,7 @@ class LineNumber extends GutterMarker {
 	toDOM(view) {
 		const element = view.dom.ownerDocument.createElement('span');
 		const start   = this.section > 0 && this.line === 1;
-		element.className = start ? 'cm-function-number' : 'cm-croq-line-number';
+		element.className = start ? 'cm-function-number' : 'cm-opticm-line-number';
 		element.classList.toggle('cm-function-even', this.section % 2 !== 0);
 		element.textContent = start ? this.section : this.line;
 		return element;

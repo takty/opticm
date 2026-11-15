@@ -1,12 +1,12 @@
 {
-	"name": "croq-mirror",
+	"name": "opticm",
 	"version": "0.1.0",
-	"description": "CodeMirror 6 based editor component extracted from Croqujs",
+	"description": "Standalone CodeMirror 6 editor component",
 	"license": "MIT",
 	"private": true,
 	"type": "module",
 	"exports": {
-		".": "./dist/croq-mirror.min.js",
+		".": "./dist/opticm.min.js",
 		"./analysis": "./dist/analysis.js",
 		"./structure": "./dist/structure-view.js",
 		"./function-line-numbers": "./dist/function-line-numbers.js",

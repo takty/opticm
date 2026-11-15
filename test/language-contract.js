@@ -38,13 +38,13 @@ export async function runLanguageContractTests(assert) {
 			getComputedStyle(inactiveTab, '::before').color === 'rgb(251, 221, 230)' &&
 			activeTabShadow.includes('0px 0px 6px') && inactiveTabShadow.includes('0px 0px 6px'),
 			'standalone whitespace extension styles active and inactive lines');
-		whitespaceHost.style.setProperty('--croq-whitespace-active-color', '#123456');
-		whitespaceHost.style.setProperty('--croq-whitespace-tab-color', '#654321');
+		whitespaceHost.style.setProperty('--opticm-whitespace-active-color', '#123456');
+		whitespaceHost.style.setProperty('--opticm-whitespace-tab-color', '#654321');
 		assert(getComputedStyle(activeTab, '::before').color === 'rgb(18, 52, 86)' &&
 			getComputedStyle(inactiveTab, '::before').color === 'rgb(101, 67, 33)',
 			'whitespace colors can be customized');
 		whitespaceView.dispatch({ effects: whitespaceCompartment.reconfigure([]) });
-		assert(!whitespaceView.dom.classList.contains('cm-croq-whitespace') &&
+		assert(!whitespaceView.dom.classList.contains('cm-opticm-whitespace') &&
 			!whitespaceHost.querySelector('.cm-highlightTab, .cm-highlightSpace') &&
 			!whitespaceView.dom.querySelector('style'), 'removing whitespace extension removes its marks and stylesheet');
 	} finally {
@@ -110,17 +110,17 @@ export async function runLanguageContractTests(assert) {
 		return !!painted() === expected;
 	};
 	try {
-		host.style.setProperty('--croq-structure-overlay-z-index', '7');
-		host.style.setProperty('--croq-structure-content-z-index', '8');
-		host.style.setProperty('--croq-structure-scroller-z-index', '2');
+		host.style.setProperty('--opticm-structure-overlay-z-index', '7');
+		host.style.setProperty('--opticm-structure-content-z-index', '8');
+		host.style.setProperty('--opticm-structure-scroller-z-index', '2');
 		assert(getComputedStyle(host.querySelector('.cm-structure-overlay')).zIndex === '7' &&
 			getComputedStyle(standalone.contentDOM).zIndex === '8' &&
 			getComputedStyle(standalone.scrollDOM).zIndex === '2' &&
 			getComputedStyle(otherHost.querySelector('.cm-structure-overlay')).zIndex === '0',
 			'structure CSS custom properties apply per editor');
-		host.style.removeProperty('--croq-structure-overlay-z-index');
-		host.style.removeProperty('--croq-structure-content-z-index');
-		host.style.removeProperty('--croq-structure-scroller-z-index');
+		host.style.removeProperty('--opticm-structure-overlay-z-index');
+		host.style.removeProperty('--opticm-structure-content-z-index');
+		host.style.removeProperty('--opticm-structure-scroller-z-index');
 		standalone.dispatch({ effects: setStructure.of([{
 			kind: 'range', from: { line: 0, ch: 0 }, to: { line: 2, ch: 1 }, fill: 'rgba(255, 0, 0, 0.4)',
 			spineChars: 3, branchChars: 4, branches: [{ line: 1, ch: 0 }],
@@ -350,26 +350,26 @@ export async function runLanguageContractTests(assert) {
 		assert(getComputedStyle(gutter).overflow === 'visible' &&
 			getComputedStyle(firstSection, '::before').backgroundColor !== 'rgba(0, 0, 0, 0)',
 			'standalone gutter renders the section background');
-		numbersHost.style.setProperty('--croq-function-number-color', '#123456');
-		numbersHost.style.setProperty('--croq-function-line-color', '#234567');
-		numbersHost.style.setProperty('--croq-function-number-padding', '0 9px 0 6px');
-		numbersHost.style.setProperty('--croq-function-gutter-min-width', '48px');
-		numbersHost.style.setProperty('--croq-function-gutter-edge-width', '21px');
-		numbersHost.style.setProperty('--croq-function-stripe-width', '5px');
-		numbersHost.style.setProperty('--croq-function-stripe-color', '#bcdef0');
-		numbersHost.style.setProperty('--croq-function-alternate-background', '#345678');
-		numbersHost.style.setProperty('--croq-mirror-lint-gutter-width', '8px');
+		numbersHost.style.setProperty('--opticm-function-number-color', '#123456');
+		numbersHost.style.setProperty('--opticm-function-line-color', '#234567');
+		numbersHost.style.setProperty('--opticm-function-number-padding', '0 9px 0 6px');
+		numbersHost.style.setProperty('--opticm-function-gutter-min-width', '48px');
+		numbersHost.style.setProperty('--opticm-function-gutter-edge-width', '21px');
+		numbersHost.style.setProperty('--opticm-function-stripe-width', '5px');
+		numbersHost.style.setProperty('--opticm-function-stripe-color', '#bcdef0');
+		numbersHost.style.setProperty('--opticm-function-alternate-background', '#345678');
+		numbersHost.style.setProperty('--opticm-lint-gutter-width', '8px');
 		const edge = getComputedStyle(numbersHost.querySelector('.cm-gutters'), '::after');
 		assert(getComputedStyle(gutter.querySelector('.cm-function-number')).color === 'rgb(18, 52, 86)' &&
 			getComputedStyle(gutter.querySelector('.cm-function-number')).paddingLeft === '6px' &&
-			getComputedStyle(gutter.querySelector('.cm-croq-line-number')).color === 'rgb(35, 69, 103)' &&
+			getComputedStyle(gutter.querySelector('.cm-opticm-line-number')).color === 'rgb(35, 69, 103)' &&
 			getComputedStyle(visible[0]).minWidth === '48px' && edge.width === '21px' &&
 			edge.backgroundImage.includes('5px') && edge.backgroundImage.includes('188, 222, 240') &&
 			getComputedStyle(firstSection, '::before').backgroundColor === 'rgb(52, 86, 120)' &&
 			getComputedStyle(firstSection, '::before').left === '-8px',
 			'function gutter colors, dimensions and stripes respond to custom properties');
-		numbersHost.style.setProperty('--croq-function-gutter-edge-pattern', 'none');
-		numbersHost.style.setProperty('--croq-function-gutter-edge-color', '#456789');
+		numbersHost.style.setProperty('--opticm-function-gutter-edge-pattern', 'none');
+		numbersHost.style.setProperty('--opticm-function-gutter-edge-color', '#456789');
 		assert(getComputedStyle(numbersHost.querySelector('.cm-gutters'), '::after').backgroundImage === 'none' &&
 			getComputedStyle(numbersHost.querySelector('.cm-gutters'), '::after').backgroundColor === 'rgb(69, 103, 137)',
 			'function gutter edge pattern and color can be overridden');
@@ -405,11 +405,11 @@ export async function runLanguageContractTests(assert) {
 		parent: markersHost,
 	});
 	try {
-		markersHost.style.setProperty('--croq-function-scroll-marker-track-width', '16px');
-		markersHost.style.setProperty('--croq-function-scroll-marker-inset', '3px');
-		markersHost.style.setProperty('--croq-function-scroll-marker-radius', '25%');
-		markersHost.style.setProperty('--croq-function-scroll-marker-z-index', '6');
-		markersHost.style.setProperty('--croq-function-scroll-marker-color', '#102030');
+		markersHost.style.setProperty('--opticm-function-scroll-marker-track-width', '16px');
+		markersHost.style.setProperty('--opticm-function-scroll-marker-inset', '3px');
+		markersHost.style.setProperty('--opticm-function-scroll-marker-radius', '25%');
+		markersHost.style.setProperty('--opticm-function-scroll-marker-z-index', '6');
+		markersHost.style.setProperty('--opticm-function-scroll-marker-color', '#102030');
 		markers.dispatch({ effects: setCommonAnalysis.of(createCommonAnalysis({
 			version: 1, sourceLength: markerDoc.length, complete: true,
 			structures: [], declarations: [], syntax: [], references: [],
@@ -472,8 +472,8 @@ export async function runLanguageContractTests(assert) {
 		assert(selectionStyle?.nonce === 'first-nonce', 'extension stylesheet uses the editor CSP nonce');
 		selectionView.dispatch({ effects: nonceCompartment.reconfigure(EditorView.cspNonce.of('next-nonce')) });
 		assert(selectionStyle.nonce === 'next-nonce', 'extension stylesheet follows CSP nonce changes');
-		selectionHost.style.setProperty('--croq-gutter-cursor', 'crosshair');
-		selectionHost.style.setProperty('--croq-gutter-line-selection-cursor', 'move');
+		selectionHost.style.setProperty('--opticm-gutter-cursor', 'crosshair');
+		selectionHost.style.setProperty('--opticm-gutter-line-selection-cursor', 'move');
 		assert(getComputedStyle(selectionHost.querySelector('.cm-lineNumbers')).cursor === 'crosshair',
 			'gutter cursor can be customized through CSS');
 		lineClick(1);
@@ -555,7 +555,7 @@ export async function runLanguageContractTests(assert) {
 		parent: syntaxHost,
 	});
 	try {
-		syntaxHost.style.setProperty('--croq-syntax-keyword-color', '#123456');
+		syntaxHost.style.setProperty('--opticm-syntax-keyword-color', '#123456');
 		syntaxView.dispatch({ effects: setSyntaxHighlights.of([{ from: 0, to: 5, kind: 'keyword' }, { from: 6, to: 13, kind: 'type' }]) });
 		const keyword = syntaxHost.querySelector('.cm-syntax-keyword');
 		const type = syntaxHost.querySelector('.cm-syntax-type');
@@ -591,7 +591,7 @@ export async function runLanguageContractTests(assert) {
 				return from < 0 ? [] : [{ from, to: from + 5, kind: 'local-reference' }];
 			}),
 		]) });
-		syntaxHost.style.setProperty('--croq-syntax-local-variable-color', '#234567');
+		syntaxHost.style.setProperty('--opticm-syntax-local-variable-color', '#234567');
 		const reference = syntaxHost.querySelector('.cm-syntax-local-reference');
 		assert(reference?.textContent === 'class' && getComputedStyle(reference).color === 'rgb(35, 69, 103)',
 			'standalone syntax source supplies ranges and supports local-reference color');
@@ -731,15 +731,15 @@ export async function runLanguageContractTests(assert) {
 		assert(getComputedStyle(overlay).pointerEvents === 'none' &&
 			Number(getComputedStyle(rulerView.contentDOM).zIndex) > Number(getComputedStyle(overlay).zIndex),
 			'standalone ruler overlay stays behind text and does not intercept input');
-		rulerHost.style.setProperty('--croq-indent-ruler-width', '3px');
-		rulerHost.style.setProperty('--croq-indent-ruler-color', '#123456');
-		rulerHost.style.setProperty('--croq-indent-ruler-style', 'solid');
-		rules[0].style.setProperty('--croq-indent-ruler-column', '2');
+		rulerHost.style.setProperty('--opticm-indent-ruler-width', '3px');
+		rulerHost.style.setProperty('--opticm-indent-ruler-color', '#123456');
+		rulerHost.style.setProperty('--opticm-indent-ruler-style', 'solid');
+		rules[0].style.setProperty('--opticm-indent-ruler-column', '2');
 		assert(getComputedStyle(rules[0]).borderLeftWidth === '3px' &&
 			getComputedStyle(rules[0]).borderLeftColor === 'rgb(18, 52, 86)' &&
 			getComputedStyle(rules[0]).borderLeftStyle === 'solid' && aligned(rules[0], 2) && aligned(rules[1], 8),
 			'ruler color, width, style and individual columns accept custom properties');
-		rules[0].style.removeProperty('--croq-indent-ruler-column');
+		rules[0].style.removeProperty('--opticm-indent-ruler-column');
 		rulerView.scrollDOM.scrollLeft = 15;
 		rulerView.scrollDOM.scrollTop = 100;
 		await waitForRulers();
@@ -765,7 +765,7 @@ export async function runLanguageContractTests(assert) {
 			'removing the ruler extension removes its overlay and stylesheet');
 		rulerView.dispatch({ effects: rulerCompartment.reconfigure(indentRulers) });
 		await waitForRulers();
-		assert(rulerHost.querySelectorAll('.cm-croq-rulers > span').length === 3,
+		assert(rulerHost.querySelectorAll('.cm-opticm-rulers > span').length === 3,
 			'reinstalling the ruler extension restores its guides');
 	} finally {
 		rulerView.destroy();
@@ -783,7 +783,7 @@ export async function runLanguageContractTests(assert) {
 	// A non-JS implementation proves the view consumes the contract rather than
 	// JavaScript AST fields, JSHint errors or a Tern server.
 	const root = document.createElement('div');
-	root.className = 'croq-mirror';
+	root.className = 'opticm';
 	root.style.cssText = 'height:300px;width:500px;box-sizing:border-box';
 	document.body.prepend(root);
 	let disposed = false, definitions, resolveHint;

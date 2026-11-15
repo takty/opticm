@@ -53,7 +53,7 @@ async function buildJavaScript() {
 	await copyDirectory(join(root, 'src/res'), join(stageRoot, 'res'));
 	await bundle({
 		entryPoints  : {
-			'croq-mirror'    : join(stageRoot, 'index.js'),
+			'opticm'    : join(stageRoot, 'index.js'),
 			'analysis-worker': join(stageRoot, 'lang/js/analysis-worker.js'),
 			'analysis-worker-java': join(stageRoot, 'lang/java/analysis-worker.js'),
 		},
@@ -89,7 +89,7 @@ async function buildJavaScript() {
 			name: 'shared-analysis-entry',
 			setup(build) {
 				build.onResolve({ filter: /(?:^|[/\\])analysis[/\\]common-analysis\.js$/ }, args =>
-					args.kind === 'entry-point' ? null : { path: 'croq-mirror/analysis', external: true });
+					args.kind === 'entry-point' ? null : { path: 'opticm/analysis', external: true });
 			},
 		}],
 		format: 'esm',
@@ -112,7 +112,7 @@ async function buildStyle() {
 		legalComments: 'inline',
 	});
 	const minifiedCss = await transform(styles.outputFiles[0].text, { loader: 'css', minify: true, legalComments: 'inline', target: 'es2022' });
-	await writeFileIfChanged(join(out, 'croq-mirror.min.css'), minifiedCss.code);
+	await writeFileIfChanged(join(out, 'opticm.min.css'), minifiedCss.code);
 }
 
 async function copyLicenses() {

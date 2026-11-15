@@ -1,7 +1,7 @@
 // .build/extensions/structure-view/index.js
 import { Facet, StateEffect, StateField, countColumn } from "@codemirror/state";
 import { EditorView as EditorView2, ViewPlugin as ViewPlugin2 } from "@codemirror/view";
-import { commonAnalysisState } from "croq-mirror/analysis";
+import { commonAnalysisState } from "opticm/analysis";
 
 // .build/extensions/styles.js
 import { EditorView, ViewPlugin } from "@codemirror/view";
@@ -25,7 +25,7 @@ function extensionStyles(css) {
 }
 
 // .build/extensions/structure-view/style.css
-var style_default = ".cm-editor.cm-structure-view .cm-scroller {\r\n	z-index: var(--croq-structure-scroller-z-index, auto);\r\n}\r\n\r\n.cm-editor.cm-structure-view .cm-content {\r\n	z-index: var(--croq-structure-content-z-index, 1);\r\n}\r\n\r\n.cm-editor.cm-structure-view .cm-structure-overlay {\r\n	position: var(--croq-structure-overlay-position, absolute);\r\n	z-index: var(--croq-structure-overlay-z-index, 0);\r\n	overflow: var(--croq-structure-overlay-overflow, hidden);\r\n	pointer-events: var(--croq-structure-overlay-pointer-events, none);\r\n}\r\n\r\n.cm-editor.cm-structure-view .code-structure-view {\r\n	display: var(--croq-structure-canvas-display, block);\r\n	width: var(--croq-structure-canvas-width, 100%);\r\n	height: var(--croq-structure-canvas-height, 100%);\r\n}\r\n";
+var style_default = ".cm-editor.cm-structure-view .cm-scroller {\r\n	z-index: var(--opticm-structure-scroller-z-index, auto);\r\n}\r\n\r\n.cm-editor.cm-structure-view .cm-content {\r\n	z-index: var(--opticm-structure-content-z-index, 1);\r\n}\r\n\r\n.cm-editor.cm-structure-view .cm-structure-overlay {\r\n	position: var(--opticm-structure-overlay-position, absolute);\r\n	z-index: var(--opticm-structure-overlay-z-index, 0);\r\n	overflow: var(--opticm-structure-overlay-overflow, hidden);\r\n	pointer-events: var(--opticm-structure-overlay-pointer-events, none);\r\n}\r\n\r\n.cm-editor.cm-structure-view .code-structure-view {\r\n	display: var(--opticm-structure-canvas-display, block);\r\n	width: var(--opticm-structure-canvas-width, 100%);\r\n	height: var(--opticm-structure-canvas-height, 100%);\r\n}\r\n";
 
 // .build/extensions/structure-view/index.js
 var setStructure = StateEffect.define();
@@ -149,7 +149,7 @@ var structurePlugin = ViewPlugin2.fromClass(class {
       const match = /^var\(\s*(--[\w-]+)\s*,\s*(.+)\)$/.exec(value);
       return match ? colors.getPropertyValue(match[1]).trim() || match[2] : value;
     };
-    const linePadding = parseFloat(window.getComputedStyle(view.contentDOM).getPropertyValue("--croq-mirror-line-padding")) || 0;
+    const linePadding = parseFloat(window.getComputedStyle(view.contentDOM).getPropertyValue("--opticm-line-padding")) || 0;
     const left = Math.max(frame.left, content.left);
     const width = Math.max(0, frame.left + scroller.clientWidth - left);
     const height = scroller.clientHeight;
@@ -244,11 +244,11 @@ var structureView = [
 ];
 function commonDecorations(analysis, doc, options) {
   const colors = {
-    class: ["var(--croq-mirror-l-red, #e61e58)", 0.12],
+    class: ["var(--opticm-l-red, #e61e58)", 0.12],
     function: ["hsla(40, 100%, 50%, 0.15)"],
     conditional: ["hsla(150, 100%, 35%, 0.15)"],
     loop: ["hsla(190, 90%, 50%, 0.20)"],
-    loop2: ["var(--croq-mirror-l-purple, #9a74a3)", 0.2]
+    loop2: ["var(--opticm-l-purple, #9a74a3)", 0.2]
   };
   const position = (offset) => {
     const line = doc.lineAt(offset);

@@ -1,51 +1,51 @@
 .cm-editor.cm-syntax-highlighting .cm-syntax-comment {
-	color: var(--croq-syntax-comment-color, var(--croq-mirror-l-gray, #777));
-	font-weight: var(--croq-syntax-comment-font-weight, bold);
+	color: var(--opticm-syntax-comment-color, var(--opticm-l-gray, #777));
+	font-weight: var(--opticm-syntax-comment-font-weight, bold);
 }
 
 .cm-editor.cm-syntax-highlighting :is(.cm-syntax-keyword, .cm-syntax-operator) {
-	color: var(--croq-syntax-keyword-color, var(--croq-mirror-l-bodybrown, #7c6a5a));
-	font-weight: var(--croq-syntax-keyword-font-weight, bold);
+	color: var(--opticm-syntax-keyword-color, var(--opticm-l-bodybrown, #7c6a5a));
+	font-weight: var(--opticm-syntax-keyword-font-weight, bold);
 }
 
 .cm-editor.cm-syntax-highlighting .cm-syntax-type {
-	color: var(--croq-syntax-type-color, var(--croq-mirror-l-blue, #2e449a));
+	color: var(--opticm-syntax-type-color, var(--opticm-l-blue, #2e449a));
 }
 
 .cm-editor.cm-syntax-highlighting .cm-syntax-function {
-	color: var(--croq-syntax-function-color, var(--croq-mirror-l-turquoise, #005363));
+	color: var(--opticm-syntax-function-color, var(--opticm-l-turquoise, #005363));
 }
 
 .cm-editor.cm-syntax-highlighting :is(.cm-syntax-function-definition, .cm-syntax-function-definition *, .cm-syntax-class-definition, .cm-syntax-class-definition *) {
-	color: var(--croq-syntax-function-definition-color, var(--croq-mirror-color-text, #110));
-	font-weight: var(--croq-syntax-function-definition-font-weight, bold);
+	color: var(--opticm-syntax-function-definition-color, var(--opticm-color-text, #110));
+	font-weight: var(--opticm-syntax-function-definition-font-weight, bold);
 }
 
 .cm-editor.cm-syntax-highlighting :where(.cm-syntax-definition) {
-	color: var(--croq-syntax-definition-color, inherit);
+	color: var(--opticm-syntax-definition-color, inherit);
 }
 
 .cm-editor.cm-syntax-highlighting .cm-syntax-definition {
-	font-weight: var(--croq-syntax-definition-font-weight, bold);
+	font-weight: var(--opticm-syntax-definition-font-weight, bold);
 }
 
 .cm-editor.cm-syntax-highlighting :is(.cm-syntax-field-definition, .cm-syntax-field-definition *, .cm-syntax-property-definition, .cm-syntax-property-definition *) {
-	color: var(--croq-syntax-definition-color, var(--croq-mirror-color-text, #110));
-	font-weight: var(--croq-syntax-definition-font-weight, bold);
+	color: var(--opticm-syntax-definition-color, var(--opticm-color-text, #110));
+	font-weight: var(--opticm-syntax-definition-font-weight, bold);
 }
 
 .cm-editor.cm-syntax-highlighting .cm-syntax-property {
-	color: var(--croq-syntax-property-color, var(--croq-mirror-l-blue, #2e449a));
+	color: var(--opticm-syntax-property-color, var(--opticm-l-blue, #2e449a));
 }
 
 .cm-editor.cm-syntax-highlighting .cm-syntax-variable {
-	color: var(--croq-syntax-variable-color, inherit);
+	color: var(--opticm-syntax-variable-color, inherit);
 }
 
 .cm-editor.cm-syntax-highlighting .cm-syntax-literal {
-	color: var(--croq-syntax-literal-color, var(--croq-mirror-l-orange, #f5a200));
-	font-weight: var(--croq-syntax-literal-font-weight, bold);
-	text-shadow: var(--croq-syntax-literal-text-shadow, var(--croq-mirror-l-yellow, #fdde00) 0 0 0.25em);
+	color: var(--opticm-syntax-literal-color, var(--opticm-l-orange, #f5a200));
+	font-weight: var(--opticm-syntax-literal-font-weight, bold);
+	text-shadow: var(--opticm-syntax-literal-text-shadow, var(--opticm-l-yellow, #fdde00) 0 0 0.25em);
 }
 
 .cm-editor.cm-syntax-highlighting .cm-activeLine .cm-syntax-literal {
@@ -53,9 +53,9 @@
 }
 
 .cm-editor.cm-syntax-highlighting .cm-syntax-invalid {
-	text-decoration: var(--croq-syntax-invalid-decoration, underline wavy var(--croq-mirror-l-red, #e61e58));
+	text-decoration: var(--opticm-syntax-invalid-decoration, underline wavy var(--opticm-l-red, #e61e58));
 }
 
 .cm-editor.cm-syntax-highlighting :is(.cm-syntax-local-variable, .cm-syntax-local-reference, .cm-syntax-local-reference .cm-syntax-variable) {
-	color: var(--croq-syntax-local-variable-color, hsl(86 60% 30%));
+	color: var(--opticm-syntax-local-variable-color, hsl(86 60% 30%));
 }

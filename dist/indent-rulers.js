@@ -23,7 +23,7 @@ function extensionStyles(css) {
 }
 
 // .build/extensions/indent-rulers/style.css
-var style_default = ".cm-editor.cm-indent-rulers .cm-scroller {\r\n	z-index: var(--croq-indent-ruler-scroller-z-index, var(--croq-structure-scroller-z-index, auto));\r\n}\r\n\r\n.cm-editor.cm-indent-rulers .cm-content {\r\n	z-index: var(--croq-indent-ruler-content-z-index, var(--croq-structure-content-z-index, 1));\r\n}\r\n\r\n.cm-editor.cm-indent-rulers .cm-ruler-overlay {\r\n	position: var(--croq-indent-ruler-overlay-position, absolute);\r\n	z-index: var(--croq-indent-ruler-overlay-z-index, 0);\r\n	overflow: var(--croq-indent-ruler-overlay-overflow, hidden);\r\n	pointer-events: var(--croq-indent-ruler-pointer-events, none);\r\n}\r\n\r\n.cm-editor.cm-indent-rulers .cm-croq-rulers {\r\n	position: var(--croq-indent-ruler-container-position, absolute);\r\n	inset-block: var(--croq-indent-ruler-inset-block, 0);\r\n	right: var(--croq-indent-ruler-container-right, 0);\r\n}\r\n\r\n.cm-editor.cm-indent-rulers .cm-croq-rulers > span {\r\n	position: var(--croq-indent-ruler-position, absolute);\r\n	inset-block: var(--croq-indent-ruler-inset-block, 0);\r\n	left: calc(var(--croq-indent-ruler-column, var(--ruler-column)) * var(--ruler-character-width));\r\n	border-left: var(--croq-indent-ruler-width, 2px) var(--croq-indent-ruler-style, dashed)\r\n		var(--croq-indent-ruler-color, color-mix(in srgb, var(--croq-mirror-l-red, #e61e58) 15%, transparent));\r\n}\r\n";
+var style_default = ".cm-editor.cm-indent-rulers .cm-scroller {\r\n	z-index: var(--opticm-indent-ruler-scroller-z-index, var(--opticm-structure-scroller-z-index, auto));\r\n}\r\n\r\n.cm-editor.cm-indent-rulers .cm-content {\r\n	z-index: var(--opticm-indent-ruler-content-z-index, var(--opticm-structure-content-z-index, 1));\r\n}\r\n\r\n.cm-editor.cm-indent-rulers .cm-ruler-overlay {\r\n	position: var(--opticm-indent-ruler-overlay-position, absolute);\r\n	z-index: var(--opticm-indent-ruler-overlay-z-index, 0);\r\n	overflow: var(--opticm-indent-ruler-overlay-overflow, hidden);\r\n	pointer-events: var(--opticm-indent-ruler-pointer-events, none);\r\n}\r\n\r\n.cm-editor.cm-indent-rulers .cm-opticm-rulers {\r\n	position: var(--opticm-indent-ruler-container-position, absolute);\r\n	inset-block: var(--opticm-indent-ruler-inset-block, 0);\r\n	right: var(--opticm-indent-ruler-container-right, 0);\r\n}\r\n\r\n.cm-editor.cm-indent-rulers .cm-opticm-rulers > span {\r\n	position: var(--opticm-indent-ruler-position, absolute);\r\n	inset-block: var(--opticm-indent-ruler-inset-block, 0);\r\n	left: calc(var(--opticm-indent-ruler-column, var(--ruler-column)) * var(--ruler-character-width));\r\n	border-left: var(--opticm-indent-ruler-width, 2px) var(--opticm-indent-ruler-style, dashed)\r\n		var(--opticm-indent-ruler-color, color-mix(in srgb, var(--opticm-l-red, #e61e58) 15%, transparent));\r\n}\r\n";
 
 // .build/extensions/indent-rulers/index.js
 var columns = [4, 8, 12];
@@ -35,7 +35,7 @@ var rulerPlugin = ViewPlugin2.fromClass(class {
     this.overlay.className = "cm-ruler-overlay";
     this.overlay.setAttribute("aria-hidden", "true");
     this.ruler = document.createElement("div");
-    this.ruler.className = "cm-croq-rulers";
+    this.ruler.className = "cm-opticm-rulers";
     this.ruler.append(...columns.map((column) => {
       const rule = document.createElement("span");
       rule.style.setProperty("--ruler-column", column);
