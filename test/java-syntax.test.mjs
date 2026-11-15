@@ -2,9 +2,13 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import { Language, Parser } from 'web-tree-sitter';
-import { createCommonAnalysis } from '../src/analysis/common-analysis.js';
+import { EditorState } from '@codemirror/state';
+import { java } from '@codemirror/lang-java';
+import { commonAnalysisState, createCommonAnalysis, setCommonAnalysis } from '../src/analysis/common-analysis.js';
+import { lezerAnalysis, syntaxAnalysisState } from '../src/analysis/lezer-analysis.js';
 import { analyzeJava } from '../src/lang/java/analyzer.js';
 import { diagnoseJava } from '../src/lang/java/diagnostics.js';
+import { lezerSyntax } from '../src/lang/java/lezer-syntax.js';
 
 await Parser.init();
 const parser = new Parser();
@@ -35,6 +39,47 @@ test('Java worker distinguishes method definitions from calls', () => {
 		const names = analyzeJava(source, tree.rootNode).syntaxHighlights
 			.filter(item => item.kind === 'function-definition').map(item => source.slice(item.from, item.to));
 		assert.deepEqual(names, ['method', 'run']);
+	} finally {
+		tree.delete();
+	}
+});
+
+test('Java array type brackets follow their element type before and after worker analysis', () => {
+	const source = '// 😀\nclass A { int[][] numbers; String[] names; int extra[]; boolean[] flags; ' +
+		'java.util.List<String[]>[] lists; String result()[] { return names; } ' +
+		'void run(int arg[], String[] args) { for (double item[] : items) {} ' +
+		'int[] values = new int[2][]; int n = values[0]; } } ' +
+		'interface I { int constant[] = {}; } record R(String items[]) {}';
+	const tree = parser.parse(source);
+	try {
+		const result = analyzeJava(source, tree.rootNode);
+		assert.equal(result.success, true);
+		let state = EditorState.create({ doc: source, extensions: [java(), commonAnalysisState, lezerAnalysis(lezerSyntax)] });
+		const assertBrackets = ranges => {
+			for (const [fragment, kind] of [
+				['int[][]', 'keyword'], ['String[] names', 'type'], ['int extra[]', 'keyword'],
+				['String result()[]', 'type'], ['int arg[]', 'keyword'], ['String[] args', 'type'],
+				['boolean[] flags', 'keyword'], ['java.util.List<String[]>[] lists', 'type'],
+				['double item[]', 'keyword'], ['int[] values', 'keyword'], ['int constant[]', 'keyword'],
+				['String items[]', 'type'],
+			]) {
+				const start = source.indexOf(fragment);
+				assert.notEqual(start, -1);
+				for (let i = 0; i < fragment.length; i++) {
+					if (fragment[i] !== '[' && fragment[i] !== ']') continue;
+					assert.ok(ranges.some(item => item.from === start + i && item.to === start + i + 1 && item.kind === kind),
+						`${fragment}: ${fragment[i]} must use ${kind}`);
+				}
+			}
+			for (const fragment of ['new int[2][]', 'values[0]']) {
+				const start = source.indexOf(fragment);
+				assert.ok(!ranges.some(item => item.from >= start && item.to <= start + fragment.length &&
+					['[', ']'].includes(source.slice(item.from, item.to))), `${fragment} is not a type declaration`);
+			}
+		};
+		assertBrackets(state.field(syntaxAnalysisState).data.syntax);
+		state = state.update({ effects: setCommonAnalysis.of({ ...result.commonAnalysis, version: 1 }) }).state;
+		assertBrackets(state.field(syntaxAnalysisState).data.syntax);
 	} finally {
 		tree.delete();
 	}

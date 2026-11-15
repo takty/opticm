@@ -123,6 +123,20 @@ export function analyzeJava(source, rootNode) {
 		}
 		if (node.isMissing) return;
 		locals.enter(node);
+		if (node.type === 'dimensions') {
+			let owner = node.parent;
+			if (owner?.type === 'variable_declarator') owner = owner.parent;
+			if (owner && ['array_type', 'field_declaration', 'constant_declaration', 'local_variable_declaration',
+				'formal_parameter', 'method_declaration', 'enhanced_for_statement'].includes(owner.type)) {
+				let type = owner.childForFieldName(owner.type === 'array_type' ? 'element' : 'type');
+				if (type?.type === 'array_type') type = type.childForFieldName('element');
+				const kind = type && ['integral_type', 'floating_point_type', 'boolean_type'].includes(type.type)
+					? 'keyword' : 'type';
+				for (const child of node.children) {
+					if (child.type === '[' || child.type === ']') add(child, kind);
+				}
+			}
+		}
 		if (node.type === 'class_declaration') {
 			addRange(node, 'class', 'var(--croq-mirror-l-red, #e61e58)', [], 0.12);
 		} else if (FUNCTION_NODES.has(node.type)) {

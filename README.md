@@ -397,7 +397,9 @@ reads the CodeMirror Lezer tree in both languages and reconciles its ranges with
 worker results. New Lezer tokens update the parsed region during edits, including
 when a comment delimiter is added or removed. Document loads clear retained
 ranges. With automatic analysis disabled, the Lezer syntax tree still provides
-immediate highlighting.
+immediate highlighting. In Java, array type brackets use the same color as
+their element type; brackets in array accesses and creation expressions are
+not affected.
 
 Standalone consumers can also use `syntaxHighlightingSource(analyze, needsRefresh)`
 with a synchronous callback that receives an `EditorState`. The optional

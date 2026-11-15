@@ -40,6 +40,23 @@ export const lezerSyntax = {
 			if (kind === 'variable' && isReference(node)) add(from, to, 'variable-reference');
 		}
 	},
+	collectSyntax(tree, _state, add) {
+		tree.iterate({
+			enter(node) {
+				if (node.name !== 'Dimension') return;
+				const dimension = node.node;
+				let owner = dimension.parent;
+				if (owner?.name === 'VariableDeclarator') owner = owner.parent;
+				if (!owner || !['ArrayType', 'FieldDeclaration', 'ConstantDeclaration', 'LocalVariableDeclaration',
+					'FormalParameter', 'RecordComponent', 'MethodDeclaration', 'ForSpec'].includes(owner.name)) return;
+				const type = owner.getChild('ArrayType') ?? owner;
+				const kind = type.getChild('PrimitiveType') ? 'keyword' : 'type';
+				for (let child = dimension.firstChild; child; child = child.nextSibling) {
+					if (child.name === '[' || child.name === ']') add(child.from, child.to, kind);
+				}
+			},
+		});
+	},
 };
 
 function isReference(node) {

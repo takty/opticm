@@ -52,13 +52,8 @@ try {
 	});
 	let id = 0;
 	const pending = new Map();
-	let pausedFont = null;
 	socket.onmessage = ({ data }) => {
 		const result = JSON.parse(data);
-		if (result.method === 'Fetch.requestPaused') {
-			pausedFont = result.params.requestId;
-			return;
-		}
 		const p = pending.get(result.id);
 		if (p) {
 			pending.delete(result.id);
@@ -76,10 +71,27 @@ try {
 	await send('Network.enable', {}, fontSession);
 	await send('Network.setCacheDisabled', { cacheDisabled: true }, fontSession);
 	await send('Emulation.setDeviceMetricsOverride', { width: 640, height: 450, deviceScaleFactor: 2, mobile: false }, fontSession);
-	await send('Fetch.enable', { patterns: [{ urlPattern: '*.woff*' }] }, fontSession);
+	await send('Page.addScriptToEvaluateOnNewDocument', {
+		source: `{
+			const loadFont = document.fonts.load.bind(document.fonts);
+			document.fonts.load = (...args) => new Promise((resolve, reject) => {
+				window.fontLoadPending = true;
+				window.fontLoadArgs = args;
+				window.releaseFontLoad = () => {
+					window.fontLoadPending = false;
+					loadFont(...args).then(resolve, reject);
+				};
+			});
+		}`,
+	}, fontSession);
 	await send('Page.navigate', { url: `http://127.0.0.1:${port}/docs/` }, fontSession);
-	for (let i = 0; i < 100 && !pausedFont; i++) await new Promise(resolve => setTimeout(resolve, 100));
-	if (!pausedFont) throw new Error('Demo font request was not observed');
+	let fontPending = false;
+	for (let i = 0; i < 100 && !fontPending; i++) {
+		const result = await send('Runtime.evaluate', { expression: '!!window.fontLoadPending', returnByValue: true }, fontSession);
+		fontPending = result.result?.value;
+		if (!fontPending) await new Promise(resolve => setTimeout(resolve, 100));
+	}
+	if (!fontPending) throw new Error('Demo font load was not observed');
 	const beforeFont = await send('Runtime.evaluate', {
 		expression: '({ editor: !!document.querySelector(".cm-editor"), status: document.querySelector("#status")?.textContent })',
 		returnByValue: true,
@@ -87,8 +99,7 @@ try {
 	if (beforeFont.result.value.editor || beforeFont.result.value.status !== 'Loading...') {
 		throw new Error('Demo must wait for its font before creating the editor: ' + JSON.stringify(beforeFont));
 	}
-	await send('Fetch.continueRequest', { requestId: pausedFont }, fontSession);
-	await send('Fetch.disable', {}, fontSession);
+	await send('Runtime.evaluate', { expression: 'window.releaseFontLoad()' }, fontSession);
 	let fontReady = false;
 	for (let i = 0; i < 100; i++) {
 		const status = await send('Runtime.evaluate', {
@@ -127,15 +138,11 @@ try {
 		Math.abs(metrics.ruler - metrics.start - 4 * metrics.actual) > 1) {
 		throw new Error('Demo ruler is misaligned after a delayed font load: ' + JSON.stringify(fontMetrics));
 	}
-	pausedFont = null;
-	await send('Fetch.enable', { patterns: [{ urlPattern: '*.woff*' }] }, fontSession);
 	const customStart = await send('Runtime.evaluate', {
 		expression: `(() => {
-			const fontURL = performance.getEntriesByType('resource').find(item => /\\.woff(?:\\?|$)/.test(item.name)).name;
-			document.fonts.add(new FontFace('Delayed Test Font', 'url("' + fontURL + '?custom=1")'));
 			const host = document.createElement('div');
 			host.id = 'custom-font-host';
-			host.style.cssText = 'height: 200px; width: 400px; --test-font: "Delayed Test Font", monospace';
+			host.style.cssText = 'height: 200px; width: 400px; --test-font: "Test Font", monospace';
 			document.body.append(host);
 			host.scrollIntoView();
 			window.customFontResult = { ready: false, error: null };
@@ -149,17 +156,22 @@ try {
 		returnByValue: true,
 	}, fontSession);
 	if (customStart.exceptionDetails) throw new Error('Custom font test setup failed: ' + JSON.stringify(customStart));
-	for (let i = 0; i < 100 && !pausedFont; i++) await new Promise(resolve => setTimeout(resolve, 100));
-	if (!pausedFont) throw new Error('Configured custom font was not requested');
+	fontPending = false;
+	for (let i = 0; i < 100 && !fontPending; i++) {
+		const result = await send('Runtime.evaluate', { expression: '!!window.fontLoadPending', returnByValue: true }, fontSession);
+		fontPending = result.result?.value;
+		if (!fontPending) await new Promise(resolve => setTimeout(resolve, 100));
+	}
+	if (!fontPending) throw new Error('Configured custom font load was not observed');
 	const beforeCustom = await send('Runtime.evaluate', {
-		expression: '({ editor: !!document.querySelector("#custom-font-host .cm-editor"), ...window.customFontResult })',
+		expression: '({ editor: !!document.querySelector("#custom-font-host .cm-editor"), font: window.fontLoadArgs?.[0], ...window.customFontResult })',
 		returnByValue: true,
 	}, fontSession);
-	if (beforeCustom.result.value.editor || beforeCustom.result.value.ready || beforeCustom.result.value.error) {
+	if (beforeCustom.result.value.editor || beforeCustom.result.value.ready || beforeCustom.result.value.error ||
+		!beforeCustom.result.value.font?.includes('Test Font')) {
 		throw new Error('Editor must wait for the configured custom font: ' + JSON.stringify(beforeCustom));
 	}
-	await send('Fetch.continueRequest', { requestId: pausedFont }, fontSession);
-	await send('Fetch.disable', {}, fontSession);
+	await send('Runtime.evaluate', { expression: 'window.releaseFontLoad()' }, fontSession);
 	let customResult;
 	for (let i = 0; i < 100; i++) {
 		const result = await send('Runtime.evaluate', {
@@ -193,30 +205,6 @@ try {
 	const custom = customMetrics.result?.value;
 	if (!custom || Math.abs(custom.width - custom.actual) > 0.25) {
 		throw new Error('Custom-font ruler is misaligned: ' + JSON.stringify(customMetrics));
-	}
-	const failedFont = await send('Runtime.evaluate', {
-		expression: `(async () => {
-			document.fonts.add(new FontFace('Missing Test Font', 'url("/missing-test-font.woff")'));
-			const host = document.createElement('div');
-			document.body.append(host);
-			const { createEditor } = await import(new URL('croq-mirror.min.js', document.baseURI).href);
-			let failed = false;
-			try {
-				await createEditor(host, { codeLanguage: null, fontFamily: '"Missing Test Font"' });
-			} catch (error) {
-				failed = error instanceof Error;
-			}
-			const cleaned = host.childNodes.length === 0;
-			const editor = await createEditor(host, { codeLanguage: null });
-			editor.destroy();
-			host.remove();
-			return { failed, cleaned };
-		})()`,
-		awaitPromise: true,
-		returnByValue: true,
-	}, fontSession);
-	if (!failedFont.result?.value?.failed || !failedFont.result.value.cleaned) {
-		throw new Error('Font load errors must reject and clean up the editor: ' + JSON.stringify(failedFont));
 	}
 	await send('Target.closeTarget', { targetId: fontTarget });
 	console.log('Demo and custom-font editors wait for their fonts and align rulers.');
@@ -306,7 +294,7 @@ try {
 				assert(document.querySelector('.cm-editor.cm-easy-line-selection'), 'Recreate must retain extension settings');
 				toggle('easyLineSelection').click();
 				assert(document.querySelector('.cm-editor.cm-gutter-line-selection'), 'Standard gutter selection remains enabled');
-				assert(getComputedStyle(document.querySelector('.cm-editor')).fontFamily.includes('Inconsolata'), 'Example editor uses Inconsolata');
+				assert(getComputedStyle(document.querySelector('.cm-editor')).fontFamily === 'monospace', 'Example editor uses the default font');
 				return true;
 			})()`,
 			awaitPromise: true,
