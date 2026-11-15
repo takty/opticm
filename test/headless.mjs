@@ -52,8 +52,13 @@ try {
 	});
 	let id = 0;
 	const pending = new Map();
+	let pausedFont = null;
 	socket.onmessage = ({ data }) => {
 		const result = JSON.parse(data);
+		if (result.method === 'Fetch.requestPaused') {
+			pausedFont = result.params.requestId;
+			return;
+		}
 		const p = pending.get(result.id);
 		if (p) {
 			pending.delete(result.id);
@@ -65,6 +70,156 @@ try {
 		pending.set(n, { resolve, reject });
 		socket.send(JSON.stringify({ id: n, method, params, sessionId }));
 	});
+	const { targetId: fontTarget } = await send('Target.createTarget', { url: 'about:blank' });
+	const { sessionId: fontSession } = await send('Target.attachToTarget', { targetId: fontTarget, flatten: true });
+	await send('Page.enable', {}, fontSession);
+	await send('Network.enable', {}, fontSession);
+	await send('Network.setCacheDisabled', { cacheDisabled: true }, fontSession);
+	await send('Emulation.setDeviceMetricsOverride', { width: 640, height: 450, deviceScaleFactor: 2, mobile: false }, fontSession);
+	await send('Fetch.enable', { patterns: [{ urlPattern: '*.woff*' }] }, fontSession);
+	await send('Page.navigate', { url: `http://127.0.0.1:${port}/docs/` }, fontSession);
+	for (let i = 0; i < 100 && !pausedFont; i++) await new Promise(resolve => setTimeout(resolve, 100));
+	if (!pausedFont) throw new Error('Demo font request was not observed');
+	const beforeFont = await send('Runtime.evaluate', {
+		expression: '({ editor: !!document.querySelector(".cm-editor"), status: document.querySelector("#status")?.textContent })',
+		returnByValue: true,
+	}, fontSession);
+	if (beforeFont.result.value.editor || beforeFont.result.value.status !== 'Loading...') {
+		throw new Error('Demo must wait for its font before creating the editor: ' + JSON.stringify(beforeFont));
+	}
+	await send('Fetch.continueRequest', { requestId: pausedFont }, fontSession);
+	await send('Fetch.disable', {}, fontSession);
+	let fontReady = false;
+	for (let i = 0; i < 100; i++) {
+		const status = await send('Runtime.evaluate', {
+			expression: 'document.querySelector("#status")?.textContent', returnByValue: true,
+		}, fontSession);
+		if (status.result?.value?.startsWith('Ready.')) {
+			fontReady = true;
+			break;
+		}
+		await new Promise(resolve => setTimeout(resolve, 100));
+	}
+	if (!fontReady) throw new Error('Demo did not initialize after its font loaded');
+	const fontMetrics = await send('Runtime.evaluate', {
+		expression: `(async () => {
+			const editor = document.querySelector('.cm-editor');
+			editor.scrollIntoView();
+			await new Promise(resolve => setTimeout(resolve, 300));
+			const content = editor.querySelector('.cm-content');
+			const line = content.querySelector('.cm-line');
+			const rulers = editor.querySelector('.cm-croq-rulers');
+			const context = document.createElement('canvas').getContext('2d');
+			context.font = getComputedStyle(content).font;
+			return {
+				fonts: document.fonts.status,
+				width: parseFloat(rulers.style.getPropertyValue('--ruler-character-width')),
+				actual: context.measureText('mmmmmmmmmmmm').width / 12,
+				start: line.getBoundingClientRect().left + parseFloat(getComputedStyle(line).paddingLeft),
+				ruler: rulers.firstElementChild.getBoundingClientRect().left,
+			};
+		})()`,
+		awaitPromise: true,
+		returnByValue: true,
+	}, fontSession);
+	const metrics = fontMetrics.result?.value;
+	if (!metrics || metrics.fonts !== 'loaded' || Math.abs(metrics.width - metrics.actual) > 0.25 ||
+		Math.abs(metrics.ruler - metrics.start - 4 * metrics.actual) > 1) {
+		throw new Error('Demo ruler is misaligned after a delayed font load: ' + JSON.stringify(fontMetrics));
+	}
+	pausedFont = null;
+	await send('Fetch.enable', { patterns: [{ urlPattern: '*.woff*' }] }, fontSession);
+	const customStart = await send('Runtime.evaluate', {
+		expression: `(() => {
+			const fontURL = performance.getEntriesByType('resource').find(item => /\\.woff(?:\\?|$)/.test(item.name)).name;
+			document.fonts.add(new FontFace('Delayed Test Font', 'url("' + fontURL + '?custom=1")'));
+			const host = document.createElement('div');
+			host.id = 'custom-font-host';
+			host.style.cssText = 'height: 200px; width: 400px; --test-font: "Delayed Test Font", monospace';
+			document.body.append(host);
+			host.scrollIntoView();
+			window.customFontResult = { ready: false, error: null };
+			import(new URL('croq-mirror.min.js', document.baseURI).href).then(({ createEditor }) =>
+				createEditor(host, { codeLanguage: null, fontFamily: 'var(--test-font)', fontSize: 18, value: 'sample text' })
+			).then(editor => {
+				window.customFontEditor = editor;
+				window.customFontResult.ready = true;
+			}, error => { window.customFontResult.error = String(error); });
+		})()`,
+		returnByValue: true,
+	}, fontSession);
+	if (customStart.exceptionDetails) throw new Error('Custom font test setup failed: ' + JSON.stringify(customStart));
+	for (let i = 0; i < 100 && !pausedFont; i++) await new Promise(resolve => setTimeout(resolve, 100));
+	if (!pausedFont) throw new Error('Configured custom font was not requested');
+	const beforeCustom = await send('Runtime.evaluate', {
+		expression: '({ editor: !!document.querySelector("#custom-font-host .cm-editor"), ...window.customFontResult })',
+		returnByValue: true,
+	}, fontSession);
+	if (beforeCustom.result.value.editor || beforeCustom.result.value.ready || beforeCustom.result.value.error) {
+		throw new Error('Editor must wait for the configured custom font: ' + JSON.stringify(beforeCustom));
+	}
+	await send('Fetch.continueRequest', { requestId: pausedFont }, fontSession);
+	await send('Fetch.disable', {}, fontSession);
+	let customResult;
+	for (let i = 0; i < 100; i++) {
+		const result = await send('Runtime.evaluate', {
+			expression: 'window.customFontResult', returnByValue: true,
+		}, fontSession);
+		customResult = result.result?.value;
+		if (customResult?.ready || customResult?.error) break;
+		await new Promise(resolve => setTimeout(resolve, 100));
+	}
+	if (!customResult?.ready || customResult.error) {
+		throw new Error('Editor failed to initialize after the custom font loaded: ' + JSON.stringify(customResult));
+	}
+	const customMetrics = await send('Runtime.evaluate', {
+		expression: `(async () => {
+			await new Promise(resolve => setTimeout(resolve, 300));
+			const host = document.querySelector('#custom-font-host');
+			const content = host.querySelector('.cm-content');
+			const ruler = host.querySelector('.cm-croq-rulers');
+			const context = document.createElement('canvas').getContext('2d');
+			context.font = getComputedStyle(content).font;
+			const result = {
+				width: parseFloat(ruler.style.getPropertyValue('--ruler-character-width')),
+				actual: context.measureText('mmmmmmmmmmmm').width / 12,
+			};
+			window.customFontEditor.destroy();
+			return result;
+		})()`,
+		awaitPromise: true,
+		returnByValue: true,
+	}, fontSession);
+	const custom = customMetrics.result?.value;
+	if (!custom || Math.abs(custom.width - custom.actual) > 0.25) {
+		throw new Error('Custom-font ruler is misaligned: ' + JSON.stringify(customMetrics));
+	}
+	const failedFont = await send('Runtime.evaluate', {
+		expression: `(async () => {
+			document.fonts.add(new FontFace('Missing Test Font', 'url("/missing-test-font.woff")'));
+			const host = document.createElement('div');
+			document.body.append(host);
+			const { createEditor } = await import(new URL('croq-mirror.min.js', document.baseURI).href);
+			let failed = false;
+			try {
+				await createEditor(host, { codeLanguage: null, fontFamily: '"Missing Test Font"' });
+			} catch (error) {
+				failed = error instanceof Error;
+			}
+			const cleaned = host.childNodes.length === 0;
+			const editor = await createEditor(host, { codeLanguage: null });
+			editor.destroy();
+			host.remove();
+			return { failed, cleaned };
+		})()`,
+		awaitPromise: true,
+		returnByValue: true,
+	}, fontSession);
+	if (!failedFont.result?.value?.failed || !failedFont.result.value.cleaned) {
+		throw new Error('Font load errors must reject and clean up the editor: ' + JSON.stringify(failedFont));
+	}
+	await send('Target.closeTarget', { targetId: fontTarget });
+	console.log('Demo and custom-font editors wait for their fonts and align rulers.');
 	const { targetId } = await send('Target.createTarget', { url: `http://127.0.0.1:${port}/test/browser.html` });
 	const { sessionId } = await send('Target.attachToTarget', { targetId, flatten: true });
 	let result;

@@ -148,6 +148,16 @@ export async function createEditor(container, { value = '', definitions = [], ..
 	try {
 		client = language.createAnalysisClient();
 		await client.ready;
+		if (document.fonts) {
+			// Resolve inherited CSS variables before requesting the configured font.
+			const probe = document.createElement('span');
+			probe.className = 'cm-editor';
+			probe.style.fontFamily = settings.fontFamily;
+			root.append(probe);
+			const fontFamily = getComputedStyle(probe).fontFamily;
+			probe.remove();
+			await document.fonts.load(`${settings.fontSize}px ${fontFamily}`);
+		}
 		view = new Editor({
 			language,
 			phrases: LANGUAGES[settings.language].editorPhrase,

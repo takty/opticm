@@ -48,7 +48,7 @@ Initialization failures reject the promise and clean up resources and DOM elemen
 
 | API | Description |
 | --- | --- |
-| `await createEditor(container, options)` | Returns after the worker is ready and initial analysis has completed, if enabled |
+| `await createEditor(container, options)` | Returns after matching configured web fonts and the worker are ready and initial analysis has completed, if enabled |
 | `getValue()` | Returns the document text |
 | `loadDocument(text)` | Sets the text and resets history, cursor, analysis, and highlights |
 | `replaceDocument(text)` | Replaces the entire document as an undoable edit |
