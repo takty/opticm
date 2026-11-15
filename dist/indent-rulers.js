@@ -42,7 +42,7 @@ var rulerPlugin = ViewPlugin2.fromClass(class {
       return rule;
     }));
     this.overlay.append(this.ruler);
-    view.dom.append(this.overlay);
+    view.dom.insertBefore(this.overlay, view.scrollDOM.nextSibling);
     this.measure = {
       key: this,
       read: (view2) => this.read(view2),

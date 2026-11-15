@@ -105,6 +105,34 @@ try {
 		getComputedStyle(whitespaceLines()[1].querySelector('.cm-croq-space')).backgroundImage === 'none' &&
 		getComputedStyle(whitespaceLines()[1].querySelector('.cm-highlightTab'), '::before').color === 'rgb(251, 221, 230)',
 		'component preserves active-space and inactive-tab display');
+	a.loadDocument('    let sample = 1;');
+	await waitFor(() => a.getAnalysis() !== null, 'declaration analysis is ready');
+	const declarationAboveRuler = () => {
+		const rulerOverlay = editorA.querySelector('.cm-ruler-overlay');
+		const structureOverlay = editorA.querySelector('.cm-structure-overlay');
+		const rule = rulerOverlay?.querySelector('.cm-croq-rulers > span:nth-child(2)');
+		const canvas = structureOverlay?.querySelector('canvas');
+		if (!rule || !canvas?.width || !canvas.height ||
+			getComputedStyle(rulerOverlay).zIndex !== getComputedStyle(structureOverlay).zIndex ||
+			!(rulerOverlay.compareDocumentPosition(structureOverlay) & Node.DOCUMENT_POSITION_FOLLOWING)) return false;
+		const ruleBox = rule.getBoundingClientRect(), canvasBox = canvas.getBoundingClientRect();
+		const lineBox = whitespaceLines()[0].getBoundingClientRect();
+		const x = Math.floor((ruleBox.left + 1 - canvasBox.left) * canvas.width / canvasBox.width);
+		const y = Math.floor(((lineBox.top + lineBox.bottom) / 2 - canvasBox.top) * canvas.height / canvasBox.height);
+		return x >= 0 && x < canvas.width && y >= 0 && y < canvas.height &&
+			canvas.getContext('2d').getImageData(x, y, 1, 1).data[3] === 255;
+	};
+	await waitFor(declarationAboveRuler, 'declaration is painted above the overlapping ruler');
+	assert(declarationAboveRuler(), 'declaration canvas is above an overlapping ruler');
+	a.setSettings({ structureHighlight: false, declarationHighlight: false, referenceHighlight: false });
+	assert(!editorA.querySelector('.cm-structure-overlay'), 'all structure features can be disabled');
+	a.setSettings({ declarationHighlight: true });
+	await waitFor(declarationAboveRuler, 'declaration remains above the ruler after structure is re-enabled');
+	a.setSettings({ rulers: false });
+	a.setSettings({ rulers: true });
+	await waitFor(declarationAboveRuler, 'declaration remains above the ruler after rulers are re-enabled');
+	assert(declarationAboveRuler(), 'overlay order survives re-enabling either extension');
+	a.setSettings({ structureHighlight: true, declarationHighlight: true, referenceHighlight: true });
 	a.loadDocument('function one() { return 1; }');
 	await waitFor(() => a.getAnalysis() !== null, 'restored document analysis is ready');
 	let displayAnalysisEvents = 0;

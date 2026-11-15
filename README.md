@@ -430,7 +430,9 @@ brackets.
 removes the guides and their stylesheet. The guides follow scrolling, editor
 geometry and font metrics, and are clipped to the visible area and an overlay
 up to 64 character widths wide. As with the component, columns use the editor's default
-character width and are intended for monospaced fonts.
+character width and are intended for monospaced fonts. With default layering,
+the structure canvas is drawn above the guides, including after either extension
+is re-enabled.
 
 ```js
 import { indentRulers } from 'croq-mirror/indent-rulers';

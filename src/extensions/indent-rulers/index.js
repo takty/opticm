@@ -19,7 +19,8 @@ const rulerPlugin = ViewPlugin.fromClass(class {
 			return rule;
 		}));
 		this.overlay.append(this.ruler);
-		view.dom.append(this.overlay);
+		// Keep rulers below structure overlays when either extension is reconfigured.
+		view.dom.insertBefore(this.overlay, view.scrollDOM.nextSibling);
 		this.measure = {
 			key  : this,
 			read : view => this.read(view),
