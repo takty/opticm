@@ -68,7 +68,7 @@ try {
 	}
 	a.loadDocument('a \tb\nc \td');
 	const whitespaceLines = () => [...editorA.querySelectorAll('.cm-content .cm-line')];
-	assert(getComputedStyle(whitespaceLines()[0].querySelector('.cm-highlightSpace')).backgroundImage.includes('radial-gradient') &&
+	assert(getComputedStyle(whitespaceLines()[0].querySelector('.cm-highlightSpace')).backgroundImage.includes('linear-gradient') &&
 		getComputedStyle(whitespaceLines()[1].querySelector('.cm-highlightSpace')).backgroundImage === 'none' &&
 		getComputedStyle(whitespaceLines()[1].querySelector('.cm-highlightTab'), '::before').color === 'rgb(251, 221, 230)',
 		'component preserves active-space and inactive-tab display');

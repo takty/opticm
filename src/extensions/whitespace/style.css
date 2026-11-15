@@ -1,0 +1,38 @@
+.cm-editor.cm-croq-whitespace .cm-highlightSpace { background-image: none; }
+.cm-editor.cm-croq-whitespace .cm-activeLine .cm-highlightSpace {
+	background-image: linear-gradient(var(--croq-whitespace-active-color, var(--croq-mirror-l-red-35, #f6b0c5)), var(--croq-whitespace-active-color, var(--croq-mirror-l-red-35, #f6b0c5)));
+	background-size: 100% 1px;
+	background-position: left bottom;
+	background-repeat: no-repeat;
+}
+.cm-editor.cm-croq-whitespace .cm-highlightTab {
+	position: relative;
+	background-image: none;
+}
+.cm-editor.cm-croq-whitespace .cm-highlightTab::before,
+.cm-editor.cm-croq-whitespace .cm-highlightTab::after {
+	position: absolute;
+	transform: scaleX(0.8);
+	transform-origin: left;
+	color: var(--croq-whitespace-tab-color, var(--croq-mirror-l-red-15, #fbdde6));
+	font-weight: normal;
+	text-shadow: #fff 0 0 4px;
+	pointer-events: none;
+	overflow: hidden;
+	white-space: nowrap;
+}
+.cm-editor.cm-croq-whitespace .cm-highlightTab::before {
+	content: '-';
+	left: 5%;
+	right: 0;
+}
+.cm-editor.cm-croq-whitespace .cm-highlightTab::after {
+	content: '>';
+	left: min(0.8ch, max(0px, calc(100% - 0.8ch)));
+	right: 0;
+}
+.cm-editor.cm-croq-whitespace .cm-activeLine .cm-highlightTab::before,
+.cm-editor.cm-croq-whitespace .cm-activeLine .cm-highlightTab::after {
+	color: var(--croq-whitespace-active-color, var(--croq-mirror-l-red-35, #f6b0c5));
+	text-shadow: none;
+}

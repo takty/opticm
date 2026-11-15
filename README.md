@@ -295,6 +295,26 @@ import { functionScrollMarkers } from 'croq-mirror/function-scroll-markers';
 // with setCommonAnalysis.of(data) when the document's current analysis arrives.
 ```
 
+### Whitespace highlighting extension
+
+`croq-mirror/whitespace` displays tabs as arrows and spaces as underlines on
+active lines. It includes CodeMirror's `highlightWhitespace()` but does not
+install `highlightActiveLine()`; include the latter separately to mark active
+lines. Without it, spaces are hidden and tabs use the inactive color.
+
+```js
+import { highlightActiveLine } from '@codemirror/view';
+import { whitespaceHighlighting } from 'croq-mirror/whitespace';
+
+const extensions = [highlightActiveLine(), whitespaceHighlighting()];
+```
+
+Customize the colors with `--croq-whitespace-active-color` (active tabs and
+space underlines) and `--croq-whitespace-tab-color` (inactive tabs). If unset,
+they fall back to the component's pink color variables and then to `#f6b0c5`
+and `#fbdde6`. Do not install `highlightWhitespace()` separately.
+Removing the extension removes its marks and stylesheet.
+
 ### Full-line-height selection extension
 
 `croq-mirror/full-line-selection` provides CodeMirror's custom cursor and
@@ -450,7 +470,7 @@ by the extensions are applied directly and are not CSS custom properties.
 
 ## Sources and build
 
-`src/index.js` is the component's public API entry point. Common implementation modules (`editor-view.js` and `analysis-client.js`) live directly in `src/`. `src/analysis/` defines and manages shared parser data. `src/extensions/` contains the structure view, syntax highlighting, function line numbers, function scroll markers, bracket matching, full-line-height selection, gutter line selection, and indentation rulers. Whitespace highlighting is built into the editor and styled in `src/styles/index.css`. `src/lang/js/` and `src/lang/java/` contain language-specific analyzers and Lezer classifiers, and `src/lang/language-interface.md` describes the internal language contract. `src/styles/` contains the theme, and `dist/` the distribution. External library wrappers are generated in `.build/lib/` during the build.
+`src/index.js` is the component's public API entry point. Common implementation modules (`editor-view.js` and `analysis-client.js`) live directly in `src/`. `src/analysis/` defines and manages shared parser data. `src/extensions/` contains the structure view, syntax highlighting, function line numbers, function scroll markers, bracket matching, whitespace highlighting, full-line-height selection, gutter line selection, and indentation rulers. `src/lang/js/` and `src/lang/java/` contain language-specific analyzers and Lezer classifiers, and `src/lang/language-interface.md` describes the internal language contract. `src/styles/` contains the theme, and `dist/` the distribution. External library wrappers are generated in `.build/lib/` during the build.
 `build.mjs` wraps dependency browser builds in ES modules without adding globals to window.
 It organizes library preparation, JavaScript bundling, styles, and licenses into separate steps, using `tasks.mjs` for package resolution and file copying/writing.
 `src/styles/index.css` imports `variables.css`; both scope their rules to the component. The build bundles these files into the distributed stylesheet. CodeMirror 6 installs its base styles when an editor is mounted.
@@ -463,7 +483,7 @@ The distribution contains:
 - `analysis-worker.min.js`: the analysis worker and its parser dependencies
 - `analysis-worker-java.min.js`, `web-tree-sitter.wasm`, `tree-sitter-java.wasm`: the Java parser worker and WebAssembly runtimes
 - `croq-mirror.min.css`: the combined, scoped editor styles
-- `analysis.js`, `structure-view.js`, `syntax-highlighting.js`, `function-line-numbers.js`, `function-scroll-markers.js`, `bracket-matching.js`, `full-line-selection.js`, `easy-line-selection.js`, `gutter-line-selection.js` (compatibility entry), `indent-rulers.js`: standalone extensions with external CodeMirror dependencies
+- `analysis.js`, `structure-view.js`, `syntax-highlighting.js`, `function-line-numbers.js`, `function-scroll-markers.js`, `bracket-matching.js`, `whitespace.js`, `full-line-selection.js`, `easy-line-selection.js`, `gutter-line-selection.js` (compatibility entry), `indent-rulers.js`: standalone extensions with external CodeMirror dependencies
 - JavaScript source maps for debugging; these are not required at runtime
 - `licenses/`: third-party licenses
 

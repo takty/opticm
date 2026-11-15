@@ -76,6 +76,7 @@ async function buildJavaScript() {
 			'function-scroll-markers': join(stageRoot, 'extensions', 'function-scroll-markers', 'index.js'),
 			'bracket-matching': join(stageRoot, 'extensions', 'bracket-matching', 'index.js'),
 			'full-line-selection': join(stageRoot, 'extensions', 'full-line-selection', 'index.js'),
+			'whitespace': join(stageRoot, 'extensions', 'whitespace', 'index.js'),
 			'easy-line-selection': join(stageRoot, 'extensions', 'gutter-line-selection', 'index.js'),
 			'indent-rulers': join(stageRoot, 'extensions', 'indent-rulers', 'index.js'),
 			'syntax-highlighting': join(stageRoot, 'extensions', 'syntax-highlighting', 'index.js'),

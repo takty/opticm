@@ -1,5 +1,5 @@
 import { Compartment, EditorState, Prec, StateEffect, StateField, Text, Transaction } from '@codemirror/state';
-import { Decoration, EditorView, highlightActiveLine, highlightActiveLineGutter, highlightWhitespace, keymap, showTooltip } from '@codemirror/view';
+import { Decoration, EditorView, highlightActiveLine, highlightActiveLineGutter, keymap, showTooltip } from '@codemirror/view';
 import {
 	cursorDocEnd, cursorDocStart, cursorLineDown, cursorLineEnd, cursorLineStart, cursorLineUp,
 	defaultKeymap, deleteLine, history, historyKeymap, indentLess, insertTab,
@@ -20,6 +20,7 @@ import { fullLineSelection } from './extensions/full-line-selection/index.js';
 import { indentRulers, refreshIndentRulers } from './extensions/indent-rulers/index.js';
 import { syntaxHighlightingExtension, syntaxHighlightingOptions } from './extensions/syntax-highlighting/index.js';
 import { refreshStructure, structureView, structureViewOptions } from './extensions/structure-view/index.js';
+import { whitespaceHighlighting } from './extensions/whitespace/index.js';
 
 const TAB_SIZE = 4;
 const legacyKeymap = [
@@ -160,7 +161,7 @@ export class Editor {
 				highlightActiveLineGutter(),
 				selectionState,
 				highlightSelectionMatches(),
-				highlightWhitespace(),
+				whitespaceHighlighting(),
 				EditorView.scrollMargins.of(() => ({ top: 32, bottom: 32 })),
 				EditorView.contentAttributes.of({ spellcheck: 'false' }),
 				EditorView.domEventHandlers({

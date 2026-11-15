@@ -5,16 +5,49 @@ import { analyze } from '../.build/lang/js/analyzer.js';
 import { createCommonAnalysis } from '../.build/analysis/common-analysis.js';
 import { commonAnalysisState, setCommonAnalysis } from '../dist/analysis.js';
 import { Compartment, EditorSelection, EditorState } from '@codemirror/state';
-import { EditorView, lineNumbers } from '@codemirror/view';
+import { EditorView, highlightActiveLine, lineNumbers } from '@codemirror/view';
 import { retainStructureOnEdit, setStructure, structureView } from '../dist/structure-view.js';
 import { functionLineNumbers, getSectionLineNumber, setSectionStarts } from '../dist/function-line-numbers.js';
 import { functionScrollMarkers } from '../dist/function-scroll-markers.js';
 import { gutterLineSelection, setLineSelectionMode } from '../dist/gutter-line-selection.js';
 import { easyLineSelection, setEasyLineSelectionMode, standardGutterLineSelection } from '../dist/easy-line-selection.js';
 import { indentRulers } from '../dist/indent-rulers.js';
+import { whitespaceHighlighting } from '../dist/whitespace.js';
 import { setSyntaxHighlights, syntaxHighlightingExtension, syntaxHighlightingOptions, syntaxHighlightingSource } from '../dist/syntax-highlighting.js';
 
 export async function runLanguageContractTests(assert) {
+	const whitespaceHost = document.createElement('div');
+	document.body.append(whitespaceHost);
+	const whitespaceCompartment = new Compartment();
+	const whitespaceView = new EditorView({
+		state: EditorState.create({ doc: '\t a\n\t b', extensions: [highlightActiveLine(), whitespaceCompartment.of(whitespaceHighlighting())] }),
+		parent: whitespaceHost,
+	});
+	try {
+		const lines = whitespaceHost.querySelectorAll('.cm-line');
+		const activeSpace = lines[0].querySelector('.cm-highlightSpace');
+		const inactiveSpace = lines[1].querySelector('.cm-highlightSpace');
+		const activeTab = lines[0].querySelector('.cm-highlightTab');
+		const inactiveTab = lines[1].querySelector('.cm-highlightTab');
+		assert(activeSpace && inactiveSpace && activeTab && inactiveTab &&
+			getComputedStyle(activeSpace).backgroundImage.includes('linear-gradient') &&
+			getComputedStyle(inactiveSpace).backgroundImage === 'none' &&
+			getComputedStyle(activeTab, '::before').color === 'rgb(246, 176, 197)' &&
+			getComputedStyle(inactiveTab, '::before').color === 'rgb(251, 221, 230)',
+			'standalone whitespace extension styles active and inactive lines');
+		whitespaceHost.style.setProperty('--croq-whitespace-active-color', '#123456');
+		whitespaceHost.style.setProperty('--croq-whitespace-tab-color', '#654321');
+		assert(getComputedStyle(activeTab, '::before').color === 'rgb(18, 52, 86)' &&
+			getComputedStyle(inactiveTab, '::before').color === 'rgb(101, 67, 33)',
+			'whitespace colors can be customized');
+		whitespaceView.dispatch({ effects: whitespaceCompartment.reconfigure([]) });
+		assert(!whitespaceView.dom.classList.contains('cm-croq-whitespace') &&
+			!whitespaceHost.querySelector('.cm-highlightTab, .cm-highlightSpace') &&
+			!whitespaceView.dom.querySelector('style'), 'removing whitespace extension removes its marks and stylesheet');
+	} finally {
+		whitespaceView.destroy();
+		whitespaceHost.remove();
+	}
 	assert(gutterLineSelection === easyLineSelection && setLineSelectionMode === setEasyLineSelectionMode,
 		'legacy gutter exports share the new extension and state effect');
 	const ja = javascriptLanguage.diagnostics('var x = 1', 'ja', { esversion: 10, varstmt: true });
