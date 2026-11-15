@@ -1,9 +1,13 @@
 .cm-editor.cm-croq-whitespace .cm-highlightSpace { background-image: none; }
-.cm-editor.cm-croq-whitespace .cm-activeLine .cm-highlightSpace {
+.cm-editor.cm-croq-whitespace .cm-activeLine .cm-croq-space {
 	background-image: linear-gradient(var(--croq-whitespace-active-color, var(--croq-mirror-l-red-35, #f6b0c5)), var(--croq-whitespace-active-color, var(--croq-mirror-l-red-35, #f6b0c5)));
-	background-size: 100% 1px;
-	background-position: left bottom;
+	background-size: calc(100% - 2px) 2px;
+	background-position: center bottom;
 	background-repeat: no-repeat;
+}
+.cm-editor.cm-croq-whitespace .cm-activeLine .cm-croq-full-width-space {
+	background-image: linear-gradient(color-mix(in srgb, var(--croq-whitespace-active-color, var(--croq-mirror-l-red-35, #f6b0c5)) 80%, white), color-mix(in srgb, var(--croq-whitespace-active-color, var(--croq-mirror-l-red-35, #f6b0c5)) 80%, white));
+	background-size: calc(100% - 2px) 4px;
 }
 .cm-editor.cm-croq-whitespace .cm-highlightTab {
 	position: relative;

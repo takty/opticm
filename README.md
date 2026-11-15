@@ -297,10 +297,14 @@ import { functionScrollMarkers } from 'croq-mirror/function-scroll-markers';
 
 ### Whitespace highlighting extension
 
-`croq-mirror/whitespace` displays tabs as arrows and spaces as underlines on
-active lines. It includes CodeMirror's `highlightWhitespace()` but does not
+`croq-mirror/whitespace` displays tabs as arrows and both ordinary and ideographic
+spaces (U+3000) as underlines on active lines, including inside strings and
+comments. It includes CodeMirror's `highlightWhitespace()` but does not
 install `highlightActiveLine()`; include the latter separately to mark active
-lines. Without it, spaces are hidden and tabs use the inactive color.
+lines. Each space has a separate underline with a gap between adjacent spaces:
+2px thick for ordinary spaces and 4px for ideographic spaces, with the latter
+lightened by mixing the active color with 20% white. Without an active line,
+spaces are hidden and tabs use the inactive color.
 
 ```js
 import { highlightActiveLine } from '@codemirror/view';

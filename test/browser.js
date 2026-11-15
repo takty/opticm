@@ -42,6 +42,71 @@ try {
 	assert(!('getCodeMirror' in a), 'public API does not expose editor instance');
 	const editorA = document.querySelector('#a .cm-editor');
 	const editorB = document.querySelector('#b .cm-editor');
+	const whitespaceLines = () => [...editorA.querySelectorAll('.cm-content .cm-line')];
+	a.loadDocument('a  \u3000\u3000  b\n"\u3000\u3000" //\u3000');
+	const spaceMarks = line => [...line.querySelectorAll('.cm-croq-space')];
+	const fullWidthMarks = line => spaceMarks(line).filter(mark => mark.textContent === '\u3000');
+	const fullWidth = fullWidthMarks(whitespaceLines()[0]);
+	const ordinary = spaceMarks(whitespaceLines()[0]).find(mark => mark.textContent === ' ');
+	assert(fullWidth.map(mark => mark.textContent).join('') === '\u3000\u3000' &&
+		getComputedStyle(fullWidth[0]).backgroundSize === 'calc(100% - 2px) 4px' &&
+		getComputedStyle(ordinary).backgroundSize === 'calc(100% - 2px) 2px' &&
+		fullWidth[0].getBoundingClientRect().width > ordinary.getBoundingClientRect().width,
+		'ideographic spaces have a wider, 4px-thick underline while ordinary spaces remain 2px');
+	const gradientColor = mark => {
+		const gradient = getComputedStyle(mark).backgroundImage;
+		const color = gradient.match(/^linear-gradient\((.+), \1\)$/)?.[1];
+		if (!color) throw new Error('Expected a solid-color underline: ' + gradient);
+		const context = document.createElement('canvas').getContext('2d');
+		context.fillStyle = color;
+		context.fillRect(0, 0, 1, 1);
+		return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3);
+	};
+	const hasLighterFullWidth = () => {
+		const base = gradientColor(ordinary);
+		const light = gradientColor(fullWidth[0]);
+		return base.every((channel, i) => Math.abs(light[i] - (channel * 0.8 + 255 * 0.2)) <= 1);
+	};
+	assert(hasLighterFullWidth(), 'ideographic-space underline is lighter than the ordinary-space underline');
+	editorA.style.setProperty('--croq-whitespace-active-color', '#804020');
+	assert(hasLighterFullWidth(), 'ideographic-space color follows the customized active color');
+	editorA.style.removeProperty('--croq-whitespace-active-color');
+	const activeMarks = spaceMarks(whitespaceLines()[0]);
+	assert(activeMarks.map(mark => mark.textContent).join('') === '  \u3000\u3000  ' &&
+		activeMarks.length === 6 && activeMarks.every(mark => {
+			const style = getComputedStyle(mark);
+			const size = mark.textContent === '\u3000' ? 'calc(100% - 2px) 4px' : 'calc(100% - 2px) 2px';
+			return style.backgroundSize === size && style.backgroundPosition === '50% 100%';
+		}) && activeMarks.every((mark, i) => !i ||
+			Math.abs(activeMarks[i - 1].getBoundingClientRect().right - mark.getBoundingClientRect().left) < 1),
+		'adjacent ordinary and ideographic spaces have separate underlines with gaps');
+	a.replaceRange('\u3000', { line: 0, ch: 2 });
+	assert(spaceMarks(whitespaceLines()[0]).map(mark => mark.textContent).join('|') === ' |\u3000| |\u3000|\u3000| | ',
+		'editing inside a mixed run preserves one mark per space');
+	a.replaceRange('', { line: 0, ch: 2 }, { line: 0, ch: 3 });
+	assert(spaceMarks(whitespaceLines()[0]).map(mark => mark.textContent).join('|') === ' | |\u3000|\u3000| | ',
+		'deleting inside a mixed run preserves separate marks');
+	assert(fullWidthMarks(whitespaceLines()[1]).map(mark => mark.textContent).join('') === '\u3000\u3000\u3000' &&
+		fullWidthMarks(whitespaceLines()[1]).every(mark => getComputedStyle(mark).backgroundImage === 'none'),
+		'ideographic spaces in strings and comments are marked but hidden on inactive lines');
+	a.moveTo({ line: 1, ch: 0 }, { focus: false });
+	assert(fullWidthMarks(whitespaceLines()[1]).every(mark =>
+		getComputedStyle(mark).backgroundImage.includes('linear-gradient') &&
+		getComputedStyle(mark).backgroundSize === 'calc(100% - 2px) 4px'),
+		'ideographic spaces in strings and comments become visible on the active line');
+	a.replaceSelection('\u3000');
+	assert(fullWidthMarks(whitespaceLines()[1]).map(mark => mark.textContent).join('').length === 4,
+		'ideographic space decorations update after editing');
+	a.replaceRange('', { line: 1, ch: 0 }, { line: 1, ch: 1 });
+	assert(fullWidthMarks(whitespaceLines()[1]).map(mark => mark.textContent).join('').length === 3,
+		'ideographic space decorations update after deletion');
+	a.loadDocument('a \tb\nc \td');
+	assert(getComputedStyle(whitespaceLines()[0].querySelector('.cm-croq-space')).backgroundImage.includes('linear-gradient') &&
+		getComputedStyle(whitespaceLines()[1].querySelector('.cm-croq-space')).backgroundImage === 'none' &&
+		getComputedStyle(whitespaceLines()[1].querySelector('.cm-highlightTab'), '::before').color === 'rgb(251, 221, 230)',
+		'component preserves active-space and inactive-tab display');
+	a.loadDocument('function one() { return 1; }');
+	await waitFor(() => a.getAnalysis() !== null, 'restored document analysis is ready');
 	let displayAnalysisEvents = 0;
 	const offDisplayAnalysis = a.on('analysis', () => displayAnalysisEvents++);
 	a.setSettings({ structureHighlight: false, declarationHighlight: false });
@@ -66,12 +131,6 @@ try {
 		a.loadDocument(text);
 		assert(a.getLineCount() === count, 'line count includes empty and trailing lines: ' + count);
 	}
-	a.loadDocument('a \tb\nc \td');
-	const whitespaceLines = () => [...editorA.querySelectorAll('.cm-content .cm-line')];
-	assert(getComputedStyle(whitespaceLines()[0].querySelector('.cm-highlightSpace')).backgroundImage.includes('linear-gradient') &&
-		getComputedStyle(whitespaceLines()[1].querySelector('.cm-highlightSpace')).backgroundImage === 'none' &&
-		getComputedStyle(whitespaceLines()[1].querySelector('.cm-highlightTab'), '::before').color === 'rgb(251, 221, 230)',
-		'component preserves active-space and inactive-tab display');
 	a.loadDocument('function one() { return 1; }');
 	const clipboardEvents = [];
 	const offCopy = a.on('copy', event => clipboardEvents.push(['copy', event.text]));
