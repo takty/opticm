@@ -320,14 +320,14 @@ function drawStructure(canvas, { width, height, charWidth, lineHeight, decoratio
 			ctx.shadowColor = item.stroke;
 			ctx.shadowBlur = 6;
 			ctx.shadowOffsetY = 1;
-			fill(ctx, x, y, end.x - x, h, [0, lineHeight / 4, lineHeight / 4, 0]);
+			fill(ctx, x, y, end.x - x, h, [0, lineHeight / 5, lineHeight / 5, 0]);
 			ctx.restore();
 		} else if (item.appearance === 'declaration') {
 			const x = start.x - 2;
 			const tokenHeight = charWidth * 1.9;
 			const y = start.y + (lineHeight - tokenHeight) / 2;
 			const h = end.y - start.y + tokenHeight;
-			if (fill(ctx, x, y, end.x - x + 4, h, [0, lineHeight / 4, lineHeight / 4, 0])) {
+			if (fill(ctx, x, y, end.x - x + 4, h, [0, lineHeight / 5, lineHeight / 5, 0])) {
 				ctx.strokeStyle = item.stroke;
 				ctx.lineWidth = 0.5;
 				ctx.stroke();
