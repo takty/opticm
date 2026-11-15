@@ -1,6 +1,6 @@
 import { StateEffect, StateField } from '@codemirror/state';
 
-const structureKinds = new Set(['function', 'class', 'conditional', 'loop']);
+const structureKinds = new Set(['function', 'class', 'conditional', 'loop', 'loop2']);
 const declarationMutabilities = new Set(['mutable', 'immutable', 'unknown']);
 const declarationScopes = new Set(['function', 'lexical', 'member', 'parameter', 'unknown']);
 const syntaxKinds = new Set([

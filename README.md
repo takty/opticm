@@ -237,11 +237,15 @@ view.dispatch({ effects: setStructure.of([{
 ```
 
 Positions are zero-based `{line, ch}` with UTF-16 columns and exclusive ends.
+Range spines retain their existing measured width and span the full range height.
+The top, bottom and branch strokes exclude the spine and fade to transparency
+without changing color at their right ends; the top and bottom strokes keep a
+total width of 16 character cells, including the spine.
 Supply ranges as above or tokens as `{kind: 'token', appearance: 'declaration', from, to, fill, stroke}`. Use `appearance: 'reference'` for reference-style tokens.
 Colors can use `var(--property, fallback)` and are resolved against the editor
 when the canvas is repainted. An optional `opacity` sets the canvas alpha
 (default `1`). JavaScript and Java class ranges use `--croq-mirror-l-red` at
-15% opacity and are drawn underneath their method decorations.
+12% opacity and are drawn underneath their method decorations.
 The caller supplies current data in drawing order and is responsible for rejecting
 stale asynchronous analysis results. Treat the supplied array and its contents
 as immutable after dispatch. Document changes or a `load` user event

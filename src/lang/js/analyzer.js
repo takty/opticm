@@ -56,6 +56,7 @@ function createVisitor() {
 	const classLocs = [];
 	const ifLocs    = [];
 	const forLocs   = [];
+	const loop2Locs = [];
 	const fnNames   = [];
 	const ifNodes   = [];
 	const varLocs   = [];
@@ -170,6 +171,12 @@ function createVisitor() {
 		ForStatement: (node, state, c) => {
 			forLocs.push([node, node]);
 		},
+		WhileStatement: (node, state, c) => {
+			loop2Locs.push([node, node]);
+		},
+		DoWhileStatement: (node, state, c) => {
+			loop2Locs.push([node, node]);
+		},
 		get: (source, ast, success) => {
 			const fnStarts = [];
 			let lastEnd = -1;
@@ -179,7 +186,7 @@ function createVisitor() {
 					lastEnd = end.loc.end.line - 1;
 				}
 			}
-			const ranges = { fnLocs, classLocs, ifLocs, forLocs, varLocs, letLocs, constLocs };
+			const ranges = { fnLocs, classLocs, ifLocs, forLocs, loop2Locs, varLocs, letLocs, constLocs };
 			const mapRanges = (start, end) => Object.fromEntries(Object.entries(ranges).map(([kind, entries]) => [
 				kind, entries.map(([from, to, ...branches]) => [start(from), end(to), ...branches.map(start)]),
 			]));

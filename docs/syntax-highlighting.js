@@ -9,7 +9,7 @@ import { highlightTree } from "@lezer/highlight";
 
 // .build/analysis/common-analysis.js
 import { StateEffect, StateField } from "@codemirror/state";
-var structureKinds = /* @__PURE__ */ new Set(["function", "class", "conditional", "loop"]);
+var structureKinds = /* @__PURE__ */ new Set(["function", "class", "conditional", "loop", "loop2"]);
 var declarationMutabilities = /* @__PURE__ */ new Set(["mutable", "immutable", "unknown"]);
 var declarationScopes = /* @__PURE__ */ new Set(["function", "lexical", "member", "parameter", "unknown"]);
 var syntaxKinds = /* @__PURE__ */ new Set([

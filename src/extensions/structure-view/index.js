@@ -237,10 +237,11 @@ export const structureView = [
 
 function commonDecorations(analysis, doc, options) {
 	const colors = {
-		class      : ['var(--croq-mirror-l-red, #e61e58)', 0.15],
+		class      : ['var(--croq-mirror-l-red, #e61e58)', 0.12],
 		function   : ['hsla(40, 100%, 50%, 0.15)'],
 		conditional: ['hsla(150, 100%, 35%, 0.15)'],
 		loop       : ['hsla(190, 90%, 50%, 0.20)'],
+		loop2      : ['var(--croq-mirror-l-purple, #9a74a3)', 0.20],
 	};
 	const position = offset => {
 		const line = doc.lineAt(offset);
@@ -295,6 +296,19 @@ function drawStructure(canvas, { width, height, charWidth, lineHeight, decoratio
 
 	const padding = Math.min(3, lineHeight / 4);
 	const band = lineHeight - padding * 2;
+	let colorContext;
+	const transparentColor = color => {
+		if (!colorContext) {
+			const colorCanvas = canvas.ownerDocument.createElement('canvas');
+			colorCanvas.width = colorCanvas.height = 1;
+			colorContext = colorCanvas.getContext('2d');
+		}
+		colorContext.clearRect(0, 0, 1, 1);
+		colorContext.fillStyle = color;
+		colorContext.fillRect(0, 0, 1, 1);
+		const [red, green, blue] = colorContext.getImageData(0, 0, 1, 1).data;
+		return `rgba(${red}, ${green}, ${blue}, 0)`;
+	};
 	for (const item of decorations) {
 		const { start, end } = item;
 		ctx.globalAlpha = item.opacity ?? 1;
@@ -305,13 +319,24 @@ function drawStructure(canvas, { width, height, charWidth, lineHeight, decoratio
 			const top    = start.y + padding;
 			const bottom = end.y + padding;
 			fill(ctx, left, top, spine, bottom - top + band, [band / 2, 0, 0, band / 2]);
-			const capWidth = Math.min(width, charWidth * 64) / 2;
-			fill(ctx, left + spine, top, capWidth, band, [0, band / 2, band / 2, 0]);
+			const capWidth = Math.max(0, charWidth * 16 - spine);
+			const fadeColor = transparentColor(item.fill);
+			const fillHorizontal = (x, y, width, radii) => {
+				if (width <= 0) return;
+				const gradient = ctx.createLinearGradient(x, y, x + width, y);
+				gradient.addColorStop(0, item.fill);
+				gradient.addColorStop(1, fadeColor);
+				ctx.fillStyle = gradient;
+				fill(ctx, x, y, width, band, radii);
+				ctx.fillStyle = item.fill;
+			};
+			fillHorizontal(left + spine, top, capWidth, [0, 0, 0, 0]);
 			if (item.from.line !== item.to.line) {
-				fill(ctx, left + spine, bottom, capWidth, band, [0, band / 2, band / 2, 0]);
+				fillHorizontal(left + spine, bottom, capWidth, [0, 0, 0, 0]);
 			}
 			for (const row of item.branchRows) {
-				fill(ctx, left + spine, row + padding, Math.max(1, item.branchWidth - 4), band, [0, band / 2, band / 2, 0]);
+				fillHorizontal(left + spine, row + padding, Math.max(1, item.branchWidth - 4),
+					[0, band / 2, band / 2, 0]);
 			}
 		} else if (item.appearance === 'reference') {
 			const x = start.x, h = charWidth * 1.9;

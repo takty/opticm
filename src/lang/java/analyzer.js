@@ -35,9 +35,8 @@ const FUNCTION_NODES = new Set([
 	'lambda_expression',
 ]);
 const CONDITIONAL_NODES = new Set(['if_statement', 'switch_statement', 'switch_expression']);
-const LOOP_NODES = new Set([
-	'do_statement', 'enhanced_for_statement', 'for_statement', 'while_statement',
-]);
+const LOOP_NODES = new Set(['enhanced_for_statement', 'for_statement']);
+const LOOP2_NODES = new Set(['do_statement', 'while_statement']);
 
 export function analyzeJava(source, rootNode) {
 	const bytes = new TextEncoder().encode(source);
@@ -125,7 +124,7 @@ export function analyzeJava(source, rootNode) {
 		if (node.isMissing) return;
 		locals.enter(node);
 		if (node.type === 'class_declaration') {
-			addRange(node, 'class', 'var(--croq-mirror-l-red, #e61e58)', [], 0.15);
+			addRange(node, 'class', 'var(--croq-mirror-l-red, #e61e58)', [], 0.12);
 		} else if (FUNCTION_NODES.has(node.type)) {
 			const start = toOffset(node.startIndex);
 			if (start !== undefined) {
@@ -140,6 +139,8 @@ export function analyzeJava(source, rootNode) {
 			addRange(node, 'conditional', 'hsla(150, 100%, 35%, 0.15)', branches);
 		} else if (LOOP_NODES.has(node.type)) {
 			addRange(node, 'loop', 'hsla(190, 90%, 50%, 0.20)');
+		} else if (LOOP2_NODES.has(node.type)) {
+			addRange(node, 'loop2', 'var(--croq-mirror-l-purple, #9a74a3)', [], 0.20);
 		}
 		if (node.type.includes('comment')) {
 			add(node, 'comment');

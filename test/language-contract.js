@@ -119,10 +119,51 @@ export async function runLanguageContractTests(assert) {
 		host.style.removeProperty('--croq-structure-content-z-index');
 		host.style.removeProperty('--croq-structure-scroller-z-index');
 		standalone.dispatch({ effects: setStructure.of([{
-			kind: 'range', from: { line: 0, ch: 0 }, to: { line: 2, ch: 1 }, fill: '#ff0000',
+			kind: 'range', from: { line: 0, ch: 0 }, to: { line: 2, ch: 1 }, fill: 'rgba(255, 0, 0, 0.4)',
 			spineChars: 3, branchChars: 4, branches: [{ line: 1, ch: 0 }],
 		}]) });
 		assert(await waitForPaint(true), 'standalone structure extension draws externally supplied ranges');
+		const rangeCanvas = host.querySelector('canvas');
+		const rangeContext = rangeCanvas.getContext('2d');
+		const rangeEdges = () => {
+			const pixels = rangeContext.getImageData(0, 0, rangeCanvas.width, rangeCanvas.height).data;
+			let top = -1, bottom = -1;
+			for (let y = 0; y < rangeCanvas.height; y++) {
+				for (let x = 0; x < rangeCanvas.width; x++) {
+					const pixel = (y * rangeCanvas.width + x) * 4;
+					if (pixels[pixel] === 255 && pixels[pixel + 1] === 0 && pixels[pixel + 2] === 0 && pixels[pixel + 3]) {
+						if (top < 0) top = y;
+						bottom = y;
+					}
+				}
+			}
+			return { top, bottom };
+		};
+		const edges = rangeEdges();
+		const scale = window.devicePixelRatio;
+		const startX = standalone.coordsAtPos(0).left - standalone.scrollDOM.getBoundingClientRect().left;
+		const spineWidth = Math.max(1, standalone.coordsAtPos(4, -1).left - standalone.coordsAtPos(0).left - 7);
+		const rangeEnd = startX + 4 + standalone.defaultCharacterWidth * 16;
+		assert(edges.top >= 0, 'structure range caps have painted top and bottom edges');
+		const hasExpectedGradient = (y, end) => {
+			const pixels = rangeContext.getImageData(0, y, rangeCanvas.width, 1).data;
+			const spinePixel = Math.floor((startX + 4 + spineWidth / 2) * scale);
+			const endPixel = Math.ceil(end * scale) - 1;
+			const nearEndPixel = Math.floor((end - standalone.defaultCharacterWidth * 0.5) * scale);
+			const afterAlpha = endPixel + 1 < rangeCanvas.width ? pixels[(endPixel + 1) * 4 + 3] : 0;
+			const spineAlpha = pixels[spinePixel * 4 + 3];
+			const nearEndAlpha = pixels[nearEndPixel * 4 + 3];
+			const colorIndex = nearEndPixel * 4;
+			return spineAlpha > 0 && nearEndAlpha > 0 && nearEndAlpha < spineAlpha / 4 && afterAlpha === 0 &&
+				pixels[colorIndex] === 255 && pixels[colorIndex + 1] === 0 && pixels[colorIndex + 2] === 0;
+		};
+		const branchLine = host.querySelectorAll('.cm-line')[1].getBoundingClientRect();
+		const branchY = Math.floor(((branchLine.top + branchLine.bottom) / 2 - rangeCanvas.getBoundingClientRect().top) * scale);
+		const branchWidth = Math.max(1, standalone.coordsAtPos(5, -1).left - standalone.coordsAtPos(0).left - 8);
+		const branchEnd = startX + 4 + spineWidth + branchWidth;
+		assert(hasExpectedGradient(edges.top, rangeEnd) && hasExpectedGradient(edges.bottom, rangeEnd) &&
+			hasExpectedGradient(branchY, branchEnd),
+			'structure range caps exclude the existing spine width and all horizontal lines fade to transparency');
 		const classRange = [{
 			kind: 'range', from: { line: 0, ch: 0 }, to: { line: 2, ch: 1 },
 			fill: 'var(--test-class-color, #ff0000)', opacity: 0.15, spineChars: 3, branchChars: 4, branches: [],

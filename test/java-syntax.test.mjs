@@ -40,6 +40,25 @@ test('Java worker distinguishes method definitions from calls', () => {
 	}
 });
 
+test('Java while and do-while statements use purple loop2 structures', () => {
+	const source = 'class Example { void run() { for (;;) {} while (ready) { tick(); } do { tick(); } while (ready); } }';
+	const tree = parser.parse(source);
+	try {
+		const result = analyzeJava(source, tree.rootNode);
+		const loops = createCommonAnalysis({ ...result.commonAnalysis, version: 1 }).structures
+			.filter(item => item.kind === 'loop' || item.kind === 'loop2');
+		assert.deepEqual(loops.map(item => [item.kind, source.slice(item.from, item.to)]), [
+			['loop', 'for (;;) {}'],
+			['loop2', 'while (ready) { tick(); }'],
+			['loop2', 'do { tick(); } while (ready);'],
+		]);
+		assert.ok(result.decorations.some(item => item.kind === 'range' &&
+			item.fill === 'var(--croq-mirror-l-purple, #9a74a3)' && item.opacity === 0.20));
+	} finally {
+		tree.delete();
+	}
+});
+
 test('Java worker distinguishes class declarations from class references', () => {
 	const source = 'class Example {} class Other extends Example { Example field; }';
 	const tree = parser.parse(source);
@@ -219,7 +238,7 @@ test('Java emits class ranges before their methods without changing method secti
 		assert.equal(result.success, true);
 		const classes = result.decorations.filter(item => item.fill === 'var(--croq-mirror-l-red, #e61e58)');
 		assert.deepEqual(classes.map(item => [item.from.line, item.from.ch, item.to.line, item.to.ch, item.opacity]),
-			[[0, 0, 4, 1, 0.15], [2, 4, 2, 18, 0.15]]);
+			[[0, 0, 4, 1, 0.12], [2, 4, 2, 18, 0.12]]);
 		assert.deepEqual(result.sectionStarts, [1]);
 		assert.ok(result.decorations.indexOf(classes[0]) < result.decorations.findIndex(item =>
 			item.fill === 'hsla(40, 100%, 50%, 0.15)'));

@@ -17,6 +17,17 @@ test('strict and tolerant results retain the existing coordinate contract', () =
 	assert.equal('ast' in valid, false);
 });
 
+test('JavaScript while and do-while statements use loop2 structures', () => {
+	const source = 'for (;;) {}\nwhile (ready) { step(); }\ndo { step(); } while (ready);';
+	const structures = analyze(source).commonAnalysis.structures
+		.filter(item => item.kind === 'loop' || item.kind === 'loop2');
+	assert.deepEqual(structures.map(item => [item.kind, source.slice(item.from, item.to)]), [
+		['loop', 'for (;;) {}'],
+		['loop2', 'while (ready) { step(); }'],
+		['loop2', 'do { step(); } while (ready);'],
+	]);
+});
+
 test('JavaScript analysis reports class declarations and expressions', () => {
 	const result = analyze('class Outer {\n method() { return class Inner {}; }\n}\nconst Other = class {};\n');
 	assert.equal(result.success, true);
