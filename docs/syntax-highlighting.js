@@ -17,7 +17,12 @@ var syntaxKinds = /* @__PURE__ */ new Set([
   "keyword",
   "operator",
   "type",
+  "class-definition",
   "function",
+  "function-definition",
+  "field-definition",
+  "property-definition",
+  "destructuring-shorthand",
   "variable",
   "literal",
   "invalid",
@@ -83,6 +88,7 @@ function createCommonAnalysis(data) {
     version: data.version,
     sourceLength: data.sourceLength,
     complete: data.complete,
+    syntaxComplete: data.syntaxComplete !== false,
     stale: data.stale === true,
     structures,
     declarations,
@@ -199,6 +205,7 @@ function readLezer(state, tree, classifier) {
     }
   });
   classifier.collectInterimReferences?.(tree, state, add);
+  classifier.collectSyntax?.(tree, state, add);
   return {
     syntax: ranges.filter((range) => !SEMANTIC_KINDS.has(range.kind)),
     references: referencesFromSyntax(ranges)
@@ -208,7 +215,7 @@ function reconcile(interim, parsedTo, analysis) {
   if (!analysis) return interim;
   if (!analysis.stale) {
     return {
-      syntax: analysis.syntax.length ? analysis.syntax : interim.syntax,
+      syntax: analysis.syntaxComplete === false ? [...interim.syntax, ...analysis.syntax] : analysis.syntax.length ? analysis.syntax : interim.syntax,
       references: analysis.references
     };
   }
@@ -288,7 +295,7 @@ function extensionStyles(css) {
 }
 
 // .build/extensions/syntax-highlighting/style.css
-var style_default = ".cm-editor.cm-syntax-highlighting .cm-syntax-comment {\r\n	color: var(--croq-syntax-comment-color, var(--croq-mirror-l-gray, #777));\r\n	font-weight: var(--croq-syntax-comment-font-weight, bold);\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-keyword {\r\n	color: var(--croq-syntax-keyword-color, var(--croq-mirror-l-bodybrown, #7c6a5a));\r\n	font-weight: var(--croq-syntax-keyword-font-weight, bold);\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-operator {\r\n	font-weight: var(--croq-syntax-keyword-font-weight, bold);\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-type {\r\n	color: var(--croq-syntax-type-color, var(--croq-mirror-l-blue, #2e449a));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-function {\r\n	color: var(--croq-syntax-function-color, var(--croq-mirror-l-turquoise, #005363));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting :where(.cm-syntax-definition) {\r\n	color: var(--croq-syntax-definition-color, inherit);\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-definition {\r\n	font-weight: var(--croq-syntax-definition-font-weight, bold);\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-property {\r\n	color: var(--croq-syntax-property-color, var(--croq-mirror-l-blue, #2e449a));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-variable {\r\n	color: var(--croq-syntax-variable-color, inherit);\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-literal {\r\n	color: var(--croq-syntax-literal-color, var(--croq-mirror-l-orange, #f5a200));\r\n	font-weight: var(--croq-syntax-literal-font-weight, bold);\r\n	text-shadow: var(--croq-syntax-literal-text-shadow, var(--croq-mirror-l-yellow, #fdde00) 0 0 0.25em);\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-activeLine .cm-syntax-literal {\r\n	text-shadow: none;\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-invalid {\r\n	text-decoration: var(--croq-syntax-invalid-decoration, underline wavy var(--croq-mirror-l-red, #e61e58));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting :is(.cm-syntax-local-variable, .cm-syntax-local-reference, .cm-syntax-local-reference .cm-syntax-variable) {\r\n	color: var(--croq-syntax-local-variable-color, hsl(86 60% 30%));\r\n}\r\n";
+var style_default = ".cm-editor.cm-syntax-highlighting .cm-syntax-comment {\r\n	color: var(--croq-syntax-comment-color, var(--croq-mirror-l-gray, #777));\r\n	font-weight: var(--croq-syntax-comment-font-weight, bold);\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting :is(.cm-syntax-keyword, .cm-syntax-operator) {\r\n	color: var(--croq-syntax-keyword-color, var(--croq-mirror-l-bodybrown, #7c6a5a));\r\n	font-weight: var(--croq-syntax-keyword-font-weight, bold);\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-type {\r\n	color: var(--croq-syntax-type-color, var(--croq-mirror-l-blue, #2e449a));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-function {\r\n	color: var(--croq-syntax-function-color, var(--croq-mirror-l-turquoise, #005363));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting :is(.cm-syntax-function-definition, .cm-syntax-function-definition *, .cm-syntax-class-definition, .cm-syntax-class-definition *) {\r\n	color: var(--croq-syntax-function-definition-color, var(--croq-mirror-color-text, #110));\r\n	font-weight: var(--croq-syntax-function-definition-font-weight, bold);\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting :where(.cm-syntax-definition) {\r\n	color: var(--croq-syntax-definition-color, inherit);\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-definition {\r\n	font-weight: var(--croq-syntax-definition-font-weight, bold);\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting :is(.cm-syntax-field-definition, .cm-syntax-field-definition *, .cm-syntax-property-definition, .cm-syntax-property-definition *) {\r\n	color: var(--croq-syntax-definition-color, var(--croq-mirror-color-text, #110));\r\n	font-weight: var(--croq-syntax-definition-font-weight, bold);\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-property {\r\n	color: var(--croq-syntax-property-color, var(--croq-mirror-l-blue, #2e449a));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-variable {\r\n	color: var(--croq-syntax-variable-color, inherit);\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-literal {\r\n	color: var(--croq-syntax-literal-color, var(--croq-mirror-l-orange, #f5a200));\r\n	font-weight: var(--croq-syntax-literal-font-weight, bold);\r\n	text-shadow: var(--croq-syntax-literal-text-shadow, var(--croq-mirror-l-yellow, #fdde00) 0 0 0.25em);\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-activeLine .cm-syntax-literal {\r\n	text-shadow: none;\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-invalid {\r\n	text-decoration: var(--croq-syntax-invalid-decoration, underline wavy var(--croq-mirror-l-red, #e61e58));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting :is(.cm-syntax-local-variable, .cm-syntax-local-reference, .cm-syntax-local-reference .cm-syntax-variable) {\r\n	color: var(--croq-syntax-local-variable-color, hsl(86 60% 30%));\r\n}\r\n";
 
 // .build/extensions/syntax-highlighting/index.js
 var syntaxKinds2 = /* @__PURE__ */ new Set([
@@ -296,7 +303,9 @@ var syntaxKinds2 = /* @__PURE__ */ new Set([
   "keyword",
   "operator",
   "type",
+  "class-definition",
   "function",
+  "function-definition",
   "variable",
   "literal",
   "invalid",
@@ -304,6 +313,8 @@ var syntaxKinds2 = /* @__PURE__ */ new Set([
 ]);
 var semanticKinds = /* @__PURE__ */ new Set([
   "definition",
+  "field-definition",
+  "property-definition",
   "local-variable",
   "local-reference",
   "variable-reference"
@@ -313,11 +324,15 @@ var allKinds = /* @__PURE__ */ new Set([
   "keyword",
   "operator",
   "type",
+  "class-definition",
   "function",
+  "function-definition",
   "variable",
   "literal",
   "invalid",
   "definition",
+  "field-definition",
+  "property-definition",
   "property",
   "local-variable",
   "local-reference",
@@ -336,14 +351,15 @@ function activeRanges(ranges, options) {
   return ranges.filter(({ kind }) => options.syntax && syntaxKinds2.has(kind) || options.semantic && semanticKinds.has(kind));
 }
 function commonRanges(analysis, options) {
-  const ranges = analysis.syntax.filter(({ kind }) => kind === "local-variable");
+  const ranges = analysis.syntax.filter(({ kind }) => kind === "local-variable" || kind === "field-definition" || kind === "property-definition");
+  const shorthand = new Set(analysis.syntax.filter(({ kind }) => kind === "destructuring-shorthand").map(({ from, to }) => `${from}:${to}`));
   if (options.syntax) {
     ranges.push(...analysis.syntax.filter(({ kind }) => syntaxKinds2.has(kind)));
   }
   if (options.semantic) {
     for (const { from, to, role, scope } of analysis.references) {
       if (role === "definition") {
-        ranges.push({ from, to, kind: "definition" });
+        if (!shorthand.has(`${from}:${to}`)) ranges.push({ from, to, kind: "definition" });
       } else {
         ranges.push({ from, to, kind: "variable-reference" });
         if (scope === "local") {

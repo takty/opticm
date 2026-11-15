@@ -3,14 +3,13 @@
 		"bitwise": true,
 		"curly": true,
 		"eqeqeq": true,
-		"esversion": 10,
+		"esversion": 11,
 		"latedef": false,
 		"strict": false,
 		"undef": false,
 		"unused": false,
 		"varstmt": true,
 		"expr": false,
-		"plusplus": true,
 		"browser": true
 	},
 	"jsBeautifyOpt": {

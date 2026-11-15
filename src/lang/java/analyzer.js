@@ -17,6 +17,7 @@ const DECLARATIONS = new Set([
 	'class_declaration', 'interface_declaration', 'enum_declaration',
 	'record_declaration', 'annotation_type_declaration',
 ]);
+const HIGHLIGHTED_TYPE_DECLARATIONS = new Set(['class_declaration', 'interface_declaration', 'enum_declaration', 'record_declaration']);
 
 const LITERALS = new Set(['string_literal', 'character_literal', 'text_block', 'true', 'false']);
 const OPERATORS = new Set([
@@ -27,7 +28,7 @@ const OPERATORS = new Set([
 const DEFINITION_PARENTS = new Set([
 	'variable_declarator', 'formal_parameter', 'catch_formal_parameter',
 	'enhanced_for_statement', 'resource', 'method_declaration', 'constructor_declaration',
-	'compact_constructor_declaration',
+	'compact_constructor_declaration', 'enum_constant', 'instanceof_expression',
 ]);
 const FUNCTION_NODES = new Set([
 	'method_declaration', 'constructor_declaration', 'compact_constructor_declaration',
@@ -156,11 +157,18 @@ export function analyzeJava(source, rootNode) {
 			else if (isOperator(node, text)) {
 				add(node, 'operator');
 			}
-			else if (node.type === 'type_identifier') add(node, 'type');
+			else if (node.type === 'type_identifier') {
+				add(node, 'type');
+				if (HIGHLIGHTED_TYPE_DECLARATIONS.has(node.parent?.type) && node.parent.childForFieldName('name')?.startIndex === node.startIndex) {
+					add(node, 'class-definition');
+				}
+			}
 			else if (node.type === 'identifier' || node.type === 'field_identifier') {
 				addVariableDeclaration(node);
 				const local = locals.isReference(node);
 				add(node, local ? 'local-reference' : identifierKind(node));
+				if (HIGHLIGHTED_TYPE_DECLARATIONS.has(node.parent?.type) && node.parent.childForFieldName('name')?.startIndex === node.startIndex) add(node, 'class-definition');
+				if (node.parent?.type === 'method_declaration' && isDefinition(node)) add(node, 'function-definition');
 				const role = isDefinition(node) ? 'definition' : isVariableReference(node) ? 'reference' : null;
 				if (role) {
 					const from = toOffset(node.startIndex), to = toOffset(node.endIndex);

@@ -28,6 +28,70 @@ test('Java diagnostics report missing and unexpected syntax at UTF-16 positions'
 	}
 });
 
+test('Java worker distinguishes method definitions from calls', () => {
+	const source = 'class A { void method() {} void run() { method(); obj.method(); var f = obj::method; } }';
+	const tree = parser.parse(source);
+	try {
+		const names = analyzeJava(source, tree.rootNode).syntaxHighlights
+			.filter(item => item.kind === 'function-definition').map(item => source.slice(item.from, item.to));
+		assert.deepEqual(names, ['method', 'run']);
+	} finally {
+		tree.delete();
+	}
+});
+
+test('Java worker distinguishes class declarations from class references', () => {
+	const source = 'class Example {} class Other extends Example { Example field; }';
+	const tree = parser.parse(source);
+	try {
+		const names = analyzeJava(source, tree.rootNode).syntaxHighlights
+			.filter(item => item.kind === 'class-definition').map(item => source.slice(item.from, item.to));
+		assert.deepEqual(names, ['Example', 'Other']);
+	} finally {
+		tree.delete();
+	}
+});
+
+test('Java worker marks interface, enum and record names but not type references', () => {
+	const source = 'interface Contract {} enum Kind { ONE } record Point(int x) {} class Use { Contract c; Kind k; Point p; }';
+	const tree = parser.parse(source);
+	try {
+		const names = analyzeJava(source, tree.rootNode).syntaxHighlights
+			.filter(item => item.kind === 'class-definition').map(item => source.slice(item.from, item.to));
+		assert.deepEqual(names, ['Contract', 'Kind', 'Point', 'Use']);
+	} finally {
+		tree.delete();
+	}
+});
+
+test('Java enum constants are definitions in worker analysis', () => {
+	const source = 'enum Kind { ONE, TWO } class Example { Kind value = Kind.ONE; }';
+	const tree = parser.parse(source);
+	try {
+		const definitions = analyzeJava(source, tree.rootNode).commonAnalysis.references
+			.filter(item => item.role === 'definition').map(item => source.slice(item.from, item.to));
+		assert.deepEqual(definitions, ['ONE', 'TWO', 'value']);
+	} finally {
+		tree.delete();
+	}
+});
+
+test('Java instanceof pattern name is a definition, not a reference', () => {
+	const source = 'class Example { void run(Object value) { if (value instanceof String text) use(text); boolean test = value instanceof String; } }';
+	const tree = parser.parse(source);
+	try {
+		const result = analyzeJava(source, tree.rootNode);
+		const from = source.indexOf('text)');
+		assert.ok(result.commonAnalysis.references.some(item => item.from === from && item.to === from + 4 && item.role === 'definition'));
+		assert.ok(result.syntaxHighlights.some(item => item.from === from && item.to === from + 4 && item.kind === 'definition'));
+		assert.ok(!result.commonAnalysis.references.some(item => item.from === from && item.role === 'reference'));
+		const operand = source.indexOf('value instanceof');
+		assert.ok(result.commonAnalysis.references.some(item => item.from === operand && item.role === 'reference'));
+	} finally {
+		tree.delete();
+	}
+});
+
 test('Java diagnostics warn for unbraced control bodies and allow else-if chains', () => {
 	const source = 'void main() { if (ready) start(); else if (done) { stop(); } else reset();\n' +
 		'for (int i = 0; i < 1; i++) tick(); for (var x : xs) tick(x); while (ready); do tick(); while (ready); }';

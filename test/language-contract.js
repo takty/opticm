@@ -769,6 +769,7 @@ export async function runLanguageContractTests(assert) {
 		const phrases = {};
 		view.setOptions(settings, phrases, diagnostics);
 		view.loadDocument('abc\ndef\nghi');
+		assert(view.view.dom.classList.contains('cm-analysis-pending'), 'loaded document starts with pending analysis');
 		view.view.focus();
 		const activeLines = () => [...root.querySelectorAll('.cm-content .cm-activeLine')];
 		const activeGutters = () => [...root.querySelectorAll('.cm-sectionNumbers .cm-activeLineGutter')];
@@ -797,6 +798,16 @@ export async function runLanguageContractTests(assert) {
 			declarations: [{ kind: 'variable', from: 4, to: 7, mutability: 'immutable', scope: 'lexical' }],
 			syntax: [], references: [], sections: [{ kind: 'function', from: 4 }],
 		}));
+		assert(!view.view.dom.classList.contains('cm-analysis-pending'), 'fresh analysis clears pending class');
+		view.view.dispatch({ changes: { from: 0, to: 1, insert: 'a' } });
+		assert(view.view.dom.classList.contains('cm-analysis-pending'), 'editing marks analysis as pending');
+		view.setCommonAnalysis(createCommonAnalysis({
+			version: 2, sourceLength: 11, complete: true,
+			structures: [{ kind: 'function', from: 0, to: 11, branches: [] }],
+			declarations: [{ kind: 'variable', from: 4, to: 7, mutability: 'immutable', scope: 'lexical' }],
+			syntax: [], references: [], sections: [{ kind: 'function', from: 4 }],
+		}));
+		assert(!view.view.dom.classList.contains('cm-analysis-pending'), 'next analysis clears pending class');
 		assert(view.getSectionLineNumber(0).join() === '0,1' && view.getSectionLineNumber(2).join() === '1,2', 'view numbers sections from language-neutral data');
 		assert(root.querySelector('.cm-function-number')?.textContent === '1', 'view renders section start markers');
 		view.setOptions({ ...settings, functionLineNumbers: false }, phrases, diagnostics);

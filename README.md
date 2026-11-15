@@ -380,8 +380,8 @@ view.dispatch({ effects: setSyntaxHighlights.of([
 ]) });
 ```
 
-Supported kinds are `comment`, `keyword`, `operator`, `type`, `function`, `variable`,
-`literal`, `invalid`, `definition`, `property`, `local-variable`,
+Supported kinds are `comment`, `keyword`, `operator`, `type`, `class-definition`, `function`, `function-definition`, `variable`,
+`literal`, `invalid`, `definition`, `field-definition`, `property-definition`, `property`, `local-variable`,
 `local-reference`, and `variable-reference`. The editor component synchronously
 reads the CodeMirror Lezer tree in both languages and reconciles its ranges with
 worker results. New Lezer tokens update the parsed region during edits, including
@@ -398,7 +398,9 @@ retained code and fresh comments.
 
 Removing the highlighting extension removes the source's decorations. Local
 reference color can be customized with `--croq-syntax-local-variable-color`.
-Variable-reference backgrounds are drawn by the structure view. Comments, keywords/operators, definitions,
+Variable-reference backgrounds are drawn by the structure view. Class, interface, enum, record, function and method declarations use the
+editor text color and bold weight; `--croq-syntax-function-definition-color` and
+`--croq-syntax-function-definition-font-weight` customize them. Comments, keywords/operators, definitions,
 and literals are bold by default. Literals also have a text shadow, hidden on the
 active line. Font weights and literal shadows can be customized with
 `--croq-syntax-comment-font-weight`, `--croq-syntax-keyword-font-weight`,
@@ -407,6 +409,8 @@ active line. Font weights and literal shadows can be customized with
 
 The component's `syntaxHighlight` and `semanticHighlight` settings independently
 toggle token coloring and definition/reference decoration.
+While worker analysis is pending or disabled, ordinary variable references use
+the local-reference color. Fresh analysis restores their classified colors.
 
 ### Bracket matching extension
 

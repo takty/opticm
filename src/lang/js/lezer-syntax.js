@@ -23,7 +23,34 @@ export const lezerSyntax = {
 		if (kind === 'variable' || kind === 'local-variable') add(from, to, 'variable-reference');
 	},
 	collectInterimReferences,
+	collectSyntax: collectDeclarations,
 };
+
+function collectDeclarations(tree, _state, add) {
+	tree.iterate({
+		enter(node) {
+			const current = node.node;
+			if (node.name === 'ClassDeclaration') {
+				const name = current.getChild('VariableDefinition');
+				if (name) add(name.from, name.to, 'class-definition');
+			}
+			if (node.name === 'PropertyDeclaration') {
+				const name = current.getChild('PropertyDefinition') ?? current.getChild('PrivatePropertyDefinition');
+				if (name) add(name.from, name.to, 'field-definition');
+			}
+			let name = null;
+			if (node.name === 'FunctionDeclaration' || node.name === 'FunctionExpression') {
+				name = current.getChild('VariableDefinition');
+			} else if (node.name === 'MethodDeclaration') {
+				name = current.getChild('PropertyDefinition');
+			} else if (node.name === 'VariableDefinition') {
+				const initializer = current.nextSibling?.name === 'Equals' ? current.nextSibling.nextSibling : null;
+				if (initializer && ['ArrowFunction', 'FunctionExpression'].includes(initializer.name)) name = current;
+			}
+			if (name) add(name.from, name.to, 'function-definition');
+		},
+	});
+}
 
 function collectInterimReferences(tree, state, add) {
 	const references = [];

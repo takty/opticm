@@ -21,6 +21,7 @@ function readLezer(state, tree, classifier) {
 		}
 	});
 	classifier.collectInterimReferences?.(tree, state, add);
+	classifier.collectSyntax?.(tree, state, add);
 	return {
 		syntax    : ranges.filter(range => !SEMANTIC_KINDS.has(range.kind)),
 		references: referencesFromSyntax(ranges),
@@ -31,7 +32,8 @@ function reconcile(interim, parsedTo, analysis) {
 	if (!analysis) return interim;
 	if (!analysis.stale) {
 		return {
-			syntax    : analysis.syntax.length ? analysis.syntax : interim.syntax,
+			syntax    : analysis.syntaxComplete === false ? [...interim.syntax, ...analysis.syntax] :
+				analysis.syntax.length ? analysis.syntax : interim.syntax,
 			references: analysis.references
 		};
 	}

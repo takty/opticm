@@ -24,10 +24,16 @@ export const lezerSyntax = {
 		const node = tree.resolveInner(from, 1);
 		if (kind === 'definition') {
 			const parent = node.parent?.name;
-			if (typeDeclarations.has(parent)) add(from, to, 'type');
+			if (typeDeclarations.has(parent)) {
+				add(from, to, 'type');
+				if (['ClassDeclaration', 'InterfaceDeclaration', 'EnumDeclaration', 'RecordDeclaration'].includes(parent)) {
+					add(from, to, 'class-definition');
+				}
+			}
 			else {
 				add(from, to, kind);
 				add(from, to, parent === 'MethodDeclaration' ? 'function' : 'variable');
+				if (parent === 'MethodDeclaration') add(from, to, 'function-definition');
 			}
 		} else {
 			add(from, to, kind);

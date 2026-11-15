@@ -44,6 +44,11 @@ const selectionState = EditorView.editorAttributes.compute(['selection'], state 
 	class: state.selection.ranges.some(range => !range.empty) ? 'cm-has-selection' : '',
 }));
 
+const analysisState = EditorView.editorAttributes.compute([commonAnalysisState], state => {
+	const analysis = state.field(commonAnalysisState);
+	return { class: !analysis || analysis.stale ? 'cm-analysis-pending' : '' };
+});
+
 const highlightField = StateField.define({
 	create: () => new Map(),
 	update(value, transaction) {
@@ -160,6 +165,7 @@ export class Editor {
 				highlightActiveLine(),
 				highlightActiveLineGutter(),
 				selectionState,
+				analysisState,
 				highlightSelectionMatches(),
 				whitespaceHighlighting(),
 				EditorView.scrollMargins.of(() => ({ top: 32, bottom: 32 })),

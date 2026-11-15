@@ -4,7 +4,7 @@ const structureKinds = new Set(['function', 'class', 'conditional', 'loop']);
 const declarationMutabilities = new Set(['mutable', 'immutable', 'unknown']);
 const declarationScopes = new Set(['function', 'lexical', 'member', 'parameter', 'unknown']);
 const syntaxKinds = new Set([
-	'comment', 'keyword', 'operator', 'type', 'function', 'variable', 'literal', 'invalid',
+	'comment', 'keyword', 'operator', 'type', 'class-definition', 'function', 'function-definition', 'field-definition', 'property-definition', 'destructuring-shorthand', 'variable', 'literal', 'invalid',
 	'definition', 'property', 'local-variable', 'local-reference', 'variable-reference',
 ]);
 const referenceRoles = new Set(['definition', 'reference']);
@@ -73,6 +73,7 @@ export function createCommonAnalysis(data) {
 		version     : data.version,
 		sourceLength: data.sourceLength,
 		complete    : data.complete,
+		syntaxComplete: data.syntaxComplete !== false,
 		stale       : data.stale === true,
 		structures,
 		declarations,

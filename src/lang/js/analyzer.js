@@ -61,8 +61,39 @@ function createVisitor() {
 	const varLocs   = [];
 	const letLocs   = [];
 	const constLocs = [];
+	const propertyDefinitions = [];
+	const shorthandProperties = [];
+	const bindingLocs = { var: [], let: [], const: [] };
+	const collectBindings = (node, target) => {
+		if (!node) return;
+		switch (node.type) {
+			case 'Identifier':
+				if (node.name !== '✖' && node.start < node.end) target.push([node, node]);
+				break;
+			case 'AssignmentPattern': collectBindings(node.left, target); break;
+			case 'RestElement': collectBindings(node.argument, target); break;
+			case 'ArrayPattern':
+				for (const element of node.elements) collectBindings(element, target);
+				break;
+			case 'ObjectPattern':
+				for (const property of node.properties) {
+					if (property.type === 'Property' && property.shorthand && property.key.type === 'Identifier' && property.key.name !== '✖') {
+						shorthandProperties.push({ from: property.key.start, to: property.key.end, kind: 'destructuring-shorthand' });
+					}
+					collectBindings(property.value ?? property.argument, target);
+				}
+				break;
+		}
+	};
 
 	return {
+		ObjectExpression: node => {
+			for (const property of node.properties) {
+				if (property.type === 'Property' && !property.computed && property.key.type === 'Identifier' && property.key.name !== '✖') {
+					propertyDefinitions.push({ from: property.key.start, to: property.key.end, kind: 'property-definition' });
+				}
+			}
+		},
 		ClassDeclaration: (node, state, c) => {
 			fnNames.push(node.id?.name);
 			classLocs.push([node, node]);
@@ -72,6 +103,7 @@ function createVisitor() {
 		},
 		VariableDeclaration: (node, state, c) => {  // const f = function () {...};
 			for (const d of node.declarations) {
+				collectBindings(d.id, bindingLocs[node.kind]);
 				if (d.init !== null && (d.init.type === FE || d.init.type === AFE)) {
 					if (node.loc.start.line === d.loc.start.line) {
 						fnLocs.push([node, d]);  // for considering the column of 'const'
@@ -153,6 +185,11 @@ function createVisitor() {
 			]));
 			const legacy = mapRanges(node => node.loc.start, node => node.loc.end);
 			const offsets = mapRanges(node => node.start, node => node.end);
+			offsets.propertyDefinitions = propertyDefinitions;
+			offsets.shorthandProperties = shorthandProperties;
+			for (const kind of ['var', 'let', 'const']) {
+				offsets[`${kind}Locs`] = bindingLocs[kind].map(([from, to]) => [from.start, to.end]);
+			}
 			const result = { ...legacy, fnStarts, fnNames: fnNames.filter(Boolean), success };
 			return { ...result, commonAnalysis: buildCommonAnalysis(result, source, offsets, analyzeReferences(ast)) };
 		},

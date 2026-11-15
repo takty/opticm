@@ -10,8 +10,78 @@ const extensionSettings = () => Object.fromEntries(
 	Array.from(extensionControls.querySelectorAll('input[type="checkbox"]'), input => [input.name, input.checked]),
 );
 const samples = {
-	javascript: 'class Greeter {\n\tgreet(name) {\n\t\tconst message = "Hello, " + name;\n\t\tif (name) {\n\t\t\tconsole.log(message);\n\t\t}\n\t}\n}\n\nnew Greeter().greet("Croqujs");',
-	java: 'class Greeter {\n\tpublic static void main(String[] args) {\n\t\tString message = "Hello, Java";\n\t\tint count = 10;\n\t\tif (count > 0) {\n\t\t\tshowMessage(message);\n\t\t}\n\t}\n\tstatic void showMessage(String message) {\n\t\tIO.println(message);\n\t}\n}',
+	javascript: `// Functions, parameters and literals
+function showMessage(message) {
+	console.log(message);
+}
+
+class Greeter {
+	prefix = "Hello";
+	static count = 0;
+
+	greet(name) {
+		const message = this.prefix + ", " + name;
+		let remaining = 2;
+		while (remaining > 0) {
+			if (name !== null && name !== "") {
+				showMessage(message);
+			} else {
+				showMessage("Hello, guest");
+			}
+			remaining--;
+		}
+	}
+}
+
+const options = { enabled: true, name: "Croqujs" };
+const { enabled, name } = options;
+const { name: displayName } = options;
+showMessage(displayName);
+const isName = value => /^[A-Z]/.test(value);
+for (let index = 0; index < 2; index++) {
+	if (enabled && isName(name)) new Greeter().greet(name);
+}`,
+	java: `// Types, fields, methods and parameters
+interface Greeting {
+	void greet(String name);
+}
+
+enum Mood { HAPPY, QUIET }
+record Person(String name, int age) {}
+
+class Greeter implements Greeting {
+	private final String prefix = "Hello";
+	private static int count = 0;
+
+	public void greet(String name) {
+		count++;
+		String message = prefix + ", " + name;
+		int remaining = 2;
+		while (remaining > 0) {
+			if (name != null && !name.isEmpty()) {
+				showMessage(message);
+			} else {
+				showMessage("Hello, guest");
+			}
+			remaining--;
+		}
+	}
+
+	static void showMessage(String message) {
+		System.out.println(message);
+	}
+
+	public static void main(String[] args) {
+		Person person = new Person("Croqujs", 20);
+		Mood mood = Mood.HAPPY;
+		boolean enabled = true;
+		for (int index = 0; index < 2; index++) {
+			if (enabled && mood == Mood.HAPPY) {
+				new Greeter().greet(person.name());
+			}
+		}
+	}
+}`,
 };
 let editor;
 let activeCodeLanguage = selectedCodeLanguage();

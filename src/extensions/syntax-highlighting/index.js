@@ -6,14 +6,14 @@ import { extensionStyles } from '../styles.js';
 import css from './style.css';
 
 const syntaxKinds = new Set([
-	'comment', 'keyword', 'operator', 'type', 'function', 'variable', 'literal', 'invalid', 'property',
+	'comment', 'keyword', 'operator', 'type', 'class-definition', 'function', 'function-definition', 'variable', 'literal', 'invalid', 'property',
 ]);
 const semanticKinds = new Set([
-	'definition', 'local-variable', 'local-reference', 'variable-reference',
+	'definition', 'field-definition', 'property-definition', 'local-variable', 'local-reference', 'variable-reference',
 ]);
 const allKinds = new Set([
-	'comment', 'keyword', 'operator', 'type', 'function', 'variable', 'literal', 'invalid',
-	'definition', 'property', 'local-variable', 'local-reference', 'variable-reference',
+	'comment', 'keyword', 'operator', 'type', 'class-definition', 'function', 'function-definition', 'variable', 'literal', 'invalid',
+	'definition', 'field-definition', 'property-definition', 'property', 'local-variable', 'local-reference', 'variable-reference',
 ]);
 
 export const setSyntaxHighlights = StateEffect.define();
@@ -33,14 +33,16 @@ function activeRanges(ranges, options) {
 }
 
 function commonRanges(analysis, options) {
-	const ranges = analysis.syntax.filter(({ kind }) => kind === 'local-variable');
+	const ranges = analysis.syntax.filter(({ kind }) => kind === 'local-variable' || kind === 'field-definition' || kind === 'property-definition');
+	const shorthand = new Set(analysis.syntax.filter(({ kind }) => kind === 'destructuring-shorthand')
+		.map(({ from, to }) => `${from}:${to}`));
 	if (options.syntax) {
 		ranges.push(...analysis.syntax.filter(({ kind }) => syntaxKinds.has(kind)));
 	}
 	if (options.semantic) {
 		for (const { from, to, role, scope } of analysis.references) {
 			if (role === 'definition') {
-				ranges.push({ from, to, kind: 'definition' });
+				if (!shorthand.has(`${from}:${to}`)) ranges.push({ from, to, kind: 'definition' });
 			} else {
 				ranges.push({ from, to, kind: 'variable-reference' });
 				if (scope === 'local') {

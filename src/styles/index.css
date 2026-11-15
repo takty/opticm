@@ -141,6 +141,38 @@
 .croq-mirror .cm-editor.cm-javascript :is(.cm-syntax-local-variable, .cm-syntax-local-reference, .cm-syntax-local-reference .cm-syntax-variable) {
 	color: var(--croq-syntax-local-variable-color, hsl(86 60% 30%));
 }
+.croq-mirror .cm-editor.cm-javascript :is(.cm-syntax-function-definition, .cm-syntax-function-definition *, .cm-syntax-class-definition, .cm-syntax-class-definition *) {
+	color: var(--croq-syntax-function-definition-color, var(--croq-mirror-color-text));
+	font-weight: var(--croq-syntax-function-definition-font-weight, bold);
+}
+.croq-mirror .cm-editor.cm-javascript :is(.cm-syntax-field-definition, .cm-syntax-field-definition *, .cm-syntax-property-definition, .cm-syntax-property-definition *) {
+	color: var(--croq-syntax-definition-color, var(--croq-mirror-color-text));
+	font-weight: var(--croq-syntax-definition-font-weight, bold);
+}
+.croq-mirror .cm-editor.cm-java .cm-syntax-variable {
+	color: var(--croq-syntax-variable-color, var(--croq-mirror-l-turquoise));
+}
+.croq-mirror .cm-editor.cm-java :is(.cm-syntax-local-variable, .cm-syntax-local-reference, .cm-syntax-local-reference .cm-syntax-variable) {
+	color: var(--croq-syntax-local-variable-color, hsl(86 60% 30%));
+}
+.croq-mirror .cm-editor.cm-java :is(.cm-syntax-definition, .cm-syntax-definition *) {
+	color: var(--croq-syntax-definition-color, var(--croq-mirror-color-text));
+}
+.croq-mirror .cm-editor.cm-java :is(.cm-syntax-function-definition, .cm-syntax-function-definition *, .cm-syntax-class-definition, .cm-syntax-class-definition *) {
+	color: var(--croq-syntax-function-definition-color, var(--croq-mirror-color-text));
+}
+.croq-mirror .cm-editor.cm-analysis-pending .cm-syntax-variable:not(:is(
+	.cm-syntax-definition, .cm-syntax-definition *,
+	.cm-syntax-class-definition, .cm-syntax-class-definition *,
+	.cm-syntax-function-definition, .cm-syntax-function-definition *,
+	.cm-syntax-field-definition, .cm-syntax-field-definition *,
+	.cm-syntax-property-definition, .cm-syntax-property-definition *,
+	.cm-syntax-function, .cm-syntax-function *,
+	.cm-syntax-property, .cm-syntax-property *
+)):not(:has(.cm-syntax-definition, .cm-syntax-class-definition, .cm-syntax-function-definition,
+	.cm-syntax-field-definition, .cm-syntax-property-definition, .cm-syntax-function, .cm-syntax-property)) {
+	color: var(--croq-syntax-local-variable-color, hsl(86 60% 30%));
+}
 .croq-mirror .cm-editor.cm-javascript .cm-syntax-invalid { text-decoration: var(--croq-syntax-invalid-decoration, none); border-bottom: 0.15em solid var(--croq-mirror-l-red); }
 .croq-mirror .cm-editor.cm-java .cm-syntax-invalid { text-decoration: var(--croq-syntax-invalid-decoration, none); }
 

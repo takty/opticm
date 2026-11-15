@@ -42,7 +42,8 @@ export function buildCommonAnalysis(analysis, source, nodes, references) {
 		complete: analysis.success,
 		structures,
 		declarations,
-		syntax: [],
+		syntax: [...nodes.propertyDefinitions, ...nodes.shorthandProperties],
+		syntaxComplete: false,
 		references,
 		sections,
 	};

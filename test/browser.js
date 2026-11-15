@@ -626,6 +626,21 @@ try {
 		const jsRoot = document.querySelector('#a');
 		const syntaxToken = (root, kind, text) => [...root.querySelectorAll('.cm-syntax-' + kind)]
 			.find(node => node.textContent === text);
+		for (const operator of ['=', '>']) {
+			const keywordStyle = getComputedStyle(syntaxToken(javaRoot, 'keyword', 'if'));
+			const operatorStyle = getComputedStyle(syntaxToken(javaRoot, 'operator', operator));
+			assert(operatorStyle.color === keywordStyle.color && operatorStyle.fontWeight === keywordStyle.fontWeight,
+				`Java operator ${operator} matches keyword style`);
+		}
+		for (const root of [jsRoot, javaRoot]) {
+			const token = syntaxToken(root, 'function-definition', 'work');
+			assert(token && getComputedStyle(token).color === 'rgb(17, 17, 0)' &&
+				getComputedStyle(token).fontWeight === '700', 'function declaration uses bold editor text color');
+			assert(!syntaxToken(root, 'function-definition', 'log'), 'function call is not styled as a declaration');
+		}
+		const javaCall = syntaxToken(javaRoot, 'function', 'log');
+		assert(javaCall && getComputedStyle(javaCall).color === 'rgb(0, 83, 99)' &&
+			getComputedStyle(javaCall).fontWeight === '400', 'Java method call keeps its original style');
 		for (const [jsKind, javaKind, text] of [
 			['comment', 'comment', '//note'],
 			['keyword', 'keyword', 'if'],
@@ -667,6 +682,68 @@ try {
 		assert(getComputedStyle(syntaxToken(jsRoot, 'literal', '10')).textShadow === 'none' &&
 			getComputedStyle(syntaxToken(javaRoot, 'literal', '10')).textShadow === 'none',
 			'Both languages hide literal text shadow on the active line');
+		a.setSettings({ analysis: false });
+		a.loadDocument('const options = { enabled: true, name: 1 };\nconst { enabled, name } = options;');
+		const shorthandLine = () => jsRoot.querySelectorAll('.cm-content .cm-line')[1];
+		const shorthandStyle = name => {
+			const token = [...shorthandLine().querySelectorAll('.cm-syntax-property')].find(node => node.textContent === name);
+			if (!token) return null;
+			const style = getComputedStyle(token);
+			return { color: style.color, fontWeight: style.fontWeight };
+		};
+		const beforeShorthand = ['enabled', 'name'].map(shorthandStyle);
+		assert(beforeShorthand.every(style => style && style.fontWeight === '400'),
+			'destructuring shorthand uses ordinary property styling before analysis');
+		a.setSettings({ analysis: true });
+		await a.analyzeNow();
+		assert(JSON.stringify(['enabled', 'name'].map(shorthandStyle)) === JSON.stringify(beforeShorthand) &&
+			!shorthandLine().querySelector('.cm-syntax-definition'),
+			'destructuring shorthand retains its property styling after analysis');
+		a.setSettings({ analysis: false });
+		a.loadDocument('function run() {\n let local = 1;\n const object = { key: local, local };\n}');
+		const objectLine = () => jsRoot.querySelectorAll('.cm-content .cm-line')[2];
+		const objectToken = name => [...objectLine().querySelectorAll('span')]
+			.filter(node => node.textContent === name && !node.children.length).at(-1);
+		const isBoldBlack = node => node && getComputedStyle(node).fontWeight === '700' &&
+			getComputedStyle(node).color === 'rgb(17, 17, 0)';
+		assert(isBoldBlack(objectToken('key')) && isBoldBlack(objectToken('local')),
+			'object property keys are bold black before worker analysis');
+		a.setSettings({ analysis: true });
+		await a.analyzeNow();
+		assert(isBoldBlack(objectToken('key')) && isBoldBlack(objectToken('local')),
+			'object property keys remain bold black after worker analysis');
+		javaEditor.setSettings({ analysis: false });
+		javaEditor.loadDocument('enum Kind { ONE, TWO }');
+		const enumToken = () => [...javaRoot.querySelectorAll('.cm-content span')]
+			.find(node => node.textContent === 'ONE' && !node.children.length);
+		assert(isBoldBlack(enumToken()), 'enum constant is bold black before worker analysis');
+		javaEditor.setSettings({ analysis: true });
+		await javaEditor.analyzeNow();
+		assert(isBoldBlack(enumToken()), 'enum constant remains bold black after worker analysis');
+		javaEditor.setSettings({ analysis: false });
+		javaEditor.loadDocument('class Example { void run(Object value) { if (value instanceof String text) use(text); } }');
+		const patternDefinition = () => syntaxToken(javaRoot, 'definition', 'text');
+		assert(isBoldBlack(patternDefinition()), 'instanceof pattern name is bold black before worker analysis');
+		javaEditor.setSettings({ analysis: true });
+		await javaEditor.analyzeNow();
+		assert(isBoldBlack(patternDefinition()), 'instanceof pattern name remains bold black after worker analysis');
+		for (const [editor, root, source, expectedColor] of [
+			[a, jsRoot, 'function run() { let local = 1; return external + local; }', 'rgb(0, 83, 99)'],
+			[javaEditor, javaRoot, 'class Example { void run() { int local = 1; use(external, local); } }', 'rgb(0, 83, 99)'],
+		]) {
+			editor.setSettings({ analysis: false });
+			editor.loadDocument(source);
+			const external = () => syntaxToken(root, 'variable', 'external');
+			const localDefinition = () => syntaxToken(root, 'definition', 'local');
+			assert(external() && getComputedStyle(external()).color === 'rgb(83, 122, 31)' &&
+				localDefinition() && getComputedStyle(localDefinition()).color === 'rgb(17, 17, 0)',
+				'pending ordinary variables are green without changing declarations');
+			editor.setSettings({ analysis: true });
+			await editor.analyzeNow();
+			assert(external() && getComputedStyle(external()).color === expectedColor &&
+				getComputedStyle(localDefinition()).color === 'rgb(17, 17, 0)',
+				'fresh analysis restores the ordinary variable color');
+		}
 		for (const [editor, root, source] of [
 			[a, jsRoot, 'function test() {\n const text = "}";\n // }\n if (true) {\n  const values = [text];\n  return text;\n }\n}'],
 			[javaEditor, javaRoot, 'class Test {\n String text = "}";\n // }\n void run() {\n  String[] values;\n  use(text);\n }\n}'],

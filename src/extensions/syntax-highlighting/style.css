@@ -3,12 +3,8 @@
 	font-weight: var(--croq-syntax-comment-font-weight, bold);
 }
 
-.cm-editor.cm-syntax-highlighting .cm-syntax-keyword {
+.cm-editor.cm-syntax-highlighting :is(.cm-syntax-keyword, .cm-syntax-operator) {
 	color: var(--croq-syntax-keyword-color, var(--croq-mirror-l-bodybrown, #7c6a5a));
-	font-weight: var(--croq-syntax-keyword-font-weight, bold);
-}
-
-.cm-editor.cm-syntax-highlighting .cm-syntax-operator {
 	font-weight: var(--croq-syntax-keyword-font-weight, bold);
 }
 
@@ -20,11 +16,21 @@
 	color: var(--croq-syntax-function-color, var(--croq-mirror-l-turquoise, #005363));
 }
 
+.cm-editor.cm-syntax-highlighting :is(.cm-syntax-function-definition, .cm-syntax-function-definition *, .cm-syntax-class-definition, .cm-syntax-class-definition *) {
+	color: var(--croq-syntax-function-definition-color, var(--croq-mirror-color-text, #110));
+	font-weight: var(--croq-syntax-function-definition-font-weight, bold);
+}
+
 .cm-editor.cm-syntax-highlighting :where(.cm-syntax-definition) {
 	color: var(--croq-syntax-definition-color, inherit);
 }
 
 .cm-editor.cm-syntax-highlighting .cm-syntax-definition {
+	font-weight: var(--croq-syntax-definition-font-weight, bold);
+}
+
+.cm-editor.cm-syntax-highlighting :is(.cm-syntax-field-definition, .cm-syntax-field-definition *, .cm-syntax-property-definition, .cm-syntax-property-definition *) {
+	color: var(--croq-syntax-definition-color, var(--croq-mirror-color-text, #110));
 	font-weight: var(--croq-syntax-definition-font-weight, bold);
 }
 

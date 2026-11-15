@@ -51,6 +51,58 @@ test('JavaScript worker analysis reports shared UTF-16 ranges and references', (
 	assert.equal(incomplete.sourceLength, 'function unfinished( {'.length);
 });
 
+test('JavaScript worker preserves object property definitions alongside complete Lezer syntax and references', () => {
+	const doc = 'function run() { const local = 1; const object = { key: local, local, method() {}, nested: { inner: 2 } }; return object; }';
+	let state = EditorState.create({ doc, extensions: [javascript(), lezerAnalysis(javascriptSyntax), commonAnalysisState] });
+	const initial = state.field(syntaxAnalysisState).data;
+	const beforeDefinitions = initial.references.filter(item => item.role === 'definition')
+		.map(item => doc.slice(item.from, item.to));
+	assert.ok(['key', 'local', 'method', 'nested', 'inner'].every(name => beforeDefinitions.includes(name)));
+	const result = analyze(doc).commonAnalysis;
+	assert.equal(result.syntaxComplete, false);
+	assert.deepEqual(result.syntax.filter(item => item.kind === 'property-definition')
+		.map(item => doc.slice(item.from, item.to)), ['key', 'local', 'method', 'nested', 'inner']);
+	assert.ok(result.references.some(item => item.role === 'reference' && item.scope === 'local' &&
+		item.from === doc.indexOf('local, method')));
+	assert.ok(!result.references.some(item => item.role === 'definition' && item.from === doc.indexOf('key:')));
+	state = state.update({ effects: setCommonAnalysis.of({ ...result, version: 1 }) }).state;
+	const after = state.field(syntaxAnalysisState).data;
+	assert.ok(after.syntax.some(item => item.kind === 'keyword' && doc.slice(item.from, item.to) === 'return'));
+	assert.deepEqual(after.syntax.filter(item => item.kind === 'property-definition')
+		.map(item => doc.slice(item.from, item.to)), ['key', 'local', 'method', 'nested', 'inner']);
+	assert.ok(after.references.some(item => item.role === 'reference' && item.scope === 'local' &&
+		item.from === doc.indexOf('local, method')));
+});
+
+test('destructuring with an alias keeps the property distinct from the binding after worker analysis', () => {
+	const doc = 'const { name: displayName } = options;';
+	let state = EditorState.create({ doc, extensions: [javascript(), lezerAnalysis(javascriptSyntax), commonAnalysisState] });
+	const propertyFrom = doc.indexOf('name');
+	const bindingFrom = doc.indexOf('displayName');
+	const assertClassification = data => {
+		assert.ok(data.syntax.some(item => item.from === propertyFrom && item.to === propertyFrom + 4 && item.kind === 'property'));
+		assert.ok(data.references.some(item => item.from === bindingFrom && item.to === bindingFrom + 11 && item.role === 'definition'));
+		assert.ok(!data.references.some(item => item.from === propertyFrom && item.role === 'definition'));
+	};
+	assertClassification(state.field(syntaxAnalysisState).data);
+	state = state.update({ effects: setCommonAnalysis.of({ ...analyze(doc).commonAnalysis, version: 1 }) }).state;
+	assertClassification(state.field(syntaxAnalysisState).data);
+});
+
+test('worker reports shorthand properties without discarding their variable definitions', () => {
+	const doc = 'const { enabled, name, key: alias } = options;';
+	let state = EditorState.create({ doc, extensions: [javascript(), lezerAnalysis(javascriptSyntax), commonAnalysisState] });
+	const initial = state.field(syntaxAnalysisState).data;
+	assert.deepEqual(initial.syntax.filter(item => item.kind === 'property').map(item => doc.slice(item.from, item.to)),
+		['enabled', 'name', 'key']);
+	state = state.update({ effects: setCommonAnalysis.of({ ...analyze(doc).commonAnalysis, version: 1 }) }).state;
+	const after = state.field(syntaxAnalysisState).data;
+	assert.deepEqual(after.syntax.filter(item => item.kind === 'destructuring-shorthand').map(item => doc.slice(item.from, item.to)),
+		['enabled', 'name']);
+	assert.deepEqual(after.references.filter(item => item.role === 'definition').map(item => doc.slice(item.from, item.to)),
+		['enabled', 'name', 'alias']);
+});
+
 test('JavaScript conditional branches use common UTF-16 offsets', () => {
 	const source = 'if (ready) { start(); } else { stop(); }';
 	const result = createCommonAnalysis({ ...analyze(source).commonAnalysis, version: 11 });

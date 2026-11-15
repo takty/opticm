@@ -25,6 +25,41 @@ test('JavaScript analysis reports class declarations and expressions', () => {
 	assert.deepEqual(result.fnStarts, [1]);
 });
 
+test('destructuring declarations highlight individual bindings while preserving public ranges', () => {
+	const source = [
+		'const { enabled, name: alias = fallback, nested: { value }, ...rest } = options;',
+		'let [first, , [second = fallback], ...tail] = items;',
+		'var { [key]: selected } = object;',
+		'const plain = 1;',
+	].join('\n');
+	const result = analyze(source);
+	assert.equal(result.success, true);
+	const declarations = result.commonAnalysis.declarations;
+	const bindings = declarations.map(item => [source.slice(item.from, item.to), item.mutability, item.scope]);
+	assert.deepEqual(bindings, [
+		['selected', 'mutable', 'function'],
+		['first', 'mutable', 'lexical'], ['second', 'mutable', 'lexical'], ['tail', 'mutable', 'lexical'],
+		['enabled', 'immutable', 'lexical'], ['alias', 'immutable', 'lexical'],
+		['value', 'immutable', 'lexical'], ['rest', 'immutable', 'lexical'], ['plain', 'immutable', 'lexical'],
+	]);
+	const [start, end] = result.constLocs[0];
+	assert.equal(start.line, 1);
+	assert.equal(end.line, 1);
+	assert.equal(source.slice(start.column, end.column), '{ enabled, name: alias = fallback, nested: { value }, ...rest }');
+});
+
+test('object destructuring identifies shorthand without changing declaration ranges', () => {
+	const source = 'const { enabled, name, fallback = 1, key: alias, nested: { inner }, ...rest } = options;';
+	const result = analyze(source).commonAnalysis;
+	assert.deepEqual(result.syntax.filter(item => item.kind === 'destructuring-shorthand')
+		.map(item => source.slice(item.from, item.to)), ['enabled', 'name', 'fallback', 'inner']);
+	assert.deepEqual(result.declarations.map(item => source.slice(item.from, item.to)),
+		['enabled', 'name', 'fallback', 'alias', 'inner', 'rest']);
+	for (const name of ['enabled', 'name', 'fallback', 'alias', 'inner', 'rest']) {
+		assert.ok(result.references.some(item => item.role === 'definition' && source.slice(item.from, item.to) === name));
+	}
+});
+
 class WorkerMock {
 	sent = [];
 	terminated = false;
