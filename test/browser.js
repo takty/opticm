@@ -265,6 +265,23 @@ try {
 		(firstLine.getBoundingClientRect().left + parseFloat(getComputedStyle(firstLine).paddingLeft) +
 		4 * parseFloat(restoredRuler.style.getPropertyValue('--ruler-character-width')))) < 1,
 		'component ruler aligns with its padded text after re-enabling');
+	const oldRulerWidth = parseFloat(restoredRuler.style.getPropertyValue('--ruler-character-width'));
+	const oldLineHeight = firstLine.getBoundingClientRect().height;
+	a.setSettings({ fontSize: 24 });
+	await waitFor(() => parseFloat(restoredRuler.style.getPropertyValue('--ruler-character-width')) > oldRulerWidth &&
+		firstLine.getBoundingClientRect().height > oldLineHeight, 'font change updates ruler metrics without editing');
+	const changedRulerWidth = parseFloat(restoredRuler.style.getPropertyValue('--ruler-character-width'));
+	const textWidth = document.createRange();
+	const textNode = [...firstLine.childNodes].find(node => node.nodeType === Node.TEXT_NODE && node.length >= 4);
+	if (textNode) {
+		textWidth.setStart(textNode, 0);
+		textWidth.setEnd(textNode, 4);
+		assert(Math.abs(textWidth.getBoundingClientRect().width / 4 - changedRulerWidth) < 1,
+			'ruler uses the new character width after font size changes');
+	}
+	a.setSettings({ fontSize: 16 });
+	await waitFor(() => Math.abs(parseFloat(restoredRuler.style.getPropertyValue('--ruler-character-width')) - oldRulerWidth) < 0.1,
+		'font size restoration updates ruler metrics without editing');
 	const gutterWidth = () => editorA.querySelector('.cm-gutters').getBoundingClientRect().width;
 	const normalWidth = gutterWidth();
 	const structureLayer = getComputedStyle(editorA.querySelector('.cm-structure-overlay'));

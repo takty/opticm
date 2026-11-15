@@ -104,6 +104,7 @@ export class Editor {
 		this.argumentHintRequest = 0;
 		this.history             = new Compartment();
 		this.options             = {
+			font           : new Compartment(),
 			phrases        : new Compartment(),
 			wrapping       : new Compartment(),
 			numbers        : new Compartment(),
@@ -130,6 +131,7 @@ export class Editor {
 		this.view = new EditorView({
 			parent,
 			extensions: [
+				this.options.font.of([]),
 				this.options.phrases.of(EditorState.phrases.of(phrases)),
 				this.options.wrapping.of([]),
 				this.options.structure.of([
@@ -230,13 +232,15 @@ export class Editor {
 		this.completion           = settings.completion;
 		this.sectionNumbers       = settings.analysis && settings.functionLineNumbers && this.language.supportsFunctionSections;
 		this.functionMarkers      = settings.analysis && settings.functionScrollMarkers && this.language.supportsFunctionSections;
-		view.dom.style.fontFamily = settings.fontFamily;
-		view.dom.style.fontSize   = settings.fontSize + 'px';
-		view.dom.style.lineHeight = settings.lineHeight + '%';
-
 		if (!this.canUseCompletion()) this.closeCompletion();
 		const previous = this.optionState ?? {};
 		const effects = [];
+		if (previous.fontFamily !== settings.fontFamily || previous.fontSize !== settings.fontSize ||
+			previous.lineHeight !== settings.lineHeight) {
+			effects.push(this.options.font.reconfigure(EditorView.theme({
+				'&': { fontFamily: settings.fontFamily, fontSize: settings.fontSize + 'px', lineHeight: settings.lineHeight + '%' },
+			})));
+		}
 		const diagnosticsChanged = previous.diagnosticSource !== diagnosticSource;
 		if (previous.phrases !== phrases) effects.push(this.options.phrases.reconfigure(EditorState.phrases.of(phrases)));
 		if (previous.lineWrapping !== settings.lineWrapping) {
@@ -320,6 +324,9 @@ export class Editor {
 		}
 		this.optionState = {
 			phrases,
+			fontFamily          : settings.fontFamily,
+			fontSize            : settings.fontSize,
+			lineHeight          : settings.lineHeight,
 			lineWrapping        : settings.lineWrapping,
 			rulers              : settings.rulers,
 			easyLineSelection   : settings.easyLineSelection,
