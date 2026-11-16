@@ -6,7 +6,7 @@ import {
 	redo, redoDepth, redoSelection, selectAll, selectDocEnd, selectDocStart, selectLineDown,
 	selectLineEnd, selectLineStart, selectLineUp, toggleComment, undo, undoDepth,
 } from '@codemirror/commands';
-import { getIndentation, indentUnit } from '@codemirror/language';
+import { getIndentation, indentOnInput, indentUnit } from '@codemirror/language';
 import { acceptCompletion, autocompletion, closeCompletion, completionStatus, startCompletion } from '@codemirror/autocomplete';
 import { forceLinting, forEachDiagnostic, lintGutter, linter, setDiagnostics } from '@codemirror/lint';
 import { closeSearchPanel, findNext, findPrevious, highlightSelectionMatches, openSearchPanel, search, searchKeymap, searchPanelOpen } from '@codemirror/search';
@@ -119,6 +119,7 @@ export class Editor {
 			functionMarkers: new Compartment(),
 			brackets       : new Compartment(),
 			closeBrackets  : new Compartment(),
+			indentOnInput  : new Compartment(),
 			access         : new Compartment(),
 			diagnostics    : new Compartment(),
 			rulers         : new Compartment(),
@@ -153,6 +154,7 @@ export class Editor {
 				this.options.access.of([]),
 				this.options.diagnostics.of([]),
 				language.extensions,
+				this.options.indentOnInput.of([]),
 				EditorState.tabSize.of(TAB_SIZE),
 				indentUnit.of('\t'),
 				EditorState.allowMultipleSelections.of(true),
@@ -242,6 +244,9 @@ export class Editor {
 		if (!this.canUseCompletion()) this.closeCompletion();
 		const previous = this.optionState ?? {};
 		const effects = [];
+		if (previous.autoIndent !== settings.autoIndent) {
+			effects.push(this.options.indentOnInput.reconfigure(settings.autoIndent ? indentOnInput() : []));
+		}
 		if (previous.fontFamily !== settings.fontFamily || previous.fontSize !== settings.fontSize ||
 			previous.lineHeight !== settings.lineHeight) {
 			effects.push(this.options.font.reconfigure(EditorView.theme({
@@ -346,6 +351,7 @@ export class Editor {
 			functionMarkers     : this.functionMarkers,
 			bracketsEnabled,
 			closeBrackets       : settings.closeBrackets,
+			autoIndent          : settings.autoIndent,
 			closeBraces         : settings.closeBraces,
 			readOnly            : this.readOnly,
 			enabled             : this.enabled,

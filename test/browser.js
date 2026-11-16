@@ -40,6 +40,25 @@ try {
 	assert(!('commonAnalysis' in a.getAnalysis()), 'public JavaScript analysis omits internal worker data');
 	assert(getComputedStyle(document.querySelector('#host-page')).color === 'rgb(1, 2, 3)', 'host CSS unaffected');
 	assert(!('getCodeMirror' in a), 'public API does not expose editor instance');
+	for (const [codeLanguage, opening] of [['javascript', 'function f() {'], ['java', 'class Example {']]) {
+		const host = document.createElement('div');
+		document.body.append(host);
+		const editor = await createEditor(host, { codeLanguage, autoFormat: false });
+		try {
+			for (const enabled of [true, false, true]) {
+				assert(editor.getSettings().autoIndent === enabled, `${codeLanguage}: autoIndent is ${enabled}`);
+				editor.loadDocument(`${opening}\n\t`);
+				editor.moveTo({ line: 1, ch: 1 });
+				assert(document.execCommand('insertText', false, '}'), `${codeLanguage}: accepts closing brace input`);
+				const expected = `${opening}\n${enabled ? '' : '\t'}}`;
+				assert(editor.getValue() === expected, `${codeLanguage}: closing brace indentation with autoIndent=${enabled}`);
+				editor.setSettings({ autoIndent: !enabled });
+			}
+		} finally {
+			editor.destroy();
+			host.remove();
+		}
+	}
 	const editorA = document.querySelector('#a .cm-editor');
 	const editorB = document.querySelector('#b .cm-editor');
 	const whitespaceLines = () => [...editorA.querySelectorAll('.cm-content .cm-line')];

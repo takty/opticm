@@ -110,7 +110,7 @@ Use `setDefinitions` to change additional definitions after initialization.
 | `closeBraces` | `false` | Include curly braces when `closeBrackets` is enabled |
 | `easyLineSelection` | `false` | Extend whole-line selection with consecutive gutter clicks |
 | `rulers` | `true` | Indentation guides |
-| `autoIndent` | `true` | Indentation correction during formatting |
+| `autoIndent` | `true` | Correct indentation during formatting and when typing language-specific triggers such as `}` in JavaScript or Java |
 | `autoFormat` | `true` | Automatic formatting when editing and leaving a line |
 | `formatting` | `true` | Enables formatting; false also disables explicit formatting |
 | `completion` | `true` | Completion and argument hints |
