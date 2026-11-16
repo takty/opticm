@@ -182,7 +182,7 @@ export class Editor {
 				commonAnalysisState,
 				lintGutter(),
 				this.options.numbers.of(absoluteLineNumbers),
-				search({ top: true }),
+				search(),
 				autocompletion({
 					activateOnTyping: false,
 					override        : [context => this.completeAt(context)],
