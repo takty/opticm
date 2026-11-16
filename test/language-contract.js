@@ -2,7 +2,7 @@ import { Editor } from '../.build/editor-view.js';
 import { javascriptLanguage } from '../.build/lang/js/index.js';
 import { plainLanguage } from '../.build/lang/plain/index.js';
 import { analyze } from '../.build/lang/js/analyzer.js';
-import { createCommonAnalysis } from '../.build/analysis/common-analysis.js';
+import { createCommonAnalysis, setCommonAnalysis as setEditorCommonAnalysis } from '../.build/analysis/common-analysis.js';
 import { commonAnalysisState, setCommonAnalysis } from '../dist/analysis.js';
 import { Compartment, EditorSelection, EditorState } from '@codemirror/state';
 import { EditorView, highlightActiveLine, lineNumbers } from '@codemirror/view';
@@ -25,8 +25,8 @@ export async function runLanguageContractTests(assert) {
 	});
 	try {
 		const lines = whitespaceHost.querySelectorAll('.cm-line');
-		const activeSpace = lines[0].querySelector('.cm-highlightSpace');
-		const inactiveSpace = lines[1].querySelector('.cm-highlightSpace');
+		const activeSpace = lines[0].querySelector('.cm-opticm-space');
+		const inactiveSpace = lines[1].querySelector('.cm-opticm-space');
 		const activeTab = lines[0].querySelector('.cm-highlightTab');
 		const inactiveTab = lines[1].querySelector('.cm-highlightTab');
 		const activeTabShadow = activeTab ? getComputedStyle(activeTab, '::before').textShadow : '';
@@ -45,7 +45,7 @@ export async function runLanguageContractTests(assert) {
 			'whitespace colors can be customized');
 		whitespaceView.dispatch({ effects: whitespaceCompartment.reconfigure([]) });
 		assert(!whitespaceView.dom.classList.contains('cm-opticm-whitespace') &&
-			!whitespaceHost.querySelector('.cm-highlightTab, .cm-highlightSpace') &&
+			!whitespaceHost.querySelector('.cm-highlightTab, .cm-highlightSpace, .cm-opticm-space') &&
 			!whitespaceView.dom.querySelector('style'), 'removing whitespace extension removes its marks and stylesheet');
 	} finally {
 		whitespaceView.destroy();
@@ -801,10 +801,11 @@ export async function runLanguageContractTests(assert) {
 		}),
 	};
 	const view = new Editor({ language, phrases: {}, onFontSizeChange() {} }, root);
+	const applyAnalysis = data => view.view.dispatch({ effects: setEditorCommonAnalysis.of(data) });
 	try {
 		const settings = {
 			analysis: true, functionLineNumbers: true, functionScrollMarkers: false, completion: true,
-			structureHighlight: true, declarationHighlight: true, syntaxHighlight: true,
+			structureHighlight: true, declarationHighlight: true, referenceHighlight: true, syntaxHighlight: true,
 			semanticHighlight: true, bracketMatching: true, lineWrapping: false, rulers: false,
 			autoIndent: false, fontSize: 16, fontFamily: 'monospace', lineHeight: 165,
 			disabled: false, readOnly: false,
@@ -836,7 +837,7 @@ export async function runLanguageContractTests(assert) {
 			'collapsing a selection restores the current line and gutter');
 		view.setDefinitions(['opaque definition']);
 		assert(definitions[0] === 'opaque definition', 'view forwards definitions without interpreting them');
-		view.setCommonAnalysis(createCommonAnalysis({
+		applyAnalysis(createCommonAnalysis({
 			version: 1, sourceLength: 11, complete: true,
 			structures: [{ kind: 'function', from: 0, to: 11, branches: [] }],
 			declarations: [{ kind: 'variable', from: 4, to: 7, mutability: 'immutable', scope: 'lexical' }],
@@ -845,7 +846,7 @@ export async function runLanguageContractTests(assert) {
 		assert(!view.view.dom.classList.contains('cm-analysis-pending'), 'fresh analysis clears pending class');
 		view.view.dispatch({ changes: { from: 0, to: 1, insert: 'a' } });
 		assert(view.view.dom.classList.contains('cm-analysis-pending'), 'editing marks analysis as pending');
-		view.setCommonAnalysis(createCommonAnalysis({
+		applyAnalysis(createCommonAnalysis({
 			version: 2, sourceLength: 11, complete: true,
 			structures: [{ kind: 'function', from: 0, to: 11, branches: [] }],
 			declarations: [{ kind: 'variable', from: 4, to: 7, mutability: 'immutable', scope: 'lexical' }],
@@ -893,7 +894,7 @@ export async function runLanguageContractTests(assert) {
 		view.view.dispatch({ selection: { anchor: 7 } });
 		view.format();
 		assert(view.view.state.doc.line(2).text === 'def', 'read-only blocks language formatting edits');
-		view.setCommonAnalysis(null);
+		applyAnalysis(null);
 		assert(view.getSectionLineNumber(2).join() === '0,3', 'clearing common analysis restores absolute numbering');
 	} finally {
 		view.destroy();

@@ -11,15 +11,15 @@ import { acceptCompletion, autocompletion, closeCompletion, completionStatus, st
 import { forceLinting, forEachDiagnostic, lintGutter, linter, setDiagnostics } from '@codemirror/lint';
 import { closeSearchPanel, findNext, findPrevious, highlightSelectionMatches, openSearchPanel, search, searchKeymap, searchPanelOpen } from '@codemirror/search';
 
-import { commonAnalysisState, setCommonAnalysis } from './analysis/common-analysis.js';
+import { commonAnalysisState } from './analysis/common-analysis.js';
+import { createStructureExtensions, createSyntaxExtensions } from './display-extensions.js';
 import { bracketMatchingExtension } from './extensions/bracket-matching/index.js';
 import { absoluteLineNumbers, functionLineNumbers, getSectionLineNumber } from './extensions/function-line-numbers/index.js';
 import { functionScrollMarkers, refreshFunctionScrollMarkers } from './extensions/function-scroll-markers/index.js';
 import { easyLineSelection, setEasyLineSelectionMode, standardGutterLineSelection } from './extensions/gutter-line-selection/index.js';
 import { fullLineSelection } from './extensions/full-line-selection/index.js';
 import { indentRulers, refreshIndentRulers } from './extensions/indent-rulers/index.js';
-import { syntaxHighlightingExtension, syntaxHighlightingOptions } from './extensions/syntax-highlighting/index.js';
-import { refreshStructure, structureView, structureViewOptions } from './extensions/structure-view/index.js';
+import { refreshStructure } from './extensions/structure-view/index.js';
 import { whitespaceHighlighting } from './extensions/whitespace/index.js';
 
 const TAB_SIZE = 4;
@@ -141,14 +141,12 @@ export class Editor {
 				this.options.font.of([]),
 				this.options.phrases.of(EditorState.phrases.of(phrases)),
 				this.options.wrapping.of([]),
-				this.options.structure.of([
-					structureView,
-					structureViewOptions({ structures: true, declarations: true, references: true }),
-				]),
-				this.options.syntax.of([
-					syntaxHighlightingExtension,
-					syntaxHighlightingOptions({ syntax: true, semantic: true }),
-				]),
+				this.options.structure.of(createStructureExtensions({
+					structureHighlight  : true,
+					declarationHighlight: true,
+					referenceHighlight  : true,
+				})),
+				this.options.syntax.of(createSyntaxExtensions({ syntaxHighlight: true, semanticHighlight: true })),
 				this.options.functionMarkers.of([]),
 				this.options.brackets.of(bracketMatchingExtension),
 				this.options.access.of([]),
@@ -269,21 +267,11 @@ export class Editor {
 		}
 		if (previous.structureHighlight !== settings.structureHighlight ||
 			previous.declarationHighlight !== settings.declarationHighlight || previous.referenceHighlight !== settings.referenceHighlight) {
-			effects.push(this.options.structure.reconfigure(settings.structureHighlight || settings.declarationHighlight || settings.referenceHighlight ? [
-				structureView,
-				structureViewOptions({
-					structures: settings.structureHighlight,
-					declarations: settings.declarationHighlight,
-					references: settings.referenceHighlight,
-				}),
-			] : []));
+			effects.push(this.options.structure.reconfigure(createStructureExtensions(settings)));
 		}
 		if (previous.syntaxHighlight !== settings.syntaxHighlight ||
 			previous.semanticHighlight !== settings.semanticHighlight) {
-			effects.push(this.options.syntax.reconfigure(settings.syntaxHighlight || settings.semanticHighlight ? [
-				syntaxHighlightingExtension,
-				syntaxHighlightingOptions({ syntax: settings.syntaxHighlight, semantic: settings.semanticHighlight }),
-			] : []));
+			effects.push(this.options.syntax.reconfigure(createSyntaxExtensions(settings)));
 		}
 		if (previous.functionMarkers !== this.functionMarkers) {
 			effects.push(this.options.functionMarkers.reconfigure(this.functionMarkers ? functionScrollMarkers : []));
@@ -564,10 +552,6 @@ export class Editor {
 			effects       : this.history.reconfigure([]),
 		});
 		this.view.dispatch({ effects: this.history.reconfigure(history({ newGroupDelay: 200 })) });
-	}
-
-	setCommonAnalysis(data) {
-		this.view.dispatch({ effects: setCommonAnalysis.of(data) });
 	}
 
 	getSectionLineNumber(line) {

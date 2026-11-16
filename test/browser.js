@@ -1,8 +1,8 @@
 import { createEditor } from '../dist/opticm.min.js';
 const results = [];
-const assert = (condition, message) => {
+const assert = (condition, message, details = '') => {
 	if (!condition) {
-		throw new Error(message);
+		throw new Error(message + details);
 	}
 	results.push(message);
 };
@@ -50,8 +50,11 @@ try {
 				editor.loadDocument(`${opening}\n\t`);
 				editor.moveTo({ line: 1, ch: 1 });
 				assert(document.execCommand('insertText', false, '}'), `${codeLanguage}: accepts closing brace input`);
+				await waitFor(() => editor.getValue().endsWith('}'), `${codeLanguage}: closing brace input reaches editor state`);
 				const expected = `${opening}\n${enabled ? '' : '\t'}}`;
-				assert(editor.getValue() === expected, `${codeLanguage}: closing brace indentation with autoIndent=${enabled}`);
+				const actual = editor.getValue();
+				assert(actual === expected, `${codeLanguage}: closing brace indentation with autoIndent=${enabled}`,
+					`. Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
 				editor.setSettings({ autoIndent: !enabled });
 			}
 		} finally {
@@ -156,13 +159,16 @@ try {
 	await waitFor(() => a.getAnalysis() !== null, 'restored document analysis is ready');
 	let displayAnalysisEvents = 0;
 	const offDisplayAnalysis = a.on('analysis', () => displayAnalysisEvents++);
-	a.setSettings({ structureHighlight: false, declarationHighlight: false });
-	assert(!editorA.querySelector('.cm-structure-overlay'), 'disabling both canvas features removes the structure view');
+	a.setSettings({ structureHighlight: false, declarationHighlight: false, referenceHighlight: false });
+	assert(!editorA.querySelector('.cm-structure-overlay'), 'disabling all three canvas features removes the structure view');
+	a.setSettings({ referenceHighlight: true });
+	assert(editorA.querySelector('.cm-structure-overlay'), 'reference highlighting can be enabled on its own');
+	a.setSettings({ referenceHighlight: false });
 	a.setSettings({ structureHighlight: true, declarationHighlight: false });
 	assert(editorA.querySelector('.cm-structure-overlay'), 'structure highlighting can be enabled without declaration highlighting');
 	a.setSettings({ structureHighlight: false, declarationHighlight: true });
 	assert(editorA.querySelector('.cm-structure-overlay'), 'declaration highlighting can be enabled without structure highlighting');
-	a.setSettings({ structureHighlight: true, declarationHighlight: true });
+	a.setSettings({ structureHighlight: true, declarationHighlight: true, referenceHighlight: true });
 	a.setSettings({ syntaxHighlight: false, semanticHighlight: true });
 	assert(editorA.classList.contains('cm-syntax-highlighting'), 'semantic highlighting can remain enabled without syntax coloring');
 	a.setSettings({ syntaxHighlight: false, semanticHighlight: false });
@@ -187,9 +193,11 @@ try {
 	assert(a.getSelection() === a.getValue(), 'select-all shortcut selects the entire document');
 	const selectedLineStyle = getComputedStyle(editorA.querySelector('.cm-line'));
 	assert(editorA.classList.contains('cm-has-selection') && editorA.querySelector('.cm-activeLine') &&
-		editorA.querySelector('.cm-activeLineGutter') && selectedLineStyle.boxShadow === 'none' &&
-		getComputedStyle(editorA.querySelector('.cm-syntax-literal')).textShadow !== 'none',
-		'JavaScript selection hides the active-line frame without suppressing standard classes or literal shadows');
+		editorA.querySelector('.cm-activeLineGutter') && selectedLineStyle.boxShadow === 'none',
+		'JavaScript selection hides the active-line frame while retaining standard active-line classes');
+	const activeLiteral = editorA.querySelector('.cm-activeLine .cm-syntax-literal');
+	assert(activeLiteral && getComputedStyle(activeLiteral).textShadow === 'none',
+		'JavaScript literals on the active line remain without a text shadow during selection');
 	const selectionBackgrounds = () => [...editorA.querySelectorAll('.cm-full-line-selectionLayer .cm-selectionBackground')];
 	await waitFor(() => selectionBackgrounds().length, 'selection is rendered');
 	const selectedLineBox = editorA.querySelector('.cm-line').getBoundingClientRect();
@@ -856,11 +864,18 @@ try {
 		]) {
 			root.scrollIntoView({ block: 'center' });
 			editor.setSettings({ analysis: false });
-			for (const [input, expected] of [['(', '()'], ['[', '[]'], ["'", "''"], ['"', '""'], ['{', '{']]) {
+			const codeLanguage = editor.getSettings().codeLanguage;
+			const checkDelimiter = async (input, expected, message) => {
 				editor.loadDocument('');
 				editor.focus();
 				assert(document.execCommand('insertText', false, input), 'editor accepts delimiter input');
-				assert(editor.getValue() === expected, 'automatic delimiter insertion: ' + editor.getSettings().codeLanguage + ' ' + input);
+				await waitFor(() => editor.getValue() !== '', `${codeLanguage}: delimiter ${JSON.stringify(input)} did not reach editor state`);
+				const actual = editor.getValue();
+				assert(actual === expected, `${message}: ${codeLanguage} ${input}`,
+					`. Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+			};
+			for (const [input, expected] of [['(', '()'], ['[', '[]'], ["'", "''"], ['"', '""'], ['{', '{']]) {
+				await checkDelimiter(input, expected, 'automatic delimiter insertion');
 			}
 			for (const [closeBrackets, closeBraces, input, expected] of [
 				[true, true, '{', '{}'],
@@ -870,10 +885,7 @@ try {
 				[true, false, '(', '()'],
 			]) {
 				editor.setSettings({ closeBrackets, closeBraces });
-				editor.loadDocument('');
-				editor.focus();
-				assert(document.execCommand('insertText', false, input) && editor.getValue() === expected,
-					'automatic closing respects runtime settings: ' + editor.getSettings().codeLanguage);
+				await checkDelimiter(input, expected, `automatic closing with closeBrackets=${closeBrackets}, closeBraces=${closeBraces}`);
 			}
 			editor.loadDocument(source);
 			editor.moveTo({ line: 0, ch: source.indexOf('{') });

@@ -5,6 +5,19 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { preview } from 'vite';
 import { build } from 'esbuild';
+
+function classPainted() {
+	const canvas = document.querySelector('.code-structure-view');
+	if (!canvas?.width || !canvas?.height) return false;
+	const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+	const alpha = Math.round(0.12 * 255);
+	for (let i = 0; i < pixels.length; i += 4) {
+		if (pixels[i] >= 220 && pixels[i + 1] < 45 && pixels[i + 2] >= 70 &&
+			pixels[i + 2] <= 100 && Math.abs(pixels[i + 3] - alpha) <= 1) return true;
+	}
+	return false;
+}
+
 const here = dirname(fileURLToPath(import.meta.url));
 const browser = process.argv[2] || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const name = browser.toLowerCase().includes('msedge') ? 'edge' : 'chrome';
@@ -253,16 +266,7 @@ try {
 				const analysis = JSON.parse(document.querySelector('#status').textContent);
 				assert(analysis.success && analysis.fnNames.includes('Greeter') && analysis.classLocs.length === 1,
 					'Worker must analyze sample class');
-				const classPainted = () => {
-					const canvas = document.querySelector('.code-structure-view');
-					if (!canvas?.width || !canvas?.height) return false;
-					const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
-					for (let i = 0; i < pixels.length; i += 4) {
-						if (pixels[i] >= 220 && pixels[i + 1] < 45 && pixels[i + 2] >= 70 &&
-							pixels[i + 2] <= 100 && pixels[i + 3] >= 37 && pixels[i + 3] <= 39) return true;
-					}
-					return false;
-				};
+				const classPainted = ${classPainted.toString()};
 				for (let i = 0; i < 100 && !classPainted(); i++) await new Promise(resolve => setTimeout(resolve, 20));
 				assert(classPainted(), 'JavaScript sample class must be painted in translucent theme red');
 				const extensions = [
@@ -365,16 +369,7 @@ try {
 					const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
 					return pixels.some((value, index) => index % 4 === 3 && value > 0);
 				};
-				const classPainted = () => {
-					const canvas = document.querySelector('.code-structure-view');
-					if (!canvas?.width || !canvas?.height) return false;
-					const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
-					for (let i = 0; i < pixels.length; i += 4) {
-						if (pixels[i] >= 220 && pixels[i + 1] < 45 && pixels[i + 2] >= 70 &&
-							pixels[i + 2] <= 100 && pixels[i + 3] >= 37 && pixels[i + 3] <= 39) return true;
-					}
-					return false;
-				};
+				const classPainted = ${classPainted.toString()};
 				for (let i = 0; i < 100 && !classPainted(); i++)
 					await new Promise(resolve => setTimeout(resolve, 20));
 				const count = [...document.querySelectorAll('.cm-content .cm-syntax-variable-reference')]

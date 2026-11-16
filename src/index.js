@@ -1,5 +1,6 @@
 import { EditorSelection } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
+import { setCommonAnalysis } from './analysis/common-analysis.js';
 import { Editor, offsetAt, positionAt } from './editor-view.js';
 import { javascriptLanguage } from './lang/js/index.js';
 import { javaLanguage } from './lang/java/index.js';
@@ -205,7 +206,7 @@ export async function createEditor(container, { value = '', definitions = [], ..
 			const result = await client.request(cm.state.doc.toString(), version);
 			if (result === null) return null;
 			if (!destroyed && result.version === version && settings.analysis) {
-				view.setCommonAnalysis({ ...result.commonAnalysis, version });
+				cm.dispatch({ effects: setCommonAnalysis.of({ ...result.commonAnalysis, version }) });
 				const snapshot = publicAnalysis(result);
 				analysis = structuredClone(snapshot);
 				emit('analysis', snapshot);
@@ -353,7 +354,7 @@ export async function createEditor(container, { value = '', definitions = [], ..
 				if (!settings.analysis) {
 					clearTimeout(timer);
 					analysis = null;
-					view.setCommonAnalysis(null);
+					cm.dispatch({ effects: setCommonAnalysis.of(null) });
 				}
 				applySettings();
 				if (settings.analysis && (!wasAnalyzing || delayChanged)) schedule();
