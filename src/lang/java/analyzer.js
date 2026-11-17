@@ -137,7 +137,7 @@ export function analyzeJava(source, rootNode) {
 				}
 			}
 		}
-		if (node.type === 'class_declaration') {
+		if (HIGHLIGHTED_TYPE_DECLARATIONS.has(node.type)) {
 			addRange(node, 'class', 'var(--opticm-l-red, #e61e58)', [], 0.12);
 		} else if (FUNCTION_NODES.has(node.type)) {
 			const start = toOffset(node.startIndex);

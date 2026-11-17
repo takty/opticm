@@ -275,17 +275,24 @@ test('Java classifies definitions, literals and operators separately from refere
 	}
 });
 
-test('Java emits class ranges before their methods without changing method sections', () => {
-	const source = 'class Outer {\n  void run() {\n    class Inner {}\n  }\n}\ninterface NotAClass {}\n';
+test('Java emits matching structure ranges for classes, interfaces, records, and enums', () => {
+	const source = 'class Outer {\n  void run() {\n    class Inner {}\n  }\n}\n' +
+		'interface Contract {}\nrecord Point(int x) {}\nenum Mode { ON }\n';
 	const tree = parser.parse(source);
 	try {
 		const result = analyzeJava(source, tree.rootNode);
 		assert.equal(result.success, true);
-		const classes = result.decorations.filter(item => item.fill === 'var(--opticm-l-red, #e61e58)');
-		assert.deepEqual(classes.map(item => [item.from.line, item.from.ch, item.to.line, item.to.ch, item.opacity]),
-			[[0, 0, 4, 1, 0.12], [2, 4, 2, 18, 0.12]]);
+		const types = result.decorations.filter(item => item.fill === 'var(--opticm-l-red, #e61e58)');
+		assert.deepEqual(types.map(item => [item.from.line, item.from.ch, item.to.line, item.to.ch, item.opacity]), [
+			[0, 0, 4, 1, 0.12],
+			[2, 4, 2, 18, 0.12],
+			[5, 0, 5, 21, 0.12],
+			[6, 0, 6, 22, 0.12],
+			[7, 0, 7, 16, 0.12],
+		]);
+		assert.equal(result.commonAnalysis.structures.filter(item => item.kind === 'class').length, types.length);
 		assert.deepEqual(result.sectionStarts, [1]);
-		assert.ok(result.decorations.indexOf(classes[0]) < result.decorations.findIndex(item =>
+		assert.ok(result.decorations.indexOf(types[0]) < result.decorations.findIndex(item =>
 			item.fill === 'hsla(40, 100%, 50%, 0.15)'));
 	} finally {
 		tree.delete();
