@@ -22,9 +22,10 @@ change at runtime.
 - `commonAnalysisState` owns the current shared data per editor. It maps surviving
   structure and declaration ranges across edits as stale interim data, clears on document load, and only
   accepts results for the current document version.
-- `Editor` owns the CodeMirror state, settings, and extension assembly. It
-  publishes analysis through `setCommonAnalysis`; display extensions do not
-  call a language module or inspect a parser tree.
+- `Editor` owns the CodeMirror state, settings application, and extension assembly.
+  `index.js` dispatches the `setCommonAnalysis` effect after checking that a
+  result matches the current document. Display extensions consume the shared
+  analysis state without calling a language module or inspecting a parser tree.
 - `structure-view` renders shared structures and declarations on a canvas.
   `structureViewOptions` independently enables structures, declarations, and references.
 - `syntax-highlighting` consumes common syntax and references while allowing

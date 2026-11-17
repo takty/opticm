@@ -1,6 +1,6 @@
 import { javascript, javascriptLanguage as javascriptSyntax } from '@codemirror/lang-javascript';
 import { EditorView } from '@codemirror/view';
-import { AnalysisClient } from '../../analysis-client.js';
+import { createAnalysisClient } from '../../analyzer.js';
 import { lezerAnalysis } from '../../analysis/lezer-analysis.js';
 import { closeBracketsFor } from '../close-brackets.js';
 import { completionTrigger, createCompletionSession } from './completion.js';
@@ -21,7 +21,7 @@ export const javascriptLanguage = {
 	closeBrackets: closeBracketsFor(javascriptSyntax, '`'),
 
 	createAnalysisClient() {
-		return new AnalysisClient(new Worker(new URL('./analysis-worker.min.js', import.meta.url), { type: 'module' }));
+		return createAnalysisClient('javascript');
 	},
 
 	diagnostics,

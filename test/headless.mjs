@@ -31,6 +31,7 @@ await Promise.all([
 	build({ entryPoints: [resolve(here, 'language-contract.js')], outfile: resolve(fixtures, 'test/language-contract.js'), bundle: true, loader: { '.svg': 'base64', '.css': 'text' }, format: 'esm', platform: 'browser', logLevel: 'silent' }),
 	cp(resolve(root, 'dist'), resolve(fixtures, 'dist'), { recursive: true }),
 	cp(resolve(root, 'docs'), resolve(fixtures, 'docs'), { recursive: true }),
+	cp(resolve(root, 'dist/analysis-worker-java.min.js'), resolve(fixtures, 'test/analysis-worker-java.min.js')),
 	...['browser.html', 'browser.js'].map(file => cp(resolve(here, file), resolve(fixtures, 'test', file))),
 ]);
 const server = await preview({

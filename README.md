@@ -42,6 +42,80 @@ console.log(snapshot.version, snapshot.success, snapshot.fnNames);
 
 ## Public API
 
+### Analysis and display for an existing CodeMirror editor
+
+Use the package entry points with a bundler and share the same CodeMirror
+packages between your app and the Opticm extensions.
+
+```js
+import { createAnalyzer } from 'opticm/analyzer';
+import { setCommonAnalysis } from 'opticm/analysis';
+import { createDisplayExtensions } from 'opticm/display';
+
+// Include this extension in your EditorState configuration.
+const display = createDisplayExtensions({ lineNumbers: 'function', rulers: true });
+const analyzer = await createAnalyzer({ codeLanguage: 'java' });
+
+try {
+    const source = view.state.doc.toString();
+    const snapshot = await analyzer.analyze(source);
+    if (view.state.doc.toString() === source) {
+        view.dispatch({ effects: setCommonAnalysis.of(snapshot) });
+    }
+} finally {
+    analyzer.destroy();
+}
+```
+
+`createAnalyzer()` defaults to JavaScript and returns versioned common analysis
+snapshots. For repeated analysis, reuse the analyzer, discard results for obsolete
+documents, and destroy the analyzer when its owner is disposed.
+`createDisplayExtensions()` enables syntax, semantic, structure, declaration,
+and reference highlighting by default. Each can be toggled independently.
+`lineNumbers` accepts `off` (default), `absolute`, or `function`.
+
+A host can provide `createWorker(defaultURL)`, returning a new module Worker for
+each analyzer. The default Worker and WASM URLs are resolved relative to the
+Opticm module so bundlers such as Vite can include those files in their output.
+Java also accepts absolute `treeSitterWasmURL` and `javaWasmURL` values (strings
+or URL objects). With a custom Worker factory, each omitted WASM URL resolves
+beside the Worker module. Pass the same three options under `javaAnalysis`
+when creating a Java editor with `createEditor()`.
+
+### Read-only code viewer
+
+Load `opticm.min.css` and call `createViewer()` in the same way as
+`createEditor()`. The viewer supports native text selection and copying.
+
+```js
+import { createViewer } from 'opticm';
+
+const viewer = await createViewer(document.querySelector('#example'), {
+    codeLanguage: 'java',
+    value: 'class Example {}',
+    lineNumbers: 'function',
+});
+
+await viewer.setValue('class Example { void run() {} }');
+viewer.setSettings({ rulers: false });
+// On cleanup: viewer.destroy();
+```
+
+Use an empty, sized container. `codeLanguage` is fixed at creation and accepts
+`javascript` (default), `java`, or `null` for plain text. Java accepts the same
+`javaAnalysis` options as the standalone editor. The five highlighting
+settings, `rulers`, and `lineWrapping` can be changed with `setSettings()`.
+Line numbers default to `absolute`; use `function` for per-function numbers
+or `off` to hide them. Function numbering falls back to ordinary numbering in
+plain text.
+
+`getValue()` returns the displayed text. `setValue(text)` displays the new
+text immediately and resolves after analysis. `refresh()` requests a layout
+measurement, for example after revealing a hidden container. `destroy()`
+removes the viewer and terminates its analysis worker.
+
+### Standalone editor
+
 Provide an empty container element in the current document.
 Mounting a second editor in the same container is an error.
 Initialization failures reject the promise and clean up resources and DOM elements created during initialization.

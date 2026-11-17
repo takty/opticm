@@ -71,6 +71,8 @@ async function buildJavaScript() {
 	await bundle({
 		entryPoints: {
 			'analysis': join(stageRoot, 'analysis', 'common-analysis.js'),
+			'analyzer': join(stageRoot, 'analyzer.js'),
+			'display-extensions': join(stageRoot, 'display-extensions.js'),
 			'structure-view': join(stageRoot, 'extensions', 'structure-view', 'index.js'),
 			'function-line-numbers': join(stageRoot, 'extensions', 'function-line-numbers', 'index.js'),
 			'function-scroll-markers': join(stageRoot, 'extensions', 'function-scroll-markers', 'index.js'),
@@ -90,6 +92,17 @@ async function buildJavaScript() {
 			setup(build) {
 				build.onResolve({ filter: /(?:^|[/\\])analysis[/\\]common-analysis\.js$/ }, args =>
 					args.kind === 'entry-point' ? null : { path: 'opticm/analysis', external: true });
+				const displayImports = {
+					'function-line-numbers': 'function-line-numbers',
+					'indent-rulers': 'indent-rulers',
+					'structure-view': 'structure',
+					'syntax-highlighting': 'syntax-highlighting',
+				};
+				build.onResolve({ filter: /^\.\/extensions\/[^/]+\/index\.js$/ }, args => {
+					if (args.importer !== join(stageRoot, 'display-extensions.js')) return;
+					const entry = displayImports[args.path.split('/')[2]];
+					if (entry) return { path: 'opticm/' + entry, external: true };
+				});
 			},
 		}],
 		format: 'esm',

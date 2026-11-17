@@ -8,6 +8,8 @@ import { plainLanguage } from './lang/plain/index.js';
 import english from './res/lang.en.json';
 import japanese from './res/lang.ja.json';
 
+export { createViewer } from './viewer.js';
+
 // Default settings ------------------------------------------------------------
 
 const mounted = new WeakSet();
@@ -88,7 +90,7 @@ function normalizeSettings({ gutterLineSelection, ...options }) {
 // Editor lifecycle ------------------------------------------------------------
 
 /** Creates an editor in an empty, sized container. See README.md for the API contract. */
-export async function createEditor(container, { value = '', definitions = [], ...options } = {}) {
+export async function createEditor(container, { value = '', definitions = [], javaAnalysis, ...options } = {}) {
 	if (!container || container.nodeType !== 1 || container.ownerDocument !== document) {
 		throw new TypeError('A container in the current document is required');
 	}
@@ -147,7 +149,7 @@ export async function createEditor(container, { value = '', definitions = [], ..
 	}
 
 	try {
-		client = language.createAnalysisClient();
+		client = language.createAnalysisClient(javaAnalysis);
 		await client.ready;
 		if (document.fonts) {
 			// Resolve inherited CSS variables before requesting the configured font.

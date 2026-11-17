@@ -4,6 +4,8 @@ import { plainLanguage } from '../.build/lang/plain/index.js';
 import { analyze } from '../.build/lang/js/analyzer.js';
 import { createCommonAnalysis, setCommonAnalysis as setEditorCommonAnalysis } from '../.build/analysis/common-analysis.js';
 import { commonAnalysisState, setCommonAnalysis } from '../dist/analysis.js';
+import { createAnalyzer } from '../dist/analyzer.js';
+import { createDisplayExtensions } from '../dist/display-extensions.js';
 import { Compartment, EditorSelection, EditorState } from '@codemirror/state';
 import { EditorView, highlightActiveLine, lineNumbers } from '@codemirror/view';
 import { retainStructureOnEdit, setStructure, structureView } from '../dist/structure-view.js';
@@ -16,6 +18,31 @@ import { whitespaceHighlighting } from '../dist/whitespace.js';
 import { setSyntaxHighlights, syntaxHighlightingExtension, syntaxHighlightingOptions, syntaxHighlightingSource } from '../dist/syntax-highlighting.js';
 
 export async function runLanguageContractTests(assert) {
+	const javaSource = 'class Example {\n  void run() {}\n}';
+	const analyzer = await createAnalyzer({
+		codeLanguage: 'java',
+		createWorker: () => new Worker(new URL('./analysis-worker-java.min.js', document.baseURI), { type: 'module' }),
+		treeSitterWasmURL: new URL('../dist/web-tree-sitter.wasm', document.baseURI),
+		javaWasmURL: new URL('../dist/tree-sitter-java.wasm', document.baseURI),
+	});
+	const display = new EditorView({
+		doc: javaSource,
+		extensions: createDisplayExtensions({ lineNumbers: 'function', rulers: true }),
+		parent: document.body,
+	});
+	try {
+		const analysis = await analyzer.analyze(javaSource);
+		display.dispatch({ effects: setCommonAnalysis.of(analysis) });
+		assert(display.state.field(commonAnalysisState)?.version === analysis.version &&
+			display.dom.querySelector('.cm-syntax-keyword')?.textContent === 'class' &&
+			display.dom.querySelector('.cm-function-number') &&
+			display.dom.querySelector('.code-structure-view'),
+			'external CodeMirror applies Java analysis loaded with separate Worker and WASM URLs');
+	} finally {
+		display.destroy();
+		analyzer.destroy();
+	}
+
 	const whitespaceHost = document.createElement('div');
 	document.body.append(whitespaceHost);
 	const whitespaceCompartment = new Compartment();

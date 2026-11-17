@@ -8,6 +8,8 @@
 	"exports": {
 		".": "./dist/opticm.min.js",
 		"./analysis": "./dist/analysis.js",
+		"./analyzer": "./dist/analyzer.js",
+		"./display": "./dist/display-extensions.js",
 		"./structure": "./dist/structure-view.js",
 		"./function-line-numbers": "./dist/function-line-numbers.js",
 		"./function-scroll-markers": "./dist/function-scroll-markers.js",

@@ -1,4 +1,4 @@
-import { createEditor } from '../dist/opticm.min.js';
+import { createEditor, createViewer } from '../dist/opticm.min.js';
 const results = [];
 const assert = (condition, message, details = '') => {
 	if (!condition) {
@@ -1081,6 +1081,53 @@ try {
 			'Java syntax highlighting does not draw a second underline');
 	} finally {
 		javaEditor?.destroy();
+	}
+	for (const [codeLanguage, value] of [
+		['javascript', 'function run() {\n\tconst count = 1;\n\treturn count;\n}'],
+		['java', 'class Example {\n\tint run() {\n\t\tint count = 1;\n\t\treturn count;\n\t}\n}'],
+	]) {
+		const viewerHost = document.createElement('div');
+		const editorHost = document.createElement('div');
+		viewerHost.style.height = editorHost.style.height = '200px';
+		document.body.append(viewerHost, editorHost);
+		let viewer, editor;
+		try {
+			viewer = await createViewer(viewerHost, { codeLanguage, value, lineNumbers: 'function' });
+			editor = await createEditor(editorHost, { codeLanguage, value, functionLineNumbers: true });
+			const tokenColors = host => [...host.querySelectorAll('.cm-syntax-keyword, .cm-syntax-local-reference')]
+				.map(token => [token.textContent, getComputedStyle(token).color]);
+			const viewerColors = tokenColors(viewerHost);
+			assert(viewerColors.length && JSON.stringify(viewerColors) === JSON.stringify(tokenColors(editorHost)) &&
+				viewerHost.querySelector('.code-structure-view') && viewerHost.querySelector('.cm-function-number'),
+				`${codeLanguage}: viewer matches editor token colors and displays structure and function numbers`);
+			const content = viewerHost.querySelector('.cm-content');
+			content.focus();
+			press(viewerHost, 'a', mod);
+			assert(document.getSelection().toString() === value, `${codeLanguage}: viewer text can be selected for copying`);
+			const copied = new DataTransfer();
+			content.dispatchEvent(new ClipboardEvent('copy', { bubbles: true, cancelable: true, clipboardData: copied }));
+			assert(copied.getData('text/plain') === value, `${codeLanguage}: viewer copies the selected source text`);
+			const clipboard = new DataTransfer();
+			clipboard.setData('text/plain', 'replacement');
+			content.dispatchEvent(new ClipboardEvent('paste', { bubbles: true, cancelable: true, clipboardData: clipboard }));
+			assert(!content.isContentEditable && !viewerHost.querySelector('.cm-cursorLayer, .cm-lint-marker, .cm-search') &&
+				viewer.getValue() === value, `${codeLanguage}: viewer preserves source and has no editor-only UI`);
+			await Promise.all([viewer.setValue(''), viewer.setValue(value.replaceAll('count', 'total'))]);
+			assert(viewerHost.querySelector('.cm-syntax-local-reference')?.textContent === 'total',
+				`${codeLanguage}: the latest viewer update wins`);
+			viewer.setSettings({ lineNumbers: 'off', rulers: false });
+			viewer.refresh();
+			assert(!viewerHost.querySelector('.cm-function-number, .cm-indent-rulers'), 'viewer display settings can be updated');
+			const pending = viewer.setValue(value);
+			viewer.destroy();
+			await pending;
+			assert(!viewerHost.childNodes.length, 'destroy removes the viewer during analysis');
+		} finally {
+			viewer?.destroy();
+			editor?.destroy();
+			viewerHost.remove();
+			editorHost.remove();
+		}
 	}
 	window.testResult = { passed: true, results };
 } catch (error) {
