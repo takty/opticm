@@ -284,11 +284,11 @@ test('Java emits matching structure ranges for classes, interfaces, records, and
 		assert.equal(result.success, true);
 		const types = result.decorations.filter(item => item.fill === 'var(--opticm-l-red, #e61e58)');
 		assert.deepEqual(types.map(item => [item.from.line, item.from.ch, item.to.line, item.to.ch, item.opacity]), [
-			[0, 0, 4, 1, 0.12],
-			[2, 4, 2, 18, 0.12],
-			[5, 0, 5, 21, 0.12],
-			[6, 0, 6, 22, 0.12],
-			[7, 0, 7, 16, 0.12],
+			[0, 0, 4, 1, 0.08],
+			[2, 4, 2, 18, 0.08],
+			[5, 0, 5, 21, 0.08],
+			[6, 0, 6, 22, 0.08],
+			[7, 0, 7, 16, 0.08],
 		]);
 		assert.equal(result.commonAnalysis.structures.filter(item => item.kind === 'class').length, types.length);
 		assert.deepEqual(result.sectionStarts, [1]);

@@ -10,7 +10,7 @@ function classPainted() {
 	const canvas = document.querySelector('.code-structure-view');
 	if (!canvas?.width || !canvas?.height) return false;
 	const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
-	const alpha = Math.round(0.12 * 255);
+	const alpha = Math.round(0.08 * 255);
 	for (let i = 0; i < pixels.length; i += 4) {
 		if (pixels[i] >= 220 && pixels[i + 1] < 45 && pixels[i + 2] >= 70 &&
 			pixels[i + 2] <= 100 && Math.abs(pixels[i + 3] - alpha) <= 1) return true;
