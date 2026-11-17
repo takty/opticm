@@ -6,8 +6,10 @@ import { functionLineNumbers, getSectionLineNumber, setSectionStarts } from '../
 test('section numbers use supplied starts and clear on edits or loads', () => {
 	let state = EditorState.create({ doc: 'a\nb\nc\nd\ne', extensions: [functionLineNumbers] });
 	state = state.update({ effects: setSectionStarts.of([1, 3]) }).state;
-	assert.deepEqual([0, 1, 2, 3, 4].map(line => getSectionLineNumber(state, line)),
-		[[0, 1], [1, 1], [1, 2], [2, 1], [2, 2]]);
+	assert.deepEqual(
+		[0, 1, 2, 3, 4].map(line => getSectionLineNumber(state, line)),
+		[[0, 1], [1, 1], [1, 2], [2, 1], [2, 2]],
+	);
 	state = state.update({ changes: { from: 0, insert: 'x' } }).state;
 	assert.deepEqual(getSectionLineNumber(state, 4), [0, 5]);
 	state = state.update({ effects: setSectionStarts.of([0]) }).state;

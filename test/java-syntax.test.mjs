@@ -57,18 +57,27 @@ test('Java array type brackets follow their element type before and after worker
 		let state = EditorState.create({ doc: source, extensions: [java(), commonAnalysisState, lezerAnalysis(lezerSyntax)] });
 		const assertBrackets = ranges => {
 			for (const [fragment, kind] of [
-				['int[][]', 'keyword'], ['String[] names', 'type'], ['int extra[]', 'keyword'],
-				['String result()[]', 'type'], ['int arg[]', 'keyword'], ['String[] args', 'type'],
-				['boolean[] flags', 'keyword'], ['java.util.List<String[]>[] lists', 'type'],
-				['double item[]', 'keyword'], ['int[] values', 'keyword'], ['int constant[]', 'keyword'],
+				['int[][]', 'keyword'],
+				['String[] names', 'type'],
+				['int extra[]', 'keyword'],
+				['String result()[]', 'type'],
+				['int arg[]', 'keyword'],
+				['String[] args', 'type'],
+				['boolean[] flags', 'keyword'],
+				['java.util.List<String[]>[] lists', 'type'],
+				['double item[]', 'keyword'],
+				['int[] values', 'keyword'],
+				['int constant[]', 'keyword'],
 				['String items[]', 'type'],
 			]) {
 				const start = source.indexOf(fragment);
 				assert.notEqual(start, -1);
 				for (let i = 0; i < fragment.length; i++) {
 					if (fragment[i] !== '[' && fragment[i] !== ']') continue;
-					assert.ok(ranges.some(item => item.from === start + i && item.to === start + i + 1 && item.kind === kind),
-						`${fragment}: ${fragment[i]} must use ${kind}`);
+					assert.ok(
+						ranges.some(item => item.from === start + i && item.to === start + i + 1 && item.kind === kind),
+						`${fragment}: ${fragment[i]} must use ${kind}`,
+					);
 				}
 			}
 			for (const fragment of ['new int[2][]', 'values[0]']) {
@@ -162,8 +171,10 @@ test('Java diagnostics warn for unbraced control bodies and allow else-if chains
 		const diagnostics = diagnoseJava(tree.rootNode, 'en');
 		const lines = source.split('\n');
 		assert.ok(diagnostics.every(item => item.severity === 'warning'));
-		assert.deepEqual(diagnostics.map(({ from, to }) => lines[from.line].slice(from.ch, to.ch)),
-			['start();', 'reset();', 'tick();', 'tick(x);', ';', 'tick();']);
+		assert.deepEqual(
+			diagnostics.map(({ from, to }) => lines[from.line].slice(from.ch, to.ch)),
+			['start();', 'reset();', 'tick();', 'tick(x);', ';', 'tick();'],
+		);
 	} finally {
 		tree.delete();
 	}
@@ -209,20 +220,35 @@ test('Java highlights lexical variable references without confusing declarations
 			.filter(item => item.kind === 'local-reference').map(item => item.from));
 		const offset = (fragment, name) => source.indexOf(fragment) + fragment.indexOf(name);
 		for (const [fragment, name] of [
-			['value = arg', 'arg'], ['use(value, arg, args)', 'value'], ['use(value, arg, args)', 'arg'],
+			['value = arg', 'arg'],
+			['use(value, arg, args)', 'value'],
+			['use(value, arg, args)', 'arg'],
 			['arg, args)', 'args'],
-			['this.value = value', '= value'], ['nested = value', 'value'], ['use(nested); }', 'nested'],
-			['i < 2', 'i'], ['i++', 'i'], ['use(i);', 'i'], ['use(item);', 'item'],
-			['use(v));', 'v'], ['int[value]', 'value'], ['args instanceof', 'args'],
-			['args::toString', 'args'], ['use(resource); }', 'resource'], ['use(ex); use', 'ex'],
+			['this.value = value', '= value'],
+			['nested = value', 'value'],
+			['use(nested); }', 'nested'],
+			['i < 2', 'i'],
+			['i++', 'i'],
+			['use(i);', 'i'],
+			['use(item);', 'item'],
+			['use(v));', 'v'],
+			['int[value]', 'value'],
+			['args instanceof', 'args'],
+			['args::toString', 'args'],
+			['use(resource); }', 'resource'],
+			['use(ex); use', 'ex'],
 		]) {
 			const index = offset(fragment, name) + (name === '= value' ? 2 : 0);
 			assert.ok(localOffsets.has(index), `expected local reference at ${fragment}: ${name}`);
 		}
 		for (const [fragment, name] of [
-			['int value = arg', 'value'], ['this.value = value', 'value'],
-			['    use(nested);', 'nested'], ['    use(i);', 'i'],
-			[': item)', 'item'], ['    use(item);', 'item'], ['    use(v);', 'v'],
+			['int value = arg', 'value'],
+			['this.value = value', 'value'],
+			['    use(nested);', 'nested'],
+			['    use(i);', 'i'],
+			[': item)', 'item'],
+			['    use(item);', 'item'],
+			['    use(v);', 'v'],
 		]) {
 			assert.ok(!localOffsets.has(offset(fragment, name)), `unexpected local reference at ${fragment}: ${name}`);
 		}

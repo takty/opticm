@@ -38,7 +38,8 @@ function reconcile(interim, parsedTo, analysis) {
 		};
 	}
 	const retainedReferences = new Map(analysis.references.map(reference => [
-		referenceKey(reference), reference,
+		referenceKey(reference),
+		reference
 	]));
 	return {
 		syntax: [

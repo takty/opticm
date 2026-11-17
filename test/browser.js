@@ -27,8 +27,11 @@ const mac = /Mac/.test(navigator.platform);
 const mod = mac ? { metaKey: true } : { ctrlKey: true };
 const press = (host, key, modifiers = {}) => host.querySelector('.cm-content').dispatchEvent(
 	new KeyboardEvent('keydown', {
-		key, keyCode: key.length === 1 ? key.toUpperCase().charCodeAt(0) : 0,
-		bubbles: true, cancelable: true, ...modifiers,
+		key,
+		keyCode   : key.length === 1 ? key.toUpperCase().charCodeAt(0) : 0,
+		bubbles   : true,
+		cancelable: true,
+		...modifiers,
 	}),
 );
 let a, b;
@@ -36,8 +39,18 @@ try {
 	a = await createEditor(document.querySelector('#a'), { value: 'function one() { return 1; }', language: 'ja', autoFormat: false });
 	b = await createEditor(document.querySelector('#b'), { value: 'function two() { return 2; }', language: 'en', autoFormat: false });
 	assert(!window.CodeMirror && !window.acorn && !window.JSHINT && !window.tern, 'no library globals');
-	assert(a.getAnalysis().fnNames[0] === 'one' && b.getAnalysis().fnNames[0] === 'two', 'independent analysis');
-	assert(!('commonAnalysis' in a.getAnalysis()), 'public JavaScript analysis omits internal worker data');
+	const firstAnalysis = a.getAnalysis();
+	const secondAnalysis = b.getAnalysis();
+	const analysisKeys = [
+		'complete', 'declarations', 'references', 'sections', 'sourceLength', 'stale',
+		'structures', 'syntax', 'syntaxComplete', 'text', 'version',
+	].join(',');
+	assert(
+		firstAnalysis.text === 'function one() { return 1; }' && secondAnalysis.text === 'function two() { return 2; }' &&
+			[firstAnalysis, secondAnalysis].every(snapshot => snapshot.structures.some(range => range.kind === 'function')),
+		'independent analysis',
+	);
+	assert(Object.keys(firstAnalysis).sort().join(',') === analysisKeys, 'public JavaScript analysis uses the shared format');
 	assert(getComputedStyle(document.querySelector('#host-page')).color === 'rgb(1, 2, 3)', 'host CSS unaffected');
 	assert(!('getCodeMirror' in a), 'public API does not expose editor instance');
 	for (const [codeLanguage, opening] of [['javascript', 'function f() {'], ['java', 'class Example {']]) {
@@ -53,8 +66,11 @@ try {
 				await waitFor(() => editor.getValue().endsWith('}'), `${codeLanguage}: closing brace input reaches editor state`);
 				const expected = `${opening}\n${enabled ? '' : '\t'}}`;
 				const actual = editor.getValue();
-				assert(actual === expected, `${codeLanguage}: closing brace indentation with autoIndent=${enabled}`,
-					`. Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+				assert(
+					actual === expected,
+					`${codeLanguage}: closing brace indentation with autoIndent=${enabled}`,
+					`. Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`,
+				);
 				editor.setSettings({ autoIndent: !enabled });
 			}
 		} finally {
@@ -70,11 +86,13 @@ try {
 	const fullWidthMarks = line => spaceMarks(line).filter(mark => mark.textContent === '\u3000');
 	const fullWidth = fullWidthMarks(whitespaceLines()[0]);
 	const ordinary = spaceMarks(whitespaceLines()[0]).find(mark => mark.textContent === ' ');
-	assert(fullWidth.map(mark => mark.textContent).join('') === '\u3000\u3000' &&
-		getComputedStyle(fullWidth[0]).backgroundSize === 'calc(100% - 2px) 4px' &&
-		getComputedStyle(ordinary).backgroundSize === 'calc(100% - 2px) 2px' &&
-		fullWidth[0].getBoundingClientRect().width > ordinary.getBoundingClientRect().width,
-		'ideographic spaces have a wider, 4px-thick underline while ordinary spaces remain 2px');
+	assert(
+		fullWidth.map(mark => mark.textContent).join('') === '\u3000\u3000' &&
+			getComputedStyle(fullWidth[0]).backgroundSize === 'calc(100% - 2px) 4px' &&
+			getComputedStyle(ordinary).backgroundSize === 'calc(100% - 2px) 2px' &&
+			fullWidth[0].getBoundingClientRect().width > ordinary.getBoundingClientRect().width,
+		'ideographic spaces have a wider, 4px-thick underline while ordinary spaces remain 2px',
+	);
 	const gradientColor = mark => {
 		const gradient = getComputedStyle(mark).backgroundImage;
 		const color = gradient.match(/^linear-gradient\((.+), \1\)$/)?.[1];
@@ -94,39 +112,55 @@ try {
 	assert(hasLighterFullWidth(), 'ideographic-space color follows the customized active color');
 	editorA.style.removeProperty('--opticm-whitespace-active-color');
 	const activeMarks = spaceMarks(whitespaceLines()[0]);
-	assert(activeMarks.map(mark => mark.textContent).join('') === '  \u3000\u3000  ' &&
-		activeMarks.length === 6 && activeMarks.every(mark => {
-			const style = getComputedStyle(mark);
-			const size = mark.textContent === '\u3000' ? 'calc(100% - 2px) 4px' : 'calc(100% - 2px) 2px';
-			return style.backgroundSize === size && style.backgroundPosition === '50% 100%';
-		}) && activeMarks.every((mark, i) => !i ||
-			Math.abs(activeMarks[i - 1].getBoundingClientRect().right - mark.getBoundingClientRect().left) < 1),
-		'adjacent ordinary and ideographic spaces have separate underlines with gaps');
+	assert(
+		activeMarks.map(mark => mark.textContent).join('') === '  \u3000\u3000  ' &&
+			activeMarks.length === 6 && activeMarks.every(mark => {
+				const style = getComputedStyle(mark);
+				const size = mark.textContent === '\u3000' ? 'calc(100% - 2px) 4px' : 'calc(100% - 2px) 2px';
+				return style.backgroundSize === size && style.backgroundPosition === '50% 100%';
+			}) && activeMarks.every((mark, i) => !i ||
+				Math.abs(activeMarks[i - 1].getBoundingClientRect().right - mark.getBoundingClientRect().left) < 1),
+		'adjacent ordinary and ideographic spaces have separate underlines with gaps',
+	);
 	a.replaceRange('\u3000', { line: 0, ch: 2 });
-	assert(spaceMarks(whitespaceLines()[0]).map(mark => mark.textContent).join('|') === ' |\u3000| |\u3000|\u3000| | ',
-		'editing inside a mixed run preserves one mark per space');
+	assert(
+		spaceMarks(whitespaceLines()[0]).map(mark => mark.textContent).join('|') === ' |\u3000| |\u3000|\u3000| | ',
+		'editing inside a mixed run preserves one mark per space',
+	);
 	a.replaceRange('', { line: 0, ch: 2 }, { line: 0, ch: 3 });
-	assert(spaceMarks(whitespaceLines()[0]).map(mark => mark.textContent).join('|') === ' | |\u3000|\u3000| | ',
-		'deleting inside a mixed run preserves separate marks');
-	assert(fullWidthMarks(whitespaceLines()[1]).map(mark => mark.textContent).join('') === '\u3000\u3000\u3000' &&
-		fullWidthMarks(whitespaceLines()[1]).every(mark => getComputedStyle(mark).backgroundImage === 'none'),
-		'ideographic spaces in strings and comments are marked but hidden on inactive lines');
+	assert(
+		spaceMarks(whitespaceLines()[0]).map(mark => mark.textContent).join('|') === ' | |\u3000|\u3000| | ',
+		'deleting inside a mixed run preserves separate marks',
+	);
+	assert(
+		fullWidthMarks(whitespaceLines()[1]).map(mark => mark.textContent).join('') === '\u3000\u3000\u3000' &&
+			fullWidthMarks(whitespaceLines()[1]).every(mark => getComputedStyle(mark).backgroundImage === 'none'),
+		'ideographic spaces in strings and comments are marked but hidden on inactive lines',
+	);
 	a.moveTo({ line: 1, ch: 0 }, { focus: false });
-	assert(fullWidthMarks(whitespaceLines()[1]).every(mark =>
-		getComputedStyle(mark).backgroundImage.includes('linear-gradient') &&
-		getComputedStyle(mark).backgroundSize === 'calc(100% - 2px) 4px'),
-		'ideographic spaces in strings and comments become visible on the active line');
+	assert(
+		fullWidthMarks(whitespaceLines()[1]).every(mark =>
+			getComputedStyle(mark).backgroundImage.includes('linear-gradient') &&
+			getComputedStyle(mark).backgroundSize === 'calc(100% - 2px) 4px'),
+		'ideographic spaces in strings and comments become visible on the active line',
+	);
 	a.replaceSelection('\u3000');
-	assert(fullWidthMarks(whitespaceLines()[1]).map(mark => mark.textContent).join('').length === 4,
-		'ideographic space decorations update after editing');
+	assert(
+		fullWidthMarks(whitespaceLines()[1]).map(mark => mark.textContent).join('').length === 4,
+		'ideographic space decorations update after editing',
+	);
 	a.replaceRange('', { line: 1, ch: 0 }, { line: 1, ch: 1 });
-	assert(fullWidthMarks(whitespaceLines()[1]).map(mark => mark.textContent).join('').length === 3,
-		'ideographic space decorations update after deletion');
+	assert(
+		fullWidthMarks(whitespaceLines()[1]).map(mark => mark.textContent).join('').length === 3,
+		'ideographic space decorations update after deletion',
+	);
 	a.loadDocument('a \tb\nc \td');
-	assert(getComputedStyle(whitespaceLines()[0].querySelector('.cm-opticm-space')).backgroundImage.includes('linear-gradient') &&
-		getComputedStyle(whitespaceLines()[1].querySelector('.cm-opticm-space')).backgroundImage === 'none' &&
-		getComputedStyle(whitespaceLines()[1].querySelector('.cm-highlightTab'), '::before').color === 'rgb(251, 221, 230)',
-		'component preserves active-space and inactive-tab display');
+	assert(
+		getComputedStyle(whitespaceLines()[0].querySelector('.cm-opticm-space')).backgroundImage.includes('linear-gradient') &&
+			getComputedStyle(whitespaceLines()[1].querySelector('.cm-opticm-space')).backgroundImage === 'none' &&
+			getComputedStyle(whitespaceLines()[1].querySelector('.cm-highlightTab'), '::before').color === 'rgb(251, 221, 230)',
+		'component preserves active-space and inactive-tab display',
+	);
 	a.loadDocument('    let sample = 1;');
 	await waitFor(() => a.getAnalysis() !== null, 'declaration analysis is ready');
 	const declarationAboveRuler = () => {
@@ -192,18 +226,24 @@ try {
 	press(editorA, 'a', mod);
 	assert(a.getSelection() === a.getValue(), 'select-all shortcut selects the entire document');
 	const selectedLineStyle = getComputedStyle(editorA.querySelector('.cm-line'));
-	assert(editorA.classList.contains('cm-has-selection') && editorA.querySelector('.cm-activeLine') &&
-		editorA.querySelector('.cm-activeLineGutter') && selectedLineStyle.boxShadow === 'none',
-		'JavaScript selection hides the active-line frame while retaining standard active-line classes');
+	assert(
+		editorA.classList.contains('cm-has-selection') && editorA.querySelector('.cm-activeLine') &&
+			editorA.querySelector('.cm-activeLineGutter') && selectedLineStyle.boxShadow === 'none',
+		'JavaScript selection hides the active-line frame while retaining standard active-line classes',
+	);
 	const activeLiteral = editorA.querySelector('.cm-activeLine .cm-syntax-literal');
-	assert(activeLiteral && getComputedStyle(activeLiteral).textShadow === 'none',
-		'JavaScript literals on the active line remain without a text shadow during selection');
+	assert(
+		activeLiteral && getComputedStyle(activeLiteral).textShadow === 'none',
+		'JavaScript literals on the active line remain without a text shadow during selection',
+	);
 	const selectionBackgrounds = () => [...editorA.querySelectorAll('.cm-full-line-selectionLayer .cm-selectionBackground')];
 	await waitFor(() => selectionBackgrounds().length, 'selection is rendered');
 	const selectedLineBox = editorA.querySelector('.cm-line').getBoundingClientRect();
 	const singleLineBox = selectionBackgrounds()[0].getBoundingClientRect();
-	assert(Math.abs(singleLineBox.top - selectedLineBox.top) < 1 && Math.abs(singleLineBox.height - selectedLineBox.height) < 1,
-		'single-line selection fills the entire visual line height');
+	assert(
+		Math.abs(singleLineBox.top - selectedLineBox.top) < 1 && Math.abs(singleLineBox.height - selectedLineBox.height) < 1,
+		'single-line selection fills the entire visual line height',
+	);
 	const selectionColor = () => getComputedStyle(selectionBackgrounds()[0]).backgroundColor;
 	await waitFor(() => editorA.classList.contains('cm-focused'), 'editor focus is reflected in the selection style');
 	const focusedSelectionColor = selectionColor();
@@ -212,8 +252,10 @@ try {
 	assert(selectionColor() === focusedSelectionColor, 'selection background color is the same with and without focus');
 	a.focus();
 	const selectionLayer = editorA.querySelector('.cm-full-line-selectionLayer');
-	assert(Number(getComputedStyle(selectionLayer).zIndex) > Number(getComputedStyle(editorA.querySelector('.cm-structure-overlay')).zIndex),
-		'selection highlight is painted above the structure canvas and editor background');
+	assert(
+		Number(getComputedStyle(selectionLayer).zIndex) > Number(getComputedStyle(editorA.querySelector('.cm-structure-overlay')).zIndex),
+		'selection highlight is painted above the structure canvas and editor background',
+	);
 	for (const type of ['copy', 'cut']) {
 		editorA.querySelector('.cm-content').dispatchEvent(new ClipboardEvent(type, { bubbles: true, cancelable: true, clipboardData: new DataTransfer() }));
 	}
@@ -225,14 +267,18 @@ try {
 	press(editorA, 'a', mod);
 	await waitFor(() => selectionBackgrounds().length >= 3, 'multiline selection is rendered');
 	const lineHeight = editorA.querySelector('.cm-line').getBoundingClientRect().height;
-	assert(selectionBackgrounds().every(background => Math.abs(background.getBoundingClientRect().height - lineHeight) < 1),
-		'multiline selection uses the same full visual-line height for every band');
+	assert(
+		selectionBackgrounds().every(background => Math.abs(background.getBoundingClientRect().height - lineHeight) < 1),
+		'multiline selection uses the same full visual-line height for every band',
+	);
 	a.loadDocument('one\ntwo');
 	const restoredLine = editorA.querySelector('.cm-activeLine');
-	assert(!editorA.classList.contains('cm-has-selection') && restoredLine && editorA.querySelector('.cm-activeLineGutter') &&
-		getComputedStyle(restoredLine).backgroundColor !== 'rgba(0, 0, 0, 0)' &&
-		getComputedStyle(restoredLine).boxShadow !== 'none',
-		'collapsing the selection restores active-line and gutter highlighting');
+	assert(
+		!editorA.classList.contains('cm-has-selection') && restoredLine && editorA.querySelector('.cm-activeLineGutter') &&
+			getComputedStyle(restoredLine).backgroundColor !== 'rgba(0, 0, 0, 0)' &&
+			getComputedStyle(restoredLine).boxShadow !== 'none',
+		'collapsing the selection restores active-line and gutter highlighting',
+	);
 	editorA.querySelector('.cm-content').dispatchEvent(new ClipboardEvent('cut', { bubbles: true, cancelable: true, clipboardData: new DataTransfer() }));
 	assert(a.getValue() === 'one\ntwo', 'cut without a selection leaves the current line intact');
 	a.moveTo({ line: 0, ch: 1 });
@@ -316,8 +362,10 @@ try {
 	assert(cursorUrls[0] !== cursorUrls[1], 'line selection changes embedded cursor');
 	a.setLineSelectionMode(false);
 	a.setSettings({ gutterLineSelection: false });
-	assert(editorA.classList.contains('cm-gutter-line-selection') && !editorA.classList.contains('cm-easy-line-selection'),
-		'legacy option turns off only easy selection');
+	assert(
+		editorA.classList.contains('cm-gutter-line-selection') && !editorA.classList.contains('cm-easy-line-selection'),
+		'legacy option turns off only easy selection',
+	);
 	const defaultEditorBackground = 'rgb(253, 253, 253)';
 	assert(getComputedStyle(editorA).backgroundColor === defaultEditorBackground && getComputedStyle(editorA).color === 'rgb(17, 17, 0)', 'default editor background is neutral gray');
 	const themeRoot = editorA.closest('.opticm');
@@ -328,11 +376,15 @@ try {
 	a.loadDocument('function first() {\n\tvar firstValue = 1; console.log(firstValue);\n}\nfunction second() {\n\tvar secondValue = 2;\n}');
 	await a.analyzeNow();
 	const local = editorA.querySelector('.cm-syntax-local-reference');
-	assert(local?.textContent === 'firstValue' && getComputedStyle(local).color === 'rgb(83, 122, 31)',
-		'local variable references retain the original green highlight');
-	assert([...editorA.querySelectorAll('.cm-syntax-variable')].some(node =>
-		node.textContent === 'console' && getComputedStyle(node).color === 'rgb(0, 83, 99)'),
-		'global variable references retain the original turquoise highlight');
+	assert(
+		local?.textContent === 'firstValue' && getComputedStyle(local).color === 'rgb(83, 122, 31)',
+		'local variable references retain the original green highlight',
+	);
+	assert(
+		[...editorA.querySelectorAll('.cm-syntax-variable')].some(node =>
+			node.textContent === 'console' && getComputedStyle(node).color === 'rgb(0, 83, 99)'),
+		'global variable references retain the original turquoise highlight',
+	);
 	const jsReference = () => [...editorA.querySelectorAll('.cm-syntax-variable-reference')]
 		.find(node => node.textContent === 'firstValue');
 	const jsReferenceStyle = getComputedStyle(jsReference());
@@ -343,42 +395,58 @@ try {
 	};
 	assert(jsReferenceAppearance.shadow === 'none', 'JavaScript reference background is drawn on canvas');
 	a.moveTo({ line: 1, ch: 0 }, { focus: false });
-	assert(getComputedStyle(jsReference()).boxShadow === 'none',
-		'JavaScript reference shadow is hidden on the active line');
+	assert(
+		getComputedStyle(jsReference()).boxShadow === 'none',
+		'JavaScript reference shadow is hidden on the active line',
+	);
 	a.moveTo({ line: 0, ch: 0 }, { focus: false });
 	a.setSettings({ analysis: false });
 	a.loadDocument('function f() { let item = 1; return item; }');
-	assert(editorA.querySelector('.cm-syntax-local-reference')?.textContent === 'item',
-		'JavaScript syntax highlighting remains immediate when background analysis is disabled');
+	assert(
+		editorA.querySelector('.cm-syntax-local-reference')?.textContent === 'item',
+		'JavaScript syntax highlighting remains immediate when background analysis is disabled',
+	);
 	a.replaceDocument('function f() { let other = 1; return item; }');
-	assert(!editorA.querySelector('.cm-syntax-local-reference') &&
-		[...editorA.querySelectorAll('.cm-syntax-variable')].some(node => node.textContent === 'item'),
-		'JavaScript edits immediately update local reference classification');
+	assert(
+		!editorA.querySelector('.cm-syntax-local-reference') &&
+			[...editorA.querySelectorAll('.cm-syntax-variable')].some(node => node.textContent === 'item'),
+		'JavaScript edits immediately update local reference classification',
+	);
 	a.setSettings({ analysis: true });
 	a.loadDocument('function first() {\n\tvar firstValue = 1; console.log(firstValue);\n}\nfunction second() {\n\tvar secondValue = 2;\n}');
 	await a.analyzeNow();
 	const ruler = editorA.querySelector('.cm-opticm-rulers');
-	assert([...ruler.children].map(rule => rule.style.getPropertyValue('--ruler-column')).join(',') === '4,8,12' &&
-		[...ruler.children].every(rule => getComputedStyle(rule).borderLeftStyle === 'dashed'),
-		'three dashed rulers mark the original indentation columns');
+	assert(
+		[...ruler.children].map(rule => rule.style.getPropertyValue('--ruler-column')).join(',') === '4,8,12' &&
+			[...ruler.children].every(rule => getComputedStyle(rule).borderLeftStyle === 'dashed'),
+		'three dashed rulers mark the original indentation columns',
+	);
 	themeRoot.style.setProperty('--opticm-indent-ruler-color', '#123456');
-	assert(getComputedStyle(ruler.firstElementChild).borderLeftColor === 'rgb(18, 52, 86)' &&
-		getComputedStyle(editorB.querySelector('.cm-opticm-rulers > span')).borderLeftColor !== 'rgb(18, 52, 86)',
-		'component ruler styling can be customized independently');
+	assert(
+		getComputedStyle(ruler.firstElementChild).borderLeftColor === 'rgb(18, 52, 86)' &&
+			getComputedStyle(editorB.querySelector('.cm-opticm-rulers > span')).borderLeftColor !== 'rgb(18, 52, 86)',
+		'component ruler styling can be customized independently',
+	);
 	themeRoot.style.removeProperty('--opticm-indent-ruler-color');
 	a.setSettings({ rulers: false });
-	assert(!editorA.querySelector('.cm-ruler-overlay') && editorB.querySelector('.cm-ruler-overlay'),
-		'ruler setting disables guides only in the selected editor');
+	assert(
+		!editorA.querySelector('.cm-ruler-overlay') && editorB.querySelector('.cm-ruler-overlay'),
+		'ruler setting disables guides only in the selected editor',
+	);
 	a.setSettings({ rulers: true });
-	assert(editorA.querySelectorAll('.cm-opticm-rulers > span').length === 3,
-		'ruler setting restores guides');
+	assert(
+		editorA.querySelectorAll('.cm-opticm-rulers > span').length === 3,
+		'ruler setting restores guides',
+	);
 	await new Promise(resolve => setTimeout(resolve, 120));
 	const restoredRuler = editorA.querySelector('.cm-opticm-rulers');
 	const firstLine = editorA.querySelector('.cm-content .cm-line');
-	assert(Math.abs(restoredRuler.firstElementChild.getBoundingClientRect().left -
-		(firstLine.getBoundingClientRect().left + parseFloat(getComputedStyle(firstLine).paddingLeft) +
-		4 * parseFloat(restoredRuler.style.getPropertyValue('--ruler-character-width')))) < 1,
-		'component ruler aligns with its padded text after re-enabling');
+	assert(
+		Math.abs(restoredRuler.firstElementChild.getBoundingClientRect().left -
+			(firstLine.getBoundingClientRect().left + parseFloat(getComputedStyle(firstLine).paddingLeft) +
+			4 * parseFloat(restoredRuler.style.getPropertyValue('--ruler-character-width')))) < 1,
+		'component ruler aligns with its padded text after re-enabling',
+	);
 	const oldRulerWidth = parseFloat(restoredRuler.style.getPropertyValue('--ruler-character-width'));
 	const oldLineHeight = firstLine.getBoundingClientRect().height;
 	a.setSettings({ fontSize: 24 });
@@ -390,12 +458,16 @@ try {
 	if (textNode) {
 		textWidth.setStart(textNode, 0);
 		textWidth.setEnd(textNode, 4);
-		assert(Math.abs(textWidth.getBoundingClientRect().width / 4 - changedRulerWidth) < 1,
-			'ruler uses the new character width after font size changes');
+		assert(
+			Math.abs(textWidth.getBoundingClientRect().width / 4 - changedRulerWidth) < 1,
+			'ruler uses the new character width after font size changes',
+		);
 	}
 	a.setSettings({ fontSize: 16 });
-	await waitFor(() => Math.abs(parseFloat(restoredRuler.style.getPropertyValue('--ruler-character-width')) - oldRulerWidth) < 0.1,
-		'font size restoration updates ruler metrics without editing');
+	await waitFor(
+		() => Math.abs(parseFloat(restoredRuler.style.getPropertyValue('--ruler-character-width')) - oldRulerWidth) < 0.1,
+		'font size restoration updates ruler metrics without editing',
+	);
 	const gutterWidth = () => editorA.querySelector('.cm-gutters').getBoundingClientRect().width;
 	const normalWidth = gutterWidth();
 	const structureLayer = getComputedStyle(editorA.querySelector('.cm-structure-overlay'));
@@ -403,24 +475,32 @@ try {
 	assert(getComputedStyle(editorA.querySelector('.cm-scroller')).zIndex === 'auto' &&
 		Number(textLayer.zIndex) > Number(structureLayer.zIndex), 'source text is painted above the structure canvas');
 	themeRoot.style.setProperty('--opticm-structure-overlay-z-index', '-1');
-	assert(getComputedStyle(editorA.querySelector('.cm-structure-overlay')).zIndex === '-1' &&
-		getComputedStyle(editorB.querySelector('.cm-structure-overlay')).zIndex === '0',
-		'structure layering can be customized independently in the component');
+	assert(
+		getComputedStyle(editorA.querySelector('.cm-structure-overlay')).zIndex === '-1' &&
+			getComputedStyle(editorB.querySelector('.cm-structure-overlay')).zIndex === '0',
+		'structure layering can be customized independently in the component',
+	);
 	themeRoot.style.removeProperty('--opticm-structure-overlay-z-index');
 	themeRoot.style.setProperty('--opticm-function-number-color', '#123456');
 	themeRoot.style.setProperty('--opticm-function-lint-gutter-width', '30px');
-	assert(getComputedStyle(editorA.querySelector('.cm-gutter-lint')).width === '30px',
-		'function lint gutter width is customizable from the component container');
+	assert(
+		getComputedStyle(editorA.querySelector('.cm-gutter-lint')).width === '30px',
+		'function lint gutter width is customizable from the component container',
+	);
 	themeRoot.style.removeProperty('--opticm-function-lint-gutter-width');
 	for (const functionLineNumbers of [true, false]) {
 		a.setSettings({ functionLineNumbers });
 		assert(gutterWidth() === normalWidth, 'gutter width is stable when switching line-number modes: ' + functionLineNumbers);
 		const strip = getComputedStyle(editorA.querySelector('.cm-gutters'), '::after');
-		assert(strip.backgroundImage.includes('repeating-linear-gradient') === functionLineNumbers,
-			'only per-function mode displays the striped gutter edge: ' + functionLineNumbers);
+		assert(
+			strip.backgroundImage.includes('repeating-linear-gradient') === functionLineNumbers,
+			'only per-function mode displays the striped gutter edge: ' + functionLineNumbers,
+		);
 		if (functionLineNumbers) {
-			assert(getComputedStyle(editorA.querySelectorAll('.cm-function-number')[1]).color === 'rgb(18, 52, 86)',
-				'function number color is customizable in the component');
+			assert(
+				getComputedStyle(editorA.querySelectorAll('.cm-function-number')[1]).color === 'rgb(18, 52, 86)',
+				'function number color is customizable in the component',
+			);
 		}
 		await waitFor(() => editorA.querySelectorAll('.cm-lint-marker-warning').length === 2, 'function diagnostics did not render');
 		for (const [index, marker] of [...editorA.querySelectorAll('.cm-lint-marker-warning')].entries()) {
@@ -434,8 +514,10 @@ try {
 		const marker = lintGutter.querySelector('.cm-lint-marker-warning');
 		const gutterBox = lintGutter.getBoundingClientRect();
 		const markerBox = marker.getBoundingClientRect();
-		assert(markerBox.width >= 48 && markerBox.left >= gutterBox.left && markerBox.right <= gutterBox.right,
-			'zoomed lint marker fits inside its gutter: ' + functionLineNumbers);
+		assert(
+			markerBox.width >= 48 && markerBox.left >= gutterBox.left && markerBox.right <= gutterBox.right,
+			'zoomed lint marker fits inside its gutter: ' + functionLineNumbers,
+		);
 		a.setSettings({ fontSize: originalFontSize });
 		themeRoot.style.removeProperty('--opticm-function-number-color');
 	}
@@ -448,8 +530,10 @@ try {
 	document.head.append(scrollbarStyle);
 	themeRoot.style.setProperty('--opticm-function-scroll-marker-track-width', '10px');
 	a.setSettings({ functionLineNumbers: false, functionScrollMarkers: true });
-	await waitFor(() => editorA.querySelectorAll('.cm-function-scroll-markers > span').length > 0,
-		'function scroll markers did not render independently');
+	await waitFor(
+		() => editorA.querySelectorAll('.cm-function-scroll-markers > span').length > 0,
+		'function scroll markers did not render independently',
+	);
 	const scroller = editorA.querySelector('.cm-scroller');
 	const markerBounds = editorA.querySelector('.cm-function-scroll-markers > span').getBoundingClientRect();
 	const scrollerBounds = scroller.getBoundingClientRect();
@@ -457,13 +541,17 @@ try {
 	const scrollbarRight = scrollerBounds.right - borderRight;
 	const scrollbarLeft = scrollerBounds.left + scroller.clientLeft + scroller.clientWidth;
 	assert(scrollbarRight - scrollbarLeft >= 20, 'test scrollbar must be wider than the marker track');
-	assert(Math.abs((markerBounds.left + markerBounds.right - scrollbarLeft - scrollbarRight) / 2) < 1,
-		'function markers are horizontally centered in the scrollbar');
+	assert(
+		Math.abs((markerBounds.left + markerBounds.right - scrollbarLeft - scrollbarRight) / 2) < 1,
+		'function markers are horizontally centered in the scrollbar',
+	);
 	themeRoot.style.removeProperty('--opticm-function-scroll-marker-track-width');
 	scrollbarStyle.remove();
 	a.setSettings({ functionLineNumbers: true });
-	assert(editorA.querySelectorAll('.cm-function-scroll-markers > span').length > 0,
-		'enabling function line numbers does not control function scroll markers');
+	assert(
+		editorA.querySelectorAll('.cm-function-scroll-markers > span').length > 0,
+		'enabling function line numbers does not control function scroll markers',
+	);
 	assert(longWidth > normalWidth && gutterWidth() === longWidth, 'both gutters reserve the same width for four-digit numbers');
 	a.setSettings({ functionLineNumbers: false, functionScrollMarkers: false });
 	assert(!editorA.querySelector('.cm-function-scroll-markers'), 'disabling function scroll markers removes their DOM');
@@ -513,13 +601,23 @@ try {
 	const older = await pending;
 	assert(older.text === 'const next = 2;', 'analysis snapshot keeps matching source');
 	assert(a.getAnalysis() === null, 'stale analysis not published');
+	let published;
+	const unsubscribeAnalysis = a.on('analysis', snapshot => {
+		published = structuredClone(snapshot);
+		snapshot.structures.length = 0;
+	});
 	const latest = await a.analyzeNow();
-	latest.fnNames.push('mutated');
-	assert(!a.getAnalysis().fnNames.includes('mutated'), 'analysis result detached from internal state');
+	unsubscribeAnalysis();
+	assert(JSON.stringify(published) === JSON.stringify(latest), 'analysis event publishes the shared snapshot');
+	latest.structures.length = 0;
+	assert(a.getAnalysis().structures.some(range => range.kind === 'function'), 'analysis result detached from internal state');
 	a.setSettings({ analysis: false, functionLineNumbers: true });
 	assert(a.getAnalysis() === null && editorA.querySelector('.cm-lineNumbers .cm-gutterElement:not([style*="visibility: hidden"])')?.textContent === '1', 'analysis disabled restores ordinary line numbers');
 	const once = await a.analyzeNow();
-	assert(once.fnNames[0] === 'newest' && a.getAnalysis() === null, 'explicit analysis works without enabling automatic display');
+	assert(
+		once.text === 'function newest() {}' && once.structures.some(range => range.kind === 'function') && a.getAnalysis() === null,
+		'explicit analysis works without enabling automatic display',
+	);
 	a.setSettings({ readOnly: true, disabled: true });
 	a.setSettings({ disabled: false });
 	assert(a.getState().readOnly && !a.getState().disabled, 'disabled restores read-only');
@@ -592,7 +690,7 @@ try {
 	a = await createEditor(document.querySelector('#a'), { value: 'const recreated = true;' });
 	assert(a.getValue().includes('recreated') && b.getValue().includes('two'), 'recreate without affecting sibling');
 	assert(a.getSettings().language === 'en' && searchLabel(a, document.querySelector('#a')).includes('Find'), 'omitted UI language defaults to English');
-	assert(a.getSettings().codeLanguage === 'javascript' && a.getAnalysis().success, 'omitted code language retains JavaScript analysis');
+	assert(a.getSettings().codeLanguage === 'javascript' && a.getAnalysis().complete, 'omitted code language retains JavaScript analysis');
 	b.destroy();
 	a.destroy();
 	const NativeWorker = window.Worker;
@@ -627,10 +725,12 @@ try {
 		a.loadDocument('const broken = ;\nordinary text');
 		a.focus();
 		press(plain, 'a', mod);
-		assert(plain.querySelector('.cm-editor').classList.contains('cm-has-selection') &&
-			plain.querySelector('.cm-activeLine') && plain.querySelector('.cm-activeLineGutter') &&
-			getComputedStyle(plain.querySelector('.cm-activeLine')).boxShadow === 'none',
-			'plain-text selection hides the active-line frame while retaining standard active-line classes');
+		assert(
+			plain.querySelector('.cm-editor').classList.contains('cm-has-selection') &&
+				plain.querySelector('.cm-activeLine') && plain.querySelector('.cm-activeLineGutter') &&
+				getComputedStyle(plain.querySelector('.cm-activeLine')).boxShadow === 'none',
+			'plain-text selection hides the active-line frame while retaining standard active-line classes',
+		);
 		a.moveTo({ line: 0, ch: 0 });
 		const original = a.getValue();
 		for (const command of ['format', 'complete', 'toggleComment']) {
@@ -673,10 +773,14 @@ try {
 	let javaEditor;
 	try {
 		javaEditor = await createEditor(document.querySelector('#b'), {
-			codeLanguage: 'java', value: javaSource, analysisDelay: 0, functionLineNumbers: true,
+			codeLanguage       : 'java',
+			value              : javaSource,
+			analysisDelay      : 0,
+			functionLineNumbers: true,
 		});
 		const javaRoot = document.querySelector('#b');
 		const javaAnalysis = javaEditor.getAnalysis();
+		assert(Object.keys(javaAnalysis).sort().join(',') === analysisKeys, 'public Java analysis uses the shared format');
 		javaEditor.focus();
 		press(javaRoot, 'a', mod);
 		const javaSelection = javaEditor.getSelection();
@@ -686,49 +790,72 @@ try {
 			javaEditor.getValue() === javaSource, 'unavailable Java commands preserve the document and selection');
 		const highlighted = (kind, text) => [...javaRoot.querySelectorAll('.cm-syntax-' + kind)]
 			.find(node => node.textContent === text);
-		assert(javaEditor.getSettings().codeLanguage === 'java' && javaAnalysis?.success,
-			'Java Tree-sitter worker analyzes Java 25 simple source files');
+		assert(
+			javaEditor.getSettings().codeLanguage === 'java' && javaAnalysis?.complete,
+			'Java Tree-sitter worker analyzes Java 25 simple source files',
+		);
 		javaEditor.focus();
 		press(javaRoot, 'a', mod);
-		assert(javaRoot.querySelector('.cm-editor').classList.contains('cm-has-selection') &&
-			javaRoot.querySelector('.cm-activeLine') && javaRoot.querySelector('.cm-activeLineGutter') &&
-			getComputedStyle(javaRoot.querySelector('.cm-activeLine')).boxShadow === 'none',
-			'Java selection hides the active-line frame while retaining standard active-line classes');
+		assert(
+			javaRoot.querySelector('.cm-editor').classList.contains('cm-has-selection') &&
+				javaRoot.querySelector('.cm-activeLine') && javaRoot.querySelector('.cm-activeLineGutter') &&
+				getComputedStyle(javaRoot.querySelector('.cm-activeLine')).boxShadow === 'none',
+			'Java selection hides the active-line frame while retaining standard active-line classes',
+		);
 		javaEditor.moveTo({ line: 0, ch: 0 });
-		assert(!javaRoot.querySelector('.cm-editor').classList.contains('cm-has-selection') &&
-			javaRoot.querySelector('.cm-activeLine') && javaRoot.querySelector('.cm-activeLineGutter'),
-			'Java collapsed selection restores active-line and gutter highlighting');
-		assert(highlighted('keyword', 'void') && highlighted('function', 'main') &&
-			highlighted('type', 'String') && highlighted('literal', '"Hello"') &&
-			highlighted('variable', 'count'),
-			'Java analysis results are passed to the syntax-highlighting extension');
-		assert([...javaRoot.querySelectorAll('.cm-syntax-local-reference')].some(node =>
-			node.textContent === 'count' && getComputedStyle(node).color === 'rgb(83, 122, 31)') &&
-			javaRoot.querySelector('.cm-line:nth-child(4) .cm-syntax-definition')?.textContent === 'count',
-			'Java variable declarations and local references use shared visual extensions');
+		assert(
+			!javaRoot.querySelector('.cm-editor').classList.contains('cm-has-selection') &&
+				javaRoot.querySelector('.cm-activeLine') && javaRoot.querySelector('.cm-activeLineGutter'),
+			'Java collapsed selection restores active-line and gutter highlighting',
+		);
+		assert(
+			highlighted('keyword', 'void') && highlighted('function', 'main') &&
+				highlighted('type', 'String') && highlighted('literal', '"Hello"') &&
+				highlighted('variable', 'count'),
+			'Java analysis results are passed to the syntax-highlighting extension',
+		);
+		assert(
+			[...javaRoot.querySelectorAll('.cm-syntax-local-reference')].some(node =>
+				node.textContent === 'count' && getComputedStyle(node).color === 'rgb(83, 122, 31)') &&
+				javaRoot.querySelector('.cm-line:nth-child(4) .cm-syntax-definition')?.textContent === 'count',
+			'Java variable declarations and local references use shared visual extensions',
+		);
 		const javaReference = () => [...javaRoot.querySelectorAll('.cm-syntax-variable-reference')]
 			.find(node => node.textContent === 'count');
 		const javaStyle = getComputedStyle(javaReference());
-		assert(javaStyle.backgroundColor === jsReferenceAppearance.background &&
-			javaStyle.boxShadow === jsReferenceAppearance.shadow &&
-			javaStyle.borderRadius === jsReferenceAppearance.radius,
-			'Java reference background, shadow and radius match JavaScript');
-		assert(!javaRoot.querySelector('.cm-line:nth-child(4) .cm-syntax-variable-reference'),
-			'Java variable declarations are not decorated as references');
+		assert(
+			javaStyle.backgroundColor === jsReferenceAppearance.background &&
+				javaStyle.boxShadow === jsReferenceAppearance.shadow &&
+				javaStyle.borderRadius === jsReferenceAppearance.radius,
+			'Java reference background, shadow and radius match JavaScript',
+		);
+		assert(
+			!javaRoot.querySelector('.cm-line:nth-child(4) .cm-syntax-variable-reference'),
+			'Java variable declarations are not decorated as references',
+		);
 		javaEditor.moveTo({ line: 4, ch: 0 }, { focus: false });
-		assert(getComputedStyle(javaReference()).boxShadow === 'none' &&
-			getComputedStyle(javaReference()).backgroundColor === 'rgba(0, 0, 0, 0)',
-			'Java reference background and shadow are hidden on the active line');
+		assert(
+			getComputedStyle(javaReference()).boxShadow === 'none' &&
+				getComputedStyle(javaReference()).backgroundColor === 'rgba(0, 0, 0, 0)',
+			'Java reference background and shadow are hidden on the active line',
+		);
 		const sectionMarkers = [...javaRoot.querySelectorAll('.cm-sectionNumbers .cm-function-number')]
 			.map(element => element.textContent).join();
-		assert(javaAnalysis.sectionStarts.join() === '1,8' && sectionMarkers === '1,2',
-			`Java methods drive per-function numbering: sections=${javaAnalysis.sectionStarts.join()}, markers=${sectionMarkers}`);
+		const sectionOffsets = javaAnalysis.sections.map(section => section.from).join();
+		assert(
+			sectionOffsets === [javaSource.indexOf('void main'), javaSource.indexOf('void helper')].join() && sectionMarkers === '1,2',
+			`Java methods drive per-function numbering: sections=${sectionOffsets}, markers=${sectionMarkers}`,
+		);
 		const countOffset = javaSource.indexOf('count');
-		assert(countOffset >= 0 && javaAnalysis.syntaxHighlights.some(token =>
-			token.from === countOffset && token.to === countOffset + 'count'.length && token.kind === 'variable'),
-			'Java syntax ranges map UTF-8 parser positions to UTF-16 editor offsets');
-		assert(!javaRoot.querySelector('.cm-lint-marker') && !javaRoot.querySelector('.cm-tooltip-autocomplete'),
-			'Valid Java code has no diagnostics and Java does not open completion');
+		assert(
+			countOffset >= 0 && javaAnalysis.syntax.some(token =>
+				token.from === countOffset && token.to === countOffset + 'count'.length && token.kind === 'variable'),
+			'Java syntax ranges map UTF-8 parser positions to UTF-16 editor offsets',
+		);
+		assert(
+			!javaRoot.querySelector('.cm-lint-marker') && !javaRoot.querySelector('.cm-tooltip-autocomplete'),
+			'Valid Java code has no diagnostics and Java does not open completion',
+		);
 		javaEditor.setSettings({ analysis: false });
 		javaEditor.loadDocument('void main() {\n if (true) IO.println(1);\n int n = 1\n}');
 		await waitFor(() => javaRoot.querySelector('.cm-lint-marker-error') &&
@@ -750,8 +877,10 @@ try {
 		for (const operator of ['=', '>']) {
 			const keywordStyle = getComputedStyle(syntaxToken(javaRoot, 'keyword', 'if'));
 			const operatorStyle = getComputedStyle(syntaxToken(javaRoot, 'operator', operator));
-			assert(operatorStyle.color === keywordStyle.color && operatorStyle.fontWeight === keywordStyle.fontWeight,
-				`Java operator ${operator} matches keyword style`);
+			assert(
+				operatorStyle.color === keywordStyle.color && operatorStyle.fontWeight === keywordStyle.fontWeight,
+				`Java operator ${operator} matches keyword style`,
+			);
 		}
 		for (const root of [jsRoot, javaRoot]) {
 			const token = syntaxToken(root, 'function-definition', 'work');
@@ -781,28 +910,36 @@ try {
 			const javaToken = syntaxToken(javaRoot, javaKind, text);
 			assert(jsToken && javaToken, `JavaScript and Java syntax tokens are present: ${text}`);
 			const jsStyle = getComputedStyle(jsToken), style = getComputedStyle(javaToken);
-			assert(jsStyle.fontWeight === (jsKind === 'variable-reference' ? '400' : '700') &&
-				(jsStyle.textShadow !== 'none') === (jsKind === 'literal') &&
-				jsStyle.boxShadow === 'none',
-				`JavaScript retains expected syntax weight and shadows: ${text}`);
-			assert(style.fontWeight === jsStyle.fontWeight && style.textShadow === jsStyle.textShadow &&
-				style.boxShadow === jsStyle.boxShadow,
-				`Java syntax weight and shadows match JavaScript: ${text}`);
+			assert(
+				jsStyle.fontWeight === (jsKind === 'variable-reference' ? '400' : '700') &&
+					(jsStyle.textShadow !== 'none') === (jsKind === 'literal') &&
+					jsStyle.boxShadow === 'none',
+				`JavaScript retains expected syntax weight and shadows: ${text}`,
+			);
+			assert(
+				style.fontWeight === jsStyle.fontWeight && style.textShadow === jsStyle.textShadow &&
+					style.boxShadow === jsStyle.boxShadow,
+				`Java syntax weight and shadows match JavaScript: ${text}`,
+			);
 		}
 		for (const root of [jsRoot, javaRoot]) {
 			root.style.setProperty('--opticm-syntax-literal-font-weight', '400');
 			root.style.setProperty('--opticm-syntax-literal-text-shadow', 'rgb(1, 2, 3) 1px 2px 3px');
 			const style = getComputedStyle(syntaxToken(root, 'literal', '10'));
-			assert(style.fontWeight === '400' && style.textShadow.includes('rgb(1, 2, 3)'),
-				'Literal weight and shadow accept CSS custom properties');
+			assert(
+				style.fontWeight === '400' && style.textShadow.includes('rgb(1, 2, 3)'),
+				'Literal weight and shadow accept CSS custom properties',
+			);
 			root.style.removeProperty('--opticm-syntax-literal-font-weight');
 			root.style.removeProperty('--opticm-syntax-literal-text-shadow');
 		}
 		a.moveTo({ line: 2, ch: 0 }, { focus: false });
 		javaEditor.moveTo({ line: 2, ch: 0 }, { focus: false });
-		assert(getComputedStyle(syntaxToken(jsRoot, 'literal', '10')).textShadow === 'none' &&
-			getComputedStyle(syntaxToken(javaRoot, 'literal', '10')).textShadow === 'none',
-			'Both languages hide literal text shadow on the active line');
+		assert(
+			getComputedStyle(syntaxToken(jsRoot, 'literal', '10')).textShadow === 'none' &&
+				getComputedStyle(syntaxToken(javaRoot, 'literal', '10')).textShadow === 'none',
+			'Both languages hide literal text shadow on the active line',
+		);
 		a.setSettings({ analysis: false });
 		a.loadDocument('const options = { enabled: true, name: 1 };\nconst { enabled, name } = options;');
 		const shorthandLine = () => jsRoot.querySelectorAll('.cm-content .cm-line')[1];
@@ -813,13 +950,17 @@ try {
 			return { color: style.color, fontWeight: style.fontWeight };
 		};
 		const beforeShorthand = ['enabled', 'name'].map(shorthandStyle);
-		assert(beforeShorthand.every(style => style && style.fontWeight === '400'),
-			'destructuring shorthand uses ordinary property styling before analysis');
+		assert(
+			beforeShorthand.every(style => style && style.fontWeight === '400'),
+			'destructuring shorthand uses ordinary property styling before analysis',
+		);
 		a.setSettings({ analysis: true });
 		await a.analyzeNow();
-		assert(JSON.stringify(['enabled', 'name'].map(shorthandStyle)) === JSON.stringify(beforeShorthand) &&
-			!shorthandLine().querySelector('.cm-syntax-definition'),
-			'destructuring shorthand retains its property styling after analysis');
+		assert(
+			JSON.stringify(['enabled', 'name'].map(shorthandStyle)) === JSON.stringify(beforeShorthand) &&
+				!shorthandLine().querySelector('.cm-syntax-definition'),
+			'destructuring shorthand retains its property styling after analysis',
+		);
 		a.setSettings({ analysis: false });
 		a.loadDocument('function run() {\n let local = 1;\n const object = { key: local, local };\n}');
 		const objectLine = () => jsRoot.querySelectorAll('.cm-content .cm-line')[2];
@@ -827,12 +968,16 @@ try {
 			.filter(node => node.textContent === name && !node.children.length).at(-1);
 		const isBoldBlack = node => node && getComputedStyle(node).fontWeight === '700' &&
 			getComputedStyle(node).color === 'rgb(17, 17, 0)';
-		assert(isBoldBlack(objectToken('key')) && isBoldBlack(objectToken('local')),
-			'object property keys are bold black before worker analysis');
+		assert(
+			isBoldBlack(objectToken('key')) && isBoldBlack(objectToken('local')),
+			'object property keys are bold black before worker analysis',
+		);
 		a.setSettings({ analysis: true });
 		await a.analyzeNow();
-		assert(isBoldBlack(objectToken('key')) && isBoldBlack(objectToken('local')),
-			'object property keys remain bold black after worker analysis');
+		assert(
+			isBoldBlack(objectToken('key')) && isBoldBlack(objectToken('local')),
+			'object property keys remain bold black after worker analysis',
+		);
 		javaEditor.setSettings({ analysis: false });
 		javaEditor.loadDocument('enum Kind { ONE, TWO }');
 		const enumToken = () => [...javaRoot.querySelectorAll('.cm-content span')]
@@ -856,14 +1001,18 @@ try {
 			editor.loadDocument(source);
 			const external = () => syntaxToken(root, 'variable', 'external');
 			const localDefinition = () => syntaxToken(root, 'definition', 'local');
-			assert(external() && getComputedStyle(external()).color === 'rgb(83, 122, 31)' &&
-				localDefinition() && getComputedStyle(localDefinition()).color === 'rgb(17, 17, 0)',
-				'pending ordinary variables are green without changing declarations');
+			assert(
+				external() && getComputedStyle(external()).color === 'rgb(83, 122, 31)' &&
+					localDefinition() && getComputedStyle(localDefinition()).color === 'rgb(17, 17, 0)',
+				'pending ordinary variables are green without changing declarations',
+			);
 			editor.setSettings({ analysis: true });
 			await editor.analyzeNow();
-			assert(external() && getComputedStyle(external()).color === expectedColor &&
-				getComputedStyle(localDefinition()).color === 'rgb(17, 17, 0)',
-				'fresh analysis restores the ordinary variable color');
+			assert(
+				external() && getComputedStyle(external()).color === expectedColor &&
+					getComputedStyle(localDefinition()).color === 'rgb(17, 17, 0)',
+				'fresh analysis restores the ordinary variable color',
+			);
 		}
 		for (const [editor, root, source] of [
 			[a, jsRoot, 'function test() {\n const text = "}";\n // }\n if (true) {\n  const values = [text];\n  return text;\n }\n}'],
@@ -878,8 +1027,11 @@ try {
 				assert(document.execCommand('insertText', false, input), 'editor accepts delimiter input');
 				await waitFor(() => editor.getValue() !== '', `${codeLanguage}: delimiter ${JSON.stringify(input)} did not reach editor state`);
 				const actual = editor.getValue();
-				assert(actual === expected, `${message}: ${codeLanguage} ${input}`,
-					`. Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+				assert(
+					actual === expected,
+					`${message}: ${codeLanguage} ${input}`,
+					`. Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`,
+				);
 			};
 			for (const [input, expected] of [['(', '()'], ['[', '[]'], ["'", "''"], ['"', '""'], ['{', '{']]) {
 				await checkDelimiter(input, expected, 'automatic delimiter insertion');
@@ -898,9 +1050,11 @@ try {
 			editor.moveTo({ line: 0, ch: source.indexOf('{') });
 			const lines = [...root.querySelectorAll('.cm-content .cm-line')];
 			const matches = [...root.querySelectorAll('.cm-content .cm-matchingBracket')];
-			assert(matches.length === 2 && matches[0].textContent === '{' && matches[1].textContent === '}' &&
-				matches[0].closest('.cm-line') === lines[0] && matches[1].closest('.cm-line') === lines.at(-1),
-				'bracket matching ignores braces in strings and comments even when analysis is disabled');
+			assert(
+				matches.length === 2 && matches[0].textContent === '{' && matches[1].textContent === '}' &&
+					matches[0].closest('.cm-line') === lines[0] && matches[1].closest('.cm-line') === lines.at(-1),
+				'bracket matching ignores braces in strings and comments even when analysis is disabled',
+			);
 			const overlay = root.querySelector('.cm-bracket-gutter-overlay');
 			await waitFor(() => overlay.children.length === 1, 'bracket gutter overlay was not painted');
 			const gutter = root.querySelector('.cm-gutters');
@@ -910,68 +1064,90 @@ try {
 			const overlayMarkBox = overlay.firstElementChild.getBoundingClientRect();
 			const hit = document.elementFromPoint(gutterBox.right - 2, bracketBox.top + bracketBox.height / 2);
 			const hitTestable = bracketBox.top >= 0 && bracketBox.bottom <= innerHeight;
-			assert(Math.abs(overlayBox.right - gutterBox.right) < 1 &&
-				Math.abs(overlayBox.width - parseFloat(getComputedStyle(gutter, '::after').width)) < 1 &&
-				Math.abs(overlayMarkBox.left - bracketBox.left) < 1 &&
-				Math.abs(overlayMarkBox.top - bracketBox.top) < 1 &&
-				getComputedStyle(overlay).pointerEvents === 'none' &&
-				getComputedStyle(overlay.firstElementChild, '::before').borderRadius === '50%' &&
-				(!hitTestable || hit?.closest('.cm-gutters') === gutter),
-				'bracket circle overlaps only the gutter edge without intercepting gutter input');
+			assert(
+				Math.abs(overlayBox.right - gutterBox.right) < 1 &&
+					Math.abs(overlayBox.width - parseFloat(getComputedStyle(gutter, '::after').width)) < 1 &&
+					Math.abs(overlayMarkBox.left - bracketBox.left) < 1 &&
+					Math.abs(overlayMarkBox.top - bracketBox.top) < 1 &&
+					getComputedStyle(overlay).pointerEvents === 'none' &&
+					getComputedStyle(overlay.firstElementChild, '::before').borderRadius === '50%' &&
+					(!hitTestable || hit?.closest('.cm-gutters') === gutter),
+				'bracket circle overlaps only the gutter edge without intercepting gutter input',
+			);
 			const currentMark = getComputedStyle(matches[0], '::before');
 			const otherMark = getComputedStyle(matches[1], '::before');
-			assert(getComputedStyle(matches[0]).fontWeight === '700' &&
-				getComputedStyle(matches[0]).backgroundColor === 'rgba(0, 0, 0, 0)' &&
-				getComputedStyle(matches[1]).backgroundColor === 'rgba(0, 0, 0, 0)' &&
-				currentMark.borderTopWidth === '0px' && currentMark.backgroundColor !== 'rgba(0, 0, 0, 0)' &&
-				otherMark.content !== 'none' && otherMark.borderTopWidth === '8px' && otherMark.borderRadius === '50%',
-				'bracket matches use the CM5 active-line background and bold yellow circle');
+			assert(
+				getComputedStyle(matches[0]).fontWeight === '700' &&
+					getComputedStyle(matches[0]).backgroundColor === 'rgba(0, 0, 0, 0)' &&
+					getComputedStyle(matches[1]).backgroundColor === 'rgba(0, 0, 0, 0)' &&
+					currentMark.borderTopWidth === '0px' && currentMark.backgroundColor !== 'rgba(0, 0, 0, 0)' &&
+					otherMark.content !== 'none' && otherMark.borderTopWidth === '8px' && otherMark.borderRadius === '50%',
+				'bracket matches use the CM5 active-line background and bold yellow circle',
+			);
 			const theme = root.querySelector('.opticm');
 			const originalBorderColor = otherMark.borderTopColor;
-			assert(getComputedStyle(overlay.firstElementChild, '::before').borderTopColor === originalBorderColor,
-				'gutter overlay uses the same circle color');
+			assert(
+				getComputedStyle(overlay.firstElementChild, '::before').borderTopColor === originalBorderColor,
+				'gutter overlay uses the same circle color',
+			);
 			theme.style.setProperty('--opticm-l-yellow', '#00ff00');
-			assert(getComputedStyle(matches[1], '::before').borderTopColor !== originalBorderColor &&
-				getComputedStyle(overlay.firstElementChild, '::before').borderTopColor ===
-					getComputedStyle(matches[1], '::before').borderTopColor,
-				'bracket circle uses the theme yellow color');
+			assert(
+				getComputedStyle(matches[1], '::before').borderTopColor !== originalBorderColor &&
+					getComputedStyle(overlay.firstElementChild, '::before').borderTopColor ===
+						getComputedStyle(matches[1], '::before').borderTopColor,
+				'bracket circle uses the theme yellow color',
+			);
 			theme.style.removeProperty('--opticm-l-yellow');
 			editor.loadDocument(source + '\n//' + 'x'.repeat(200));
 			editor.moveTo({ line: 0, ch: source.indexOf('{') });
 			await waitFor(() => overlay.children.length === 1, 'bracket gutter overlay did not update after editing');
 			const scroller = root.querySelector('.cm-scroller');
 			scroller.scrollLeft = 40;
-			await waitFor(() => scroller.scrollLeft >= 40 && !overlay.children.length,
-				'horizontally hidden bracket must not overlap the gutter');
+			await waitFor(
+				() => scroller.scrollLeft >= 40 && !overlay.children.length,
+				'horizontally hidden bracket must not overlap the gutter',
+			);
 			editor.loadDocument(source);
 			editor.moveTo({ line: 3, ch: source.split('\n')[3].indexOf('(') + 1 });
-			assert(root.querySelectorAll('.cm-matchingBracket').length === 2,
-				'parentheses also match while automatic analysis is disabled');
+			assert(
+				root.querySelectorAll('.cm-matchingBracket').length === 2,
+				'parentheses also match while automatic analysis is disabled',
+			);
 			editor.moveTo({ line: 4, ch: source.split('\n')[4].indexOf('[') });
-			assert([...root.querySelectorAll('.cm-matchingBracket')].map(node => node.textContent).join('') === '[]',
-				'square brackets match while automatic analysis is disabled');
+			assert(
+				[...root.querySelectorAll('.cm-matchingBracket')].map(node => node.textContent).join('') === '[]',
+				'square brackets match while automatic analysis is disabled',
+			);
 			editor.loadDocument('class Broken {');
 			editor.focus();
 			editor.moveTo({ line: 0, ch: 13 });
 			const unmatched = root.querySelector('.cm-nonmatchingBracket');
-			assert(unmatched && !root.querySelector('.cm-matchingBracket') &&
-				getComputedStyle(unmatched).backgroundColor !== 'rgba(0, 0, 0, 0)',
-				'unmatched brackets use the standard visible nonmatching style, not matching circles');
+			assert(
+				unmatched && !root.querySelector('.cm-matchingBracket') &&
+					getComputedStyle(unmatched).backgroundColor !== 'rgba(0, 0, 0, 0)',
+				'unmatched brackets use the standard visible nonmatching style, not matching circles',
+			);
 			editor.loadDocument('[)');
 			editor.moveTo({ line: 0, ch: 0 });
-			assert(root.querySelector('.cm-nonmatchingBracket'),
-				'mismatched bracket pairs are marked as nonmatching');
+			assert(
+				root.querySelector('.cm-nonmatchingBracket'),
+				'mismatched bracket pairs are marked as nonmatching',
+			);
 			editor.setSettings({ analysis: true });
 			editor.loadDocument(source.replace('// }', '// { }'));
 			await editor.analyzeNow();
 			editor.setSettings({ functionLineNumbers: true });
 			editor.moveTo({ line: 0, ch: source.indexOf('{') });
-			await waitFor(() => root.querySelector('.cm-sectionNumbers') && overlay.children.length === 1,
-				'bracket gutter overlay must also work with per-function line numbers');
+			await waitFor(
+				() => root.querySelector('.cm-sectionNumbers') && overlay.children.length === 1,
+				'bracket gutter overlay must also work with per-function line numbers',
+			);
 			editor.moveTo({ line: 2, ch: 4 });
-			assert([...root.querySelectorAll('.cm-matchingBracket')].every(node =>
-				getComputedStyle(node, '::before').content === 'none'),
-				'brackets in comments do not receive yellow circles');
+			assert(
+				[...root.querySelectorAll('.cm-matchingBracket')].every(node =>
+					getComputedStyle(node, '::before').content === 'none'),
+				'brackets in comments do not receive yellow circles',
+			);
 			await waitFor(() => !overlay.children.length, 'comment brackets must not leave a gutter circle');
 		}
 		for (const [editor, root, source, editLine, retainedLine] of [
@@ -997,8 +1173,10 @@ try {
 			await waitFor(() => alphaOnLine(retainedLine) > 0, 'unrelated structure was not initially painted');
 			editor.replaceRange('0', { line: editLine, ch: source.split('\n')[editLine].indexOf('1') });
 			await wait(150);
-			assert(editor.getAnalysis() === null && alphaOnLine(retainedLine) > 0,
-				'editing preserves unaffected structure until fresh analysis: ' + editor.getSettings().codeLanguage);
+			assert(
+				editor.getAnalysis() === null && alphaOnLine(retainedLine) > 0,
+				'editing preserves unaffected structure until fresh analysis: ' + editor.getSettings().codeLanguage,
+			);
 			editor.loadDocument(source);
 			await editor.analyzeNow();
 			await wait(150);
@@ -1008,16 +1186,20 @@ try {
 			assert(beforeHeader > 0 && beforeFollowing > 0, 'structure is painted before entering a newline');
 			editor.moveTo({ line: editLine, ch: source.split('\n')[editLine].length });
 			press(root, 'Enter');
-			await waitFor(() => editor.getValue().split('\n').length === source.split('\n').length + 1,
-				'editor did not process newline input');
+			await waitFor(
+				() => editor.getValue().split('\n').length === source.split('\n').length + 1,
+				'editor did not process newline input',
+			);
 			const headerFrames = [];
 			for (let i = 0; i < 10; i++) {
 				await new Promise(resolve => requestAnimationFrame(resolve));
 				headerFrames.push(alphaOnLine(headerLine));
 			}
-			assert(editor.getAnalysis() === null && headerFrames.every(alpha => alpha >= beforeHeader * 0.9) &&
-				alphaOnLine(retainedLine + 1) >= beforeFollowing * 0.9,
-				'newline preserves enclosing and following structures: ' + editor.getSettings().codeLanguage);
+			assert(
+				editor.getAnalysis() === null && headerFrames.every(alpha => alpha >= beforeHeader * 0.9) &&
+					alphaOnLine(retainedLine + 1) >= beforeFollowing * 0.9,
+				'newline preserves enclosing and following structures: ' + editor.getSettings().codeLanguage,
+			);
 		}
 		a.destroy();
 		javaEditor.setSettings({ analysis: true, analysisDelay: 10000 });
@@ -1029,63 +1211,87 @@ try {
 		const referenceColor = getComputedStyle(javaToken('local-reference', 'count')).color;
 		javaEditor.moveTo({ line: 2, ch: '  int count = 10'.length });
 		assert(document.execCommand('insertText', false, ' + 2'), 'Java accepts native text input');
-		await waitFor(() => javaEditor.getValue().includes('10 + 2') && javaEditor.getAnalysis() === null,
-			'Java did not process native text input');
-		assert(javaEditor.getAnalysis() === null && javaToken('keyword', 'class') &&
-			javaToken('keyword', 'int') && javaToken('function', 'run') &&
-			javaToken('local-reference', 'count') && javaToken('variable-reference', 'count') &&
-			getComputedStyle(javaToken('local-reference', 'count')).color === referenceColor &&
-			javaToken('operator', '+') && javaToken('literal', '2'),
-			'Java retains existing syntax and local-reference colors and highlights typed tokens before analysis');
+		await waitFor(
+			() => javaEditor.getValue().includes('10 + 2') && javaEditor.getAnalysis() === null,
+			'Java did not process native text input',
+		);
+		assert(
+			javaEditor.getAnalysis() === null && javaToken('keyword', 'class') &&
+				javaToken('keyword', 'int') && javaToken('function', 'run') &&
+				javaToken('local-reference', 'count') && javaToken('variable-reference', 'count') &&
+				getComputedStyle(javaToken('local-reference', 'count')).color === referenceColor &&
+				javaToken('operator', '+') && javaToken('literal', '2'),
+			'Java retains existing syntax and local-reference colors and highlights typed tokens before analysis',
+		);
 		javaEditor.replaceRange('\n  boolean active = true;', { line: 2, ch: javaEditor.getValue().split('\n')[2].length });
-		assert(javaToken('keyword', 'boolean') && javaToken('definition', 'active') &&
-			javaToken('literal', 'true') && javaToken('local-reference', 'count'),
-			'Java highlights newly inserted declarations while preserving shifted reference colors');
+		assert(
+			javaToken('keyword', 'boolean') && javaToken('definition', 'active') &&
+				javaToken('literal', 'true') && javaToken('local-reference', 'count'),
+			'Java highlights newly inserted declarations while preserving shifted reference colors',
+		);
 		javaEditor.moveTo({ line: 4, ch: 2 });
-		assert(document.execCommand('insertText', false, '/') && document.execCommand('insertText', false, '/'),
-			'Java accepts line-comment input');
-		await waitFor(() => javaEditor.getValue().split('\n')[4].startsWith('  //if'),
-			'Java did not process line-comment input');
+		assert(
+			document.execCommand('insertText', false, '/') && document.execCommand('insertText', false, '/'),
+			'Java accepts line-comment input',
+		);
+		await waitFor(
+			() => javaEditor.getValue().split('\n')[4].startsWith('  //if'),
+			'Java did not process line-comment input',
+		);
 		const commentLine = javaRoot.querySelectorAll('.cm-content .cm-line')[4];
-		assert([...commentLine.querySelectorAll('.cm-syntax-comment')].map(node => node.textContent).join('') ===
-			'//if (count > 0) { use(arg, count); }' &&
-			!commentLine.querySelector('.cm-syntax-keyword, .cm-syntax-local-reference, .cm-syntax-variable-reference, .cm-syntax-literal') &&
-			javaToken('keyword', 'boolean') &&
-			javaRoot.querySelectorAll('.cm-content .cm-line')[5].querySelector('.cm-syntax-local-reference')?.textContent === 'count',
-			'Java immediately recolors the whole new line comment without waiting for analysis');
+		assert(
+			[...commentLine.querySelectorAll('.cm-syntax-comment')].map(node => node.textContent).join('') ===
+				'//if (count > 0) { use(arg, count); }' &&
+				!commentLine.querySelector('.cm-syntax-keyword, .cm-syntax-local-reference, .cm-syntax-variable-reference, .cm-syntax-literal') &&
+				javaToken('keyword', 'boolean') &&
+				javaRoot.querySelectorAll('.cm-content .cm-line')[5].querySelector('.cm-syntax-local-reference')?.textContent === 'count',
+			'Java immediately recolors the whole new line comment without waiting for analysis',
+		);
 		javaEditor.replaceRange('', { line: 4, ch: 2 }, { line: 4, ch: 3 });
-		assert(!commentLine.querySelector('.cm-syntax-comment') && javaToken('keyword', 'if') &&
-			commentLine.querySelector('.cm-syntax-local-reference')?.textContent === 'count',
-			'removing Java comment delimiters immediately restores code highlighting');
+		assert(
+			!commentLine.querySelector('.cm-syntax-comment') && javaToken('keyword', 'if') &&
+				commentLine.querySelector('.cm-syntax-local-reference')?.textContent === 'count',
+			'removing Java comment delimiters immediately restores code highlighting',
+		);
 		javaEditor.replaceRange('', { line: 4, ch: 2 }, { line: 4, ch: 3 });
 		const edited = await javaEditor.analyzeNow();
-		assert(edited.success && javaToken('keyword', 'boolean') && javaToken('literal', 'true') &&
-			javaToken('local-reference', 'count') &&
-			getComputedStyle(javaToken('local-reference', 'count')).color === referenceColor,
-			'fresh Java analysis replaces interim highlighting without changing established colors');
+		assert(
+			edited.complete && javaToken('keyword', 'boolean') && javaToken('literal', 'true') &&
+				javaToken('local-reference', 'count') &&
+				getComputedStyle(javaToken('local-reference', 'count')).color === referenceColor,
+			'fresh Java analysis replaces interim highlighting without changing established colors',
+		);
 		javaEditor.loadDocument('class Existing {\n void run() {\n  //if (true) { use(1); }\n }\n}');
 		await javaEditor.analyzeNow();
 		javaEditor.replaceRange('', { line: 2, ch: 2 }, { line: 2, ch: 4 });
-		assert(!javaRoot.querySelector('.cm-syntax-comment') && javaToken('keyword', 'if') &&
-			javaToken('literal', 'true') && javaToken('literal', '1'),
-			'removing an analyzed Java comment immediately restores syntax coloring');
+		assert(
+			!javaRoot.querySelector('.cm-syntax-comment') && javaToken('keyword', 'if') &&
+				javaToken('literal', 'true') && javaToken('literal', '1'),
+			'removing an analyzed Java comment immediately restores syntax coloring',
+		);
 		javaEditor.setSettings({ analysis: false });
 		javaEditor.loadDocument('class Plain {\n int number = 42;\n boolean flag = false;\n Object value = null;\n}');
-		assert(javaEditor.getAnalysis() === null && javaToken('keyword', 'class') &&
-			javaToken('keyword', 'int') && javaToken('literal', '42') &&
-			javaToken('literal', 'false') && javaToken('literal', 'null'),
-			'Java syntax coloring remains available when automatic analysis is disabled');
+		assert(
+			javaEditor.getAnalysis() === null && javaToken('keyword', 'class') &&
+				javaToken('keyword', 'int') && javaToken('literal', '42') &&
+				javaToken('literal', 'false') && javaToken('literal', 'null'),
+			'Java syntax coloring remains available when automatic analysis is disabled',
+		);
 		javaEditor.setSettings({ analysis: true });
 		javaEditor.loadDocument('class Broken {\n  int value = ;\n}');
 		const broken = await javaEditor.analyzeNow();
-		assert(broken && !broken.success && javaRoot.querySelector('.cm-syntax-invalid') &&
-			!javaRoot.querySelector('.cm-function-number'),
-			'Java retains parser error ranges and clears stale method structure');
+		assert(
+			broken && !broken.complete && javaRoot.querySelector('.cm-syntax-invalid') &&
+				!javaRoot.querySelector('.cm-function-number'),
+			'Java retains parser error ranges and clears stale method structure',
+		);
 		await waitFor(() => javaRoot.querySelector('.cm-lintRange-error') &&
 			javaRoot.querySelector('.cm-lint-marker-error'), 'Java syntax errors use the diagnostic underline and gutter');
-		assert([...javaRoot.querySelectorAll('.cm-syntax-invalid')].every(node =>
-			getComputedStyle(node).textDecorationLine === 'none'),
-			'Java syntax highlighting does not draw a second underline');
+		assert(
+			[...javaRoot.querySelectorAll('.cm-syntax-invalid')].every(node =>
+				getComputedStyle(node).textDecorationLine === 'none'),
+			'Java syntax highlighting does not draw a second underline',
+		);
 	} finally {
 		javaEditor?.destroy();
 	}
@@ -1104,12 +1310,16 @@ try {
 			const tokenColors = host => [...host.querySelectorAll('.cm-syntax-keyword, .cm-syntax-local-reference')]
 				.map(token => [token.textContent, getComputedStyle(token).color]);
 			const viewerColors = tokenColors(viewerHost);
-			assert(viewerColors.length && JSON.stringify(viewerColors) === JSON.stringify(tokenColors(editorHost)) &&
-				viewerHost.querySelector('.code-structure-view') && viewerHost.querySelector('.cm-function-number'),
-				`${codeLanguage}: viewer matches editor token colors and displays structure and function numbers`);
-			assert([viewerHost, editorHost].every(host =>
-				host.querySelector('.cm-sectionNumbers .cm-function-number')?.textContent === '1'),
-				`${codeLanguage}: function numbers ignore the ordinary line-number start`);
+			assert(
+				viewerColors.length && JSON.stringify(viewerColors) === JSON.stringify(tokenColors(editorHost)) &&
+					viewerHost.querySelector('.code-structure-view') && viewerHost.querySelector('.cm-function-number'),
+				`${codeLanguage}: viewer matches editor token colors and displays structure and function numbers`,
+			);
+			assert(
+				[viewerHost, editorHost].every(host =>
+					host.querySelector('.cm-sectionNumbers .cm-function-number')?.textContent === '1'),
+				`${codeLanguage}: function numbers ignore the ordinary line-number start`,
+			);
 			const content = viewerHost.querySelector('.cm-content');
 			content.focus();
 			press(viewerHost, 'a', mod);
@@ -1123,8 +1333,10 @@ try {
 			assert(!content.isContentEditable && !viewerHost.querySelector('.cm-cursorLayer, .cm-lint-marker, .cm-search') &&
 				viewer.getValue() === value, `${codeLanguage}: viewer preserves source and has no editor-only UI`);
 			await Promise.all([viewer.setValue(''), viewer.setValue(value.replaceAll('count', 'total'))]);
-			assert(viewerHost.querySelector('.cm-syntax-local-reference')?.textContent === 'total',
-				`${codeLanguage}: the latest viewer update wins`);
+			assert(
+				viewerHost.querySelector('.cm-syntax-local-reference')?.textContent === 'total',
+				`${codeLanguage}: the latest viewer update wins`,
+			);
 			viewer.setSettings({ lineNumbers: 'off', rulers: false });
 			viewer.refresh();
 			assert(!viewerHost.querySelector('.cm-function-number, .cm-indent-rulers'), 'viewer display settings can be updated');
@@ -1159,9 +1371,11 @@ try {
 			const highlighted = () => [...host.querySelectorAll('.cm-opticm-highlighted-line')].map(line => line.textContent).join(',');
 			host.style.setProperty('--opticm-color-highlighted-line', 'rgb(10, 20, 30)');
 			component.setHighlightedLines([2, 0, 2, 5]);
-			assert(highlighted() === 'first,third' &&
-				getComputedStyle(host.querySelector('.cm-opticm-highlighted-line')).backgroundColor === 'rgb(10, 20, 30)',
-				'static highlights use unique document indices and the host color');
+			assert(
+				highlighted() === 'first,third' &&
+					getComputedStyle(host.querySelector('.cm-opticm-highlighted-line')).backgroundColor === 'rgb(10, 20, 30)',
+				'static highlights use unique document indices and the host color',
+			);
 			const replacement = 'one\ntwo\nthree\nfour\nfive\nsix';
 			if (component === excerptEditor) {
 				excerptEditor.replaceDocument(replacement);
@@ -1176,8 +1390,10 @@ try {
 		const marker = excerptEditor.highlightLine(0);
 		assert(excerptHost.querySelector('.error-line.cm-opticm-highlighted-line'), 'error and static highlights coexist');
 		excerptEditor.clearHighlight(marker);
-		assert(excerptHost.querySelector('.cm-opticm-highlighted-line') && !excerptHost.querySelector('.error-line'),
-			'clearing an error highlight preserves the static highlight');
+		assert(
+			excerptHost.querySelector('.cm-opticm-highlighted-line') && !excerptHost.querySelector('.error-line'),
+			'clearing an error highlight preserves the static highlight',
+		);
 	} finally {
 		excerptEditor?.destroy();
 		excerptViewer?.destroy();

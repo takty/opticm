@@ -40,8 +40,16 @@ test('JavaScript field declarations remain classified after worker analysis', ()
 	const fieldNames = () => state.field(syntaxAnalysisState).data.syntax
 		.filter(range => range.kind === 'field-definition').map(range => doc.slice(range.from, range.to));
 	assert.deepEqual(fieldNames(), ['field', 'count', '#secret']);
-	state = state.update({ effects: setCommonAnalysis.of({ version: 1, sourceLength: doc.length, complete: true,
-		structures: [], declarations: [], syntax: [], references: analyzeReferences(parse(doc, { ecmaVersion: 'latest' })), sections: [] }) }).state;
+	state = state.update({ effects: setCommonAnalysis.of({
+		version     : 1,
+		sourceLength: doc.length,
+		complete    : true,
+		structures  : [],
+		declarations: [],
+		syntax      : [],
+		references  : analyzeReferences(parse(doc, { ecmaVersion: 'latest' })),
+		sections    : [],
+	}) }).state;
 	assert.deepEqual(fieldNames(), ['field', 'count', '#secret']);
 });
 

@@ -117,7 +117,8 @@ try {
 	let fontReady = false;
 	for (let i = 0; i < 100; i++) {
 		const status = await send('Runtime.evaluate', {
-			expression: 'document.querySelector("#status")?.textContent', returnByValue: true,
+			expression   : 'document.querySelector("#status")?.textContent',
+			returnByValue: true,
 		}, fontSession);
 		if (status.result?.value?.startsWith('Ready.')) {
 			fontReady = true;
@@ -189,7 +190,8 @@ try {
 	let customResult;
 	for (let i = 0; i < 100; i++) {
 		const result = await send('Runtime.evaluate', {
-			expression: 'window.customFontResult', returnByValue: true,
+			expression   : 'window.customFontResult',
+			returnByValue: true,
 		}, fontSession);
 		customResult = result.result?.value;
 		if (customResult?.ready || customResult?.error) break;
@@ -265,7 +267,7 @@ try {
 				assert(document.querySelectorAll('.cm-editor').length === 1, 'One editor must mount');
 				await document.querySelector('#analysis').onclick();
 				const analysis = JSON.parse(document.querySelector('#status').textContent);
-				assert(analysis.success && analysis.fnNames.includes('Greeter') && analysis.classLocs.length === 1,
+				assert(analysis.complete && analysis.structures.filter(range => range.kind === 'class').length === 1,
 					'Worker must analyze sample class');
 				const classPainted = ${classPainted.toString()};
 				for (let i = 0; i < 100 && !classPainted(); i++) await new Promise(resolve => setTimeout(resolve, 20));
@@ -317,14 +319,15 @@ try {
 		await send('Input.dispatchMouseEvent', { type: 'mouseReleased', button: 'left', clickCount: 1, ...pastePoint.result.value }, sessionId);
 		await new Promise(resolve => setTimeout(resolve, 150));
 		const pasteStatus = await send('Runtime.evaluate', {
-			expression: `document.querySelector('#status').textContent`, returnByValue: true,
+			expression   : `document.querySelector('#status').textContent`,
+			returnByValue: true,
 		}, sessionId);
 		if (!/^(Editor text changed after Paste\.|No text change detected\.|Paste failed:)/.test(pasteStatus.result?.value)) {
 			throw new Error('Paste demo did not report its result: ' + JSON.stringify(pasteStatus.result?.value));
 		}
 		console.log('Built docs Paste button: ' + pasteStatus.result.value);
 		const markerPoint = await send('Runtime.evaluate', {
-			expression: `(async () => {
+			expression   : `(async () => {
 				const content = document.querySelector('.cm-content');
 				content.focus();
 				document.execCommand('selectAll');
@@ -340,7 +343,9 @@ try {
 				}
 				const box = marker.getBoundingClientRect();
 				return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
-			})()`, awaitPromise: true, returnByValue: true,
+			})()`,
+			awaitPromise : true,
+			returnByValue: true,
 		}, sessionId);
 		if (markerPoint.exceptionDetails) {
 			throw new Error('Sample lint marker failed: ' + JSON.stringify(markerPoint));
@@ -348,7 +353,8 @@ try {
 		await send('Input.dispatchMouseEvent', { type: 'mouseMoved', ...markerPoint.result.value }, sessionId);
 		await new Promise(resolve => setTimeout(resolve, 450));
 		const hover = await send('Runtime.evaluate', {
-			expression: `!!document.querySelector('.cm-tooltip-lint')?.textContent.trim()`, returnByValue: true,
+			expression   : `!!document.querySelector('.cm-tooltip-lint')?.textContent.trim()`,
+			returnByValue: true,
 		}, sessionId);
 		if (!hover.result?.value) {
 			throw new Error('Sample lint tooltip did not appear on mouse hover');
@@ -382,7 +388,7 @@ try {
 					[...document.querySelectorAll('.cm-syntax-keyword')].some(node => node.textContent === 'class') &&
 					document.querySelectorAll('.cm-sectionNumbers .cm-function-number').length >= 2 &&
 					structureIsPainted() && classPainted() && count &&
-					javaAnalysis.success && !Object.hasOwn(javaAnalysis, 'decorations'),
+					javaAnalysis.complete && !Object.hasOwn(javaAnalysis, 'decorations'),
 					'Built docs Java renders syntax, structure, per-method line numbers, and reference highlighting');
 				document.querySelector('#code-language input[value="javascript"]').click();
 				for (let i = 0; i < 100 && !document.querySelector('#status').textContent.includes('Switched to javascript'); i++)

@@ -1,6 +1,4 @@
-const BLOCKS = new Set([
-	'BlockStatement', 'ForStatement', 'CatchClause',
-]);
+const BLOCKS    = new Set(['BlockStatement', 'ForStatement', 'CatchClause']);
 const FUNCTIONS = new Set(['FunctionDeclaration', 'FunctionExpression', 'ArrowFunctionExpression']);
 
 export function analyzeReferences(ast) {
@@ -78,7 +76,9 @@ export function analyzeReferences(ast) {
 		if (node.type === 'StaticBlock') scope = createScope(scope, true);
 		switch (node.type) {
 			case 'Identifier':
-				if (node.name !== '✖' && node.start < node.end) candidates.push({ node, scope });
+				if (node.name !== '✖' && node.start < node.end) {
+					candidates.push({ node, scope });
+				}
 				return;
 			case 'VariableDeclaration':
 				for (const { id, init } of node.declarations) {

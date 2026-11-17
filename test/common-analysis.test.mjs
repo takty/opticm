@@ -93,14 +93,20 @@ test('worker reports shorthand properties without discarding their variable defi
 	const doc = 'const { enabled, name, key: alias } = options;';
 	let state = EditorState.create({ doc, extensions: [javascript(), lezerAnalysis(javascriptSyntax), commonAnalysisState] });
 	const initial = state.field(syntaxAnalysisState).data;
-	assert.deepEqual(initial.syntax.filter(item => item.kind === 'property').map(item => doc.slice(item.from, item.to)),
-		['enabled', 'name', 'key']);
+	assert.deepEqual(
+		initial.syntax.filter(item => item.kind === 'property').map(item => doc.slice(item.from, item.to)),
+		['enabled', 'name', 'key'],
+	);
 	state = state.update({ effects: setCommonAnalysis.of({ ...analyze(doc).commonAnalysis, version: 1 }) }).state;
 	const after = state.field(syntaxAnalysisState).data;
-	assert.deepEqual(after.syntax.filter(item => item.kind === 'destructuring-shorthand').map(item => doc.slice(item.from, item.to)),
-		['enabled', 'name']);
-	assert.deepEqual(after.references.filter(item => item.role === 'definition').map(item => doc.slice(item.from, item.to)),
-		['enabled', 'name', 'alias']);
+	assert.deepEqual(
+		after.syntax.filter(item => item.kind === 'destructuring-shorthand').map(item => doc.slice(item.from, item.to)),
+		['enabled', 'name'],
+	);
+	assert.deepEqual(
+		after.references.filter(item => item.role === 'definition').map(item => doc.slice(item.from, item.to)),
+		['enabled', 'name', 'alias'],
+	);
 });
 
 test('JavaScript conditional branches use common UTF-16 offsets', () => {
@@ -113,9 +119,14 @@ test('JavaScript conditional branches use common UTF-16 offsets', () => {
 
 test('shared analysis state validates ranges, rejects older versions and maps usable data as stale', () => {
 	const make = (version, sourceLength = 3) => createCommonAnalysis({
-		version, sourceLength, complete: true, structures: [], declarations: [],
-		syntax: sourceLength >= 3 ? [{ from: 1, to: 3, kind: 'keyword' }] : [],
-		references: [], sections: sourceLength >= 3 ? [{ kind: 'function', from: 1 }] : [],
+		version,
+		sourceLength,
+		complete    : true,
+		structures  : [],
+		declarations: [],
+		syntax      : sourceLength >= 3 ? [{ from: 1, to: 3, kind: 'keyword' }] : [],
+		references  : [],
+		sections    : sourceLength >= 3 ? [{ kind: 'function', from: 1 }] : [],
 	});
 	let state = EditorState.create({ doc: 'abc', extensions: [commonAnalysisState] });
 	state = state.update({ effects: setCommonAnalysis.of(make(3)) }).state;
@@ -125,8 +136,14 @@ test('shared analysis state validates ranges, rejects older versions and maps us
 	assert.equal(state.field(commonAnalysisState).version, 3);
 	assert.throws(() => state.update({ effects: setCommonAnalysis.of(make(4, 2)) }).state, /document length/);
 	assert.throws(() => createCommonAnalysis({
-		version: 1, sourceLength: 3, complete: true,
-		structures: [{ kind: 'function', from: 0, to: 4 }], declarations: [], syntax: [], references: [], sections: [],
+		version     : 1,
+		sourceLength: 3,
+		complete    : true,
+		structures  : [{ kind: 'function', from: 0, to: 4 }],
+		declarations: [],
+		syntax      : [],
+		references  : [],
+		sections    : [],
 	}), /range/);
 
 	state = state.update({ changes: { from: 0, to: 1, insert: 'x' } }).state;
@@ -146,11 +163,14 @@ test('shared analysis state validates ranges, rejects older versions and maps us
 
 test('shared analysis invalidates token ranges at insertion boundaries and rejects stale revisions', () => {
 	const make = version => createCommonAnalysis({
-		version, sourceLength: 3, complete: true, structures: [],
+		version,
+		sourceLength: 3,
+		complete    : true,
+		structures  : [],
 		declarations: [{ kind: 'variable', from: 1, to: 2, mutability: 'mutable', scope: 'lexical' }],
-		syntax: [{ from: 1, to: 2, kind: 'variable' }],
-		references: [{ from: 1, to: 2, role: 'reference', scope: 'local' }],
-		sections: [],
+		syntax      : [{ from: 1, to: 2, kind: 'variable' }],
+		references  : [{ from: 1, to: 2, role: 'reference', scope: 'local' }],
+		sections    : [],
 	});
 
 	for (const position of [1, 2]) {
@@ -178,9 +198,14 @@ test('shared analysis invalidates token ranges at insertion boundaries and rejec
 test('shared analysis drops a section whose start is deleted', () => {
 	let state = EditorState.create({ doc: 'function fn() {}', extensions: [commonAnalysisState] });
 	state = state.update({ effects: setCommonAnalysis.of(createCommonAnalysis({
-		version: 1, sourceLength: state.doc.length, complete: true,
-		structures: [], declarations: [], syntax: [], references: [],
-		sections: [{ kind: 'function', from: 0 }],
+		version     : 1,
+		sourceLength: state.doc.length,
+		complete    : true,
+		structures  : [],
+		declarations: [],
+		syntax      : [],
+		references  : [],
+		sections    : [{ kind: 'function', from: 0 }],
 	})) }).state;
 	state = state.update({ changes: { from: 0, to: 8 } }).state;
 	assert.deepEqual(state.field(commonAnalysisState).sections, []);
@@ -189,9 +214,14 @@ test('shared analysis drops a section whose start is deleted', () => {
 test('shared analysis retains edited structures until the next analysis', () => {
 	let state = EditorState.create({ doc: 'fn()', extensions: [commonAnalysisState] });
 	state = state.update({ effects: setCommonAnalysis.of(createCommonAnalysis({
-		version: 1, sourceLength: state.doc.length, complete: true,
-		structures: [{ kind: 'function', from: 0, to: state.doc.length, branches: [] }],
-		declarations: [], syntax: [], references: [], sections: [],
+		version     : 1,
+		sourceLength: state.doc.length,
+		complete    : true,
+		structures  : [{ kind: 'function', from: 0, to: state.doc.length, branches: [] }],
+		declarations: [],
+		syntax      : [],
+		references  : [],
+		sections    : [],
 	})) }).state;
 	state = state.update({ changes: { from: 1, to: 2, insert: 'x' } }).state;
 	const analysis = state.field(commonAnalysisState);
@@ -208,18 +238,28 @@ test('Enter and Backspace between methods retain structures in both languages', 
 		const snapshot = (state, version) => {
 			const source = state.doc.toString();
 			return {
-				version, sourceLength: source.length, complete: true,
-				structures: [
+				version,
+				sourceLength: source.length,
+				complete    : true,
+				structures  : [
 					{ kind: 'class', from: 0, to: source.length },
 					...[first, second].map(method => ({
-						kind: 'function', from: source.indexOf(method), to: source.indexOf(method) + method.length,
+						kind: 'function',
+						from: source.indexOf(method),
+						to  : source.indexOf(method) + method.length,
 					})),
 				],
-				declarations: [], syntax: [], references: [], sections: [],
+				declarations: [],
+				syntax      : [],
+				references  : [],
+				sections    : [],
 			};
 		};
-		let state = EditorState.create({ doc, selection: { anchor: doc.indexOf('\n  \n') + 3 },
-			extensions: [language(), indentUnit.of('\t'), commonAnalysisState] });
+		let state = EditorState.create({
+			doc,
+			selection : { anchor: doc.indexOf('\n  \n') + 3 },
+			extensions: [language(), indentUnit.of('\t'), commonAnalysisState],
+		});
 		state = state.update({ effects: setCommonAnalysis.of(snapshot(state, 0)) }).state;
 		const dispatch = transaction => { state = transaction.state; };
 		for (const [index, command] of [insertNewlineAndIndent, deleteCharBackward, insertNewlineAndIndent].entries()) {
@@ -250,13 +290,23 @@ test('both Lezer sources replace stale code with comments and restore code on de
 		[java, javaSyntax, 'class Example {\n  int value = 1;\n}', 'int value = 1;'],
 	]) {
 		const from = source.indexOf(text);
-		let state = EditorState.create({ doc: source, extensions: [
-			language(), commonAnalysisState, lezerAnalysis(classifier),
-		] });
+		let state = EditorState.create({
+			doc       : source,
+			extensions: [
+				language(),
+				commonAnalysisState,
+				lezerAnalysis(classifier),
+			],
+		});
 		state = state.update({ effects: setCommonAnalysis.of(createCommonAnalysis({
-			version: 1, sourceLength: source.length, complete: true,
-			structures: [], declarations: [], references: [], sections: [],
-			syntax: [{ from, to: from + 3, kind: 'keyword' }],
+			version     : 1,
+			sourceLength: source.length,
+			complete    : true,
+			structures  : [],
+			declarations: [],
+			references  : [],
+			sections    : [],
+			syntax      : [{ from, to: from + 3, kind: 'keyword' }],
 		})) }).state;
 		state = state.update({ changes: { from, insert: '//' } }).state;
 		let data = state.field(syntaxAnalysisState).data;

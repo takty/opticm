@@ -6,14 +6,44 @@ import { extensionStyles } from '../styles.js';
 import css from './style.css';
 
 const syntaxKinds = new Set([
-	'comment', 'keyword', 'operator', 'type', 'class-definition', 'function', 'function-definition', 'variable', 'literal', 'invalid', 'property',
+	'comment',
+	'keyword',
+	'operator',
+	'type',
+	'class-definition',
+	'function',
+	'function-definition',
+	'variable',
+	'literal',
+	'invalid',
+	'property',
 ]);
 const semanticKinds = new Set([
-	'definition', 'field-definition', 'property-definition', 'local-variable', 'local-reference', 'variable-reference',
+	'definition',
+	'field-definition',
+	'property-definition',
+	'local-variable',
+	'local-reference',
+	'variable-reference',
 ]);
 const allKinds = new Set([
-	'comment', 'keyword', 'operator', 'type', 'class-definition', 'function', 'function-definition', 'variable', 'literal', 'invalid',
-	'definition', 'field-definition', 'property-definition', 'property', 'local-variable', 'local-reference', 'variable-reference',
+	'comment',
+	'keyword',
+	'operator',
+	'type',
+	'class-definition',
+	'function',
+	'function-definition',
+	'variable',
+	'literal',
+	'invalid',
+	'definition',
+	'field-definition',
+	'property-definition',
+	'property',
+	'local-variable',
+	'local-reference',
+	'variable-reference',
 ]);
 
 export const setSyntaxHighlights = StateEffect.define();

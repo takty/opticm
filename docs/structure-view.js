@@ -216,17 +216,31 @@ var structurePlugin = ViewPlugin2.fromClass(class {
     );
     const scale = this.canvas.ownerDocument.defaultView.devicePixelRatio;
     const { width, height, charWidth, lineHeight, decorations } = data;
-    const drawing = JSON.stringify([scale, width, height, charWidth, lineHeight, decorations.map((item) => item.kind === "range" ? [
-      item.kind,
-      item.fill,
-      item.opacity,
-      item.start,
-      item.end.y,
-      item.spine,
-      item.from.line === item.to.line,
-      item.branchWidth,
-      item.branchRows
-    ] : [item.kind, item.appearance, item.fill, item.stroke, item.start, item.end])]);
+    const drawing = JSON.stringify([
+      scale,
+      width,
+      height,
+      charWidth,
+      lineHeight,
+      decorations.map((item) => item.kind === "range" ? [
+        item.kind,
+        item.fill,
+        item.opacity,
+        item.start,
+        item.end.y,
+        item.spine,
+        item.from.line === item.to.line,
+        item.branchWidth,
+        item.branchRows
+      ] : [
+        item.kind,
+        item.appearance,
+        item.fill,
+        item.stroke,
+        item.start,
+        item.end
+      ])
+    ]);
     if (drawing === this.lastDrawing) return;
     drawStructure(this.canvas, data, scale);
     this.lastDrawing = drawing;
@@ -256,41 +270,41 @@ function commonDecorations(analysis, doc, options) {
   };
   const decorations = [];
   if (options.structures) {
-    for (const item of analysis.structures) {
-      const [fill2, opacity] = colors[item.kind];
+    for (const it of analysis.structures) {
+      const [fill2, opacity] = colors[it.kind];
       decorations.push({
         kind: "range",
-        from: position(item.from),
-        to: position(item.to),
+        from: position(it.from),
+        to: position(it.to),
         fill: fill2,
         ...opacity === void 0 ? {} : { opacity },
         spineChars: 3,
         branchChars: 4,
-        branches: item.branches.map(position)
+        branches: it.branches.map(position)
       });
     }
   }
   if (options.declarations) {
-    for (const item of analysis.declarations) {
-      const colors2 = item.scope === "function" ? ["hsla(0, 0%, 97%, 1)", "hsla(0, 0%, 69%, 0.75)"] : item.mutability === "immutable" ? ["hsla(240, 75%, 97%, 1)", "hsla(240, 75%, 65%, 0.75)"] : ["hsla(205, 100%, 97%, 1)", "hsla(205, 100%, 52%, 0.75)"];
+    for (const it of analysis.declarations) {
+      const colors2 = it.scope === "function" ? ["hsla(0, 0%, 97%, 1)", "hsla(0, 0%, 69%, 0.75)"] : it.mutability === "immutable" ? ["hsla(240, 75%, 97%, 1)", "hsla(240, 75%, 65%, 0.75)"] : ["hsla(205, 100%, 97%, 1)", "hsla(205, 100%, 52%, 0.75)"];
       decorations.push({
         kind: "token",
         appearance: "declaration",
-        from: position(item.from),
-        to: position(item.to),
+        from: position(it.from),
+        to: position(it.to),
         fill: colors2[0],
         stroke: colors2[1]
       });
     }
   }
   if (options.references) {
-    for (const item of analysis.references) {
-      if (item.role !== "reference") continue;
+    for (const it of analysis.references) {
+      if (it.role !== "reference") continue;
       decorations.push({
         kind: "token",
         appearance: "reference",
-        from: position(item.from),
-        to: position(item.to),
+        from: position(it.from),
+        to: position(it.to),
         fill: "rgba(253, 253, 253, 0.95)",
         stroke: "rgba(46, 68, 154, 0.30)"
       });
@@ -324,55 +338,55 @@ function drawStructure(canvas, { width, height, charWidth, lineHeight, decoratio
     const [red, green, blue] = colorContext.getImageData(0, 0, 1, 1).data;
     return `rgba(${red}, ${green}, ${blue}, 0)`;
   };
-  for (const item of decorations) {
-    const { start, end } = item;
-    ctx.globalAlpha = item.opacity ?? 1;
-    ctx.fillStyle = item.fill;
-    if (item.kind === "range") {
+  for (const it of decorations) {
+    const { start, end } = it;
+    ctx.globalAlpha = it.opacity ?? 1;
+    ctx.fillStyle = it.fill;
+    if (it.kind === "range") {
       const left = start.x + 4;
-      const spine = Math.max(1, item.spine - 4);
+      const spine = Math.max(1, it.spine - 4);
       const top = start.y + padding;
       const bottom = end.y + padding;
       fill(ctx, left, top, spine, bottom - top + band, [band / 2, 0, 0, band / 2]);
       const capWidth = Math.max(0, charWidth * 16 - spine);
-      const fadeColor = transparentColor(item.fill);
+      const fadeColor = transparentColor(it.fill);
       const fillHorizontal = (x, y, width2, radii) => {
         if (width2 <= 0) return;
         const gradient = ctx.createLinearGradient(x, y, x + width2, y);
-        gradient.addColorStop(0, item.fill);
+        gradient.addColorStop(0, it.fill);
         gradient.addColorStop(1, fadeColor);
         ctx.fillStyle = gradient;
         fill(ctx, x, y, width2, band, radii);
-        ctx.fillStyle = item.fill;
+        ctx.fillStyle = it.fill;
       };
       fillHorizontal(left + spine, top, capWidth, [0, 0, 0, 0]);
-      if (item.from.line !== item.to.line) {
+      if (it.from.line !== it.to.line) {
         fillHorizontal(left + spine, bottom, capWidth, [0, 0, 0, 0]);
       }
-      for (const row of item.branchRows) {
+      for (const row of it.branchRows) {
         fillHorizontal(
           left + spine,
           row + padding,
-          Math.max(1, item.branchWidth - 4),
+          Math.max(1, it.branchWidth - 4),
           [0, band / 2, band / 2, 0]
         );
       }
-    } else if (item.appearance === "reference") {
+    } else if (it.appearance === "reference") {
       const x = start.x, h = charWidth * 1.9;
       const y = start.y + (lineHeight - h) / 2;
       ctx.save();
-      ctx.shadowColor = item.stroke;
+      ctx.shadowColor = it.stroke;
       ctx.shadowBlur = 6;
       ctx.shadowOffsetY = 1;
       fill(ctx, x, y, end.x - x, h, [0, lineHeight / 5, lineHeight / 5, 0]);
       ctx.restore();
-    } else if (item.appearance === "declaration") {
+    } else if (it.appearance === "declaration") {
       const x = start.x - 2;
       const tokenHeight = charWidth * 1.9;
       const y = start.y + (lineHeight - tokenHeight) / 2;
       const h = end.y - start.y + tokenHeight;
       if (fill(ctx, x, y, end.x - x + 4, h, [0, lineHeight / 5, lineHeight / 5, 0])) {
-        ctx.strokeStyle = item.stroke;
+        ctx.strokeStyle = it.stroke;
         ctx.lineWidth = 0.5;
         ctx.stroke();
         ctx.lineWidth = charWidth * 0.35;

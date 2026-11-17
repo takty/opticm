@@ -31,8 +31,10 @@ test('JavaScript while and do-while statements use loop2 structures', () => {
 test('JavaScript analysis reports class declarations and expressions', () => {
 	const result = analyze('class Outer {\n method() { return class Inner {}; }\n}\nconst Other = class {};\n');
 	assert.equal(result.success, true);
-	assert.deepEqual(result.classLocs.map(([from, to]) => [from.line, from.column, to.line, to.column]),
-		[[1, 0, 3, 1], [2, 19, 2, 33], [4, 14, 4, 22]]);
+	assert.deepEqual(
+		result.classLocs.map(([from, to]) => [from.line, from.column, to.line, to.column]),
+		[[1, 0, 3, 1], [2, 19, 2, 33], [4, 14, 4, 22]],
+	);
 	assert.deepEqual(result.fnStarts, [1]);
 });
 
@@ -49,9 +51,14 @@ test('destructuring declarations highlight individual bindings while preserving 
 	const bindings = declarations.map(item => [source.slice(item.from, item.to), item.mutability, item.scope]);
 	assert.deepEqual(bindings, [
 		['selected', 'mutable', 'function'],
-		['first', 'mutable', 'lexical'], ['second', 'mutable', 'lexical'], ['tail', 'mutable', 'lexical'],
-		['enabled', 'immutable', 'lexical'], ['alias', 'immutable', 'lexical'],
-		['value', 'immutable', 'lexical'], ['rest', 'immutable', 'lexical'], ['plain', 'immutable', 'lexical'],
+		['first', 'mutable', 'lexical'],
+		['second', 'mutable', 'lexical'],
+		['tail', 'mutable', 'lexical'],
+		['enabled', 'immutable', 'lexical'],
+		['alias', 'immutable', 'lexical'],
+		['value', 'immutable', 'lexical'],
+		['rest', 'immutable', 'lexical'],
+		['plain', 'immutable', 'lexical'],
 	]);
 	const [start, end] = result.constLocs[0];
 	assert.equal(start.line, 1);
@@ -64,8 +71,10 @@ test('object destructuring identifies shorthand without changing declaration ran
 	const result = analyze(source).commonAnalysis;
 	assert.deepEqual(result.syntax.filter(item => item.kind === 'destructuring-shorthand')
 		.map(item => source.slice(item.from, item.to)), ['enabled', 'name', 'fallback', 'inner']);
-	assert.deepEqual(result.declarations.map(item => source.slice(item.from, item.to)),
-		['enabled', 'name', 'fallback', 'alias', 'inner', 'rest']);
+	assert.deepEqual(
+		result.declarations.map(item => source.slice(item.from, item.to)),
+		['enabled', 'name', 'fallback', 'alias', 'inner', 'rest'],
+	);
 	for (const name of ['enabled', 'name', 'fallback', 'alias', 'inner', 'rest']) {
 		assert.ok(result.references.some(item => item.role === 'definition' && source.slice(item.from, item.to) === name));
 	}

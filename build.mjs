@@ -129,10 +129,35 @@ async function buildStyle() {
 }
 
 async function copyLicenses() {
-	for (const name of ['@codemirror/state', '@codemirror/view', '@codemirror/commands', '@codemirror/language',
-		'@codemirror/lang-java', '@codemirror/lang-javascript', '@codemirror/autocomplete', '@codemirror/lint', '@codemirror/search',
-		'@lezer/common', '@lezer/highlight', '@lezer/java', '@lezer/javascript', '@lezer/lr',
-		'@marijn/find-cluster-break', 'crelt', 'style-mod', 'w3c-keyname', 'acorn', 'acorn-loose', 'acorn-walk', 'tern', 'jshint', 'jshint-ja-edu', 'js-beautify', 'web-tree-sitter', 'tree-sitter-java']) {
+	for (const name of [
+		'@codemirror/state',
+		'@codemirror/view',
+		'@codemirror/commands',
+		'@codemirror/language',
+		'@codemirror/lang-java',
+		'@codemirror/lang-javascript',
+		'@codemirror/autocomplete',
+		'@codemirror/lint',
+		'@codemirror/search',
+		'@lezer/common',
+		'@lezer/highlight',
+		'@lezer/java',
+		'@lezer/javascript',
+		'@lezer/lr',
+		'@marijn/find-cluster-break',
+		'crelt',
+		'style-mod',
+		'w3c-keyname',
+		'acorn',
+		'acorn-loose',
+		'acorn-walk',
+		'tern',
+		'jshint',
+		'jshint-ja-edu',
+		'js-beautify',
+		'web-tree-sitter',
+		'tree-sitter-java',
+	]) {
 		const dir = resolvePackageDir(name);
 		for (const file of await readdir(dir)) {
 			if (/^(license|copying)/i.test(file)) await copyFileIfChanged(join(dir, file), join(out, 'licenses', name.replace(/^@/, '').replace('/', '-') + '-' + file));

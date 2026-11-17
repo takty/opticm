@@ -80,12 +80,12 @@ var LineNumber = class extends GutterMarker {
     return this.section === other.section && this.line === other.line;
   }
   toDOM(view) {
-    const element = view.dom.ownerDocument.createElement("span");
-    const start = this.section > 0 && this.line === 1;
-    element.className = start ? "cm-function-number" : "cm-opticm-line-number";
-    element.classList.toggle("cm-function-even", this.section % 2 !== 0);
-    element.textContent = start ? this.section : this.line;
-    return element;
+    const e = view.dom.ownerDocument.createElement("span");
+    const st = this.section > 0 && this.line === 1;
+    e.className = st ? "cm-function-number" : "cm-opticm-line-number";
+    e.classList.toggle("cm-function-even", this.section % 2 !== 0);
+    e.textContent = st ? this.section : this.line;
+    return e;
   }
 };
 function validateLineNumberStart(start) {

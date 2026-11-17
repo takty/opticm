@@ -5,7 +5,10 @@ export function diagnoseJava(root, locale) {
 	const diagnostics = [];
 	const position = ({ row, column }) => ({ line: row, ch: column });
 	const add = (node, severity, message) => diagnostics.push({
-		message, severity, from: position(node.startPosition), to: position(node.endPosition),
+		message,
+		severity,
+		from: position(node.startPosition),
+		to  : position(node.endPosition),
 	});
 	const checkBody = node => {
 		if (!node || node.type === 'block' || node.hasError) return;

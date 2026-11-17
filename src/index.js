@@ -1,6 +1,6 @@
 import { EditorSelection } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
-import { setCommonAnalysis } from './analysis/common-analysis.js';
+import { createCommonAnalysis, setCommonAnalysis } from './analysis/common-analysis.js';
 import { Editor, offsetAt, positionAt } from './editor-view.js';
 import { validateLineNumberStart } from './extensions/function-line-numbers/index.js';
 import { javascriptLanguage } from './lang/js/index.js';
@@ -211,13 +211,14 @@ export async function createEditor(container, { value = '', definitions = [], ja
 			assertAlive();
 			const result = await client.request(cm.state.doc.toString(), version);
 			if (result === null) return null;
+			const common = createCommonAnalysis({ ...result.commonAnalysis, version: result.version });
+			const snapshot = { ...common, text: result.text };
 			if (!destroyed && result.version === version && settings.analysis) {
-				cm.dispatch({ effects: setCommonAnalysis.of({ ...result.commonAnalysis, version }) });
-				const snapshot = publicAnalysis(result);
-				analysis = structuredClone(snapshot);
+				cm.dispatch({ effects: setCommonAnalysis.of(common) });
+				analysis = snapshot;
 				emit('analysis', snapshot);
 			}
-			return structuredClone(publicAnalysis(result));
+			return structuredClone(snapshot);
 		}
 
 		function handleUpdate(before, transactions) {
@@ -233,9 +234,12 @@ export async function createEditor(container, { value = '', definitions = [], ja
 			}
 			if (changed && !loading) emit('state', state());
 			if (changed || !selection.eq(before.selection)) {
-				emit('selection', { ranges: selection.ranges.map(({ anchor, head }) => ({
-					anchor: positionAt(doc, anchor), head: positionAt(doc, head),
-				})) });
+				emit('selection', {
+					ranges: selection.ranges.map(({ anchor, head }) => ({
+						anchor: positionAt(doc, anchor),
+						head  : positionAt(doc, head),
+					})),
+				});
 			}
 		}
 
@@ -466,13 +470,6 @@ export async function createEditor(container, { value = '', definitions = [], ja
 		dispose();
 		throw error;
 	}
-}
-
-function publicAnalysis(result) {
-	if (!Object.hasOwn(result, 'commonAnalysis')) return result;
-	const snapshot = { ...result };
-	delete snapshot.commonAnalysis;
-	return snapshot;
 }
 
 function changeSource(transaction) {

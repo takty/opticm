@@ -89,10 +89,10 @@ var bracketGutterOverlay = ViewPlugin2.fromClass(class {
       }
     );
     const marks = data.marks.map((mark) => {
-      const element = this.overlay.ownerDocument.createElement("span");
-      element.className = "cm-bracket-gutter-mark";
+      const e = this.overlay.ownerDocument.createElement("span");
+      e.className = "cm-bracket-gutter-mark";
       Object.assign(
-        element.style,
+        e.style,
         {
           left: mark.left + "px",
           top: mark.top + "px",
@@ -101,7 +101,7 @@ var bracketGutterOverlay = ViewPlugin2.fromClass(class {
           fontSize: mark.fontSize
         }
       );
-      return element;
+      return e;
     });
     this.overlay.replaceChildren(...marks);
   }

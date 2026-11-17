@@ -34,8 +34,8 @@ const unsubscribe = editor.on('change', event => {
     if (event.origin === 'edit') console.log('modified', event.version);
 });
 const snapshot = await editor.analyzeNow();
-// snapshot.text and snapshot.fnNames always describe the same version.
-console.log(snapshot.version, snapshot.success, snapshot.fnNames);
+// snapshot.text and snapshot.structures always describe the same version.
+console.log(snapshot.version, snapshot.complete, snapshot.structures);
 // On cleanup: unsubscribe(); editor.destroy();
 </script>
 ```
@@ -283,24 +283,29 @@ Explicit analysis failures reject the returned promise.
 
 ### Analysis results
 
+`getAnalysis()`, `analyzeNow()`, and the `analysis` event use the same
+language-independent snapshot for JavaScript and Java. The snapshot has the
+same fields as `createAnalyzer().analyze()`, plus the analyzed source in
+`text`.
+
 ```js
 {
-  version, text, success,
-  fnLocs, classLocs, fnStarts, ifLocs, forLocs, fnNames,
-  varLocs, letLocs, constLocs
+  version, text, sourceLength, complete, syntaxComplete, stale,
+  structures, declarations, syntax, references, sections,
 }
 ```
 
-The existing analyzer's format is preserved. **Only analysis ranges use one-based lines and zero-based columns as `{line, column}`.**
-Ranges are `[start, end]`, excluding the end position. `ifLocs` includes the start of the else branch as an additional element.
-`classLocs` contains class declaration and expression ranges.
-`fnStarts` contains zero-based lines delimiting function-number sections. `fnNames` contains names of functions, classes, and other constructs collected by the existing analyzer.
-It is not a list of module exports or scope-resolved public symbols.
-As in the original implementation, `forLocs` covers `ForStatement` nodes.
+Positions are zero-based UTF-16 offsets into `text`. Ranges use `from`
+(inclusive) and `to` (exclusive). Each section has a `kind` and a `from`
+offset. `complete` indicates that parsing completed without a syntax error.
+An incomplete parse can still yield usable ranges. `syntaxComplete` indicates
+whether the snapshot contains a full syntax highlighting pass. JavaScript
+parsing uses script mode.
 
-`success` is true when normal Acorn parsing succeeds, and false when tolerant parsing with acorn-loose is used.
-This flag is independent of editor diagnostics. The AST is not exposed.
-Parsing uses script mode, as in the original implementation; ES module source parsing is outside the current scope.
+Use `complete` in place of the former `success` flag, `structures` for
+structural ranges, `syntax` for syntax highlights, and `sections` for section
+starts. Applications that need exported symbol names should extract them
+from the source using their own language-specific rules.
 
 Immediately after editing, `getAnalysis()` returns `null`. Worker replies for older versions are not applied to the display or published as updates.
 `analyzeNow()` returns the version captured at the time of the call, so its text and results remain consistent even if editing continues while it is pending.

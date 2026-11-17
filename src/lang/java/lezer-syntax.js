@@ -14,8 +14,12 @@ const style = HighlightStyle.define([
 ]);
 
 const typeDeclarations = new Set([
-	'ClassDeclaration', 'InterfaceDeclaration', 'EnumDeclaration',
-	'RecordDeclaration', 'AnnotationTypeDeclaration', 'TypeParameter',
+	'ClassDeclaration',
+	'InterfaceDeclaration',
+	'EnumDeclaration',
+	'RecordDeclaration',
+	'AnnotationTypeDeclaration',
+	'TypeParameter',
 ]);
 
 export const lezerSyntax = {
@@ -47,8 +51,16 @@ export const lezerSyntax = {
 				const dimension = node.node;
 				let owner = dimension.parent;
 				if (owner?.name === 'VariableDeclarator') owner = owner.parent;
-				if (!owner || !['ArrayType', 'FieldDeclaration', 'ConstantDeclaration', 'LocalVariableDeclaration',
-					'FormalParameter', 'RecordComponent', 'MethodDeclaration', 'ForSpec'].includes(owner.name)) return;
+				if (!owner || ![
+					'ArrayType',
+					'FieldDeclaration',
+					'ConstantDeclaration',
+					'LocalVariableDeclaration',
+					'FormalParameter',
+					'RecordComponent',
+					'MethodDeclaration',
+					'ForSpec',
+				].includes(owner.name)) return;
 				const type = owner.getChild('ArrayType') ?? owner;
 				const kind = type.getChild('PrimitiveType') ? 'keyword' : 'type';
 				for (let child = dimension.firstChild; child; child = child.nextSibling) {

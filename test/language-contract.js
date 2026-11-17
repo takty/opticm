@@ -33,11 +33,13 @@ export async function runLanguageContractTests(assert) {
 	try {
 		const analysis = await analyzer.analyze(javaSource);
 		display.dispatch({ effects: setCommonAnalysis.of(analysis) });
-		assert(display.state.field(commonAnalysisState)?.version === analysis.version &&
-			display.dom.querySelector('.cm-syntax-keyword')?.textContent === 'class' &&
-			display.dom.querySelector('.cm-function-number') &&
-			display.dom.querySelector('.code-structure-view'),
-			'external CodeMirror applies Java analysis loaded with separate Worker and WASM URLs');
+		assert(
+			display.state.field(commonAnalysisState)?.version === analysis.version &&
+				display.dom.querySelector('.cm-syntax-keyword')?.textContent === 'class' &&
+				display.dom.querySelector('.cm-function-number') &&
+				display.dom.querySelector('.code-structure-view'),
+			'external CodeMirror applies Java analysis loaded with separate Worker and WASM URLs',
+		);
 	} finally {
 		display.destroy();
 		analyzer.destroy();
@@ -60,18 +62,22 @@ export async function runLanguageContractTests(assert) {
 		const inactiveTabShadow = inactiveTab ? getComputedStyle(inactiveTab, '::before').textShadow : '';
 		const tabShadow = ['1px 0px', '1px 1px', '-1px 0px', '-1px -1px', '0px 1px', '1px -1px', '0px -1px', '-1px 1px']
 			.map(offset => `rgb(255, 255, 255) ${offset} 1px`).join(', ');
-		assert(activeSpace && inactiveSpace && activeTab && inactiveTab &&
-			getComputedStyle(activeSpace).backgroundImage.includes('linear-gradient') &&
-			getComputedStyle(inactiveSpace).backgroundImage === 'none' &&
-			getComputedStyle(activeTab, '::before').color === 'rgb(246, 176, 197)' &&
-			getComputedStyle(inactiveTab, '::before').color === 'rgb(251, 221, 230)' &&
-			activeTabShadow === tabShadow && inactiveTabShadow === tabShadow,
-			'standalone whitespace extension styles active and inactive lines');
+		assert(
+			activeSpace && inactiveSpace && activeTab && inactiveTab &&
+				getComputedStyle(activeSpace).backgroundImage.includes('linear-gradient') &&
+				getComputedStyle(inactiveSpace).backgroundImage === 'none' &&
+				getComputedStyle(activeTab, '::before').color === 'rgb(246, 176, 197)' &&
+				getComputedStyle(inactiveTab, '::before').color === 'rgb(251, 221, 230)' &&
+				activeTabShadow === tabShadow && inactiveTabShadow === tabShadow,
+			'standalone whitespace extension styles active and inactive lines',
+		);
 		whitespaceHost.style.setProperty('--opticm-whitespace-active-color', '#123456');
 		whitespaceHost.style.setProperty('--opticm-whitespace-tab-color', '#654321');
-		assert(getComputedStyle(activeTab, '::before').color === 'rgb(18, 52, 86)' &&
-			getComputedStyle(inactiveTab, '::before').color === 'rgb(101, 67, 33)',
-			'whitespace colors can be customized');
+		assert(
+			getComputedStyle(activeTab, '::before').color === 'rgb(18, 52, 86)' &&
+				getComputedStyle(inactiveTab, '::before').color === 'rgb(101, 67, 33)',
+			'whitespace colors can be customized',
+		);
 		whitespaceView.dispatch({ effects: whitespaceCompartment.reconfigure([]) });
 		assert(!whitespaceView.dom.classList.contains('cm-opticm-whitespace') &&
 			!whitespaceHost.querySelector('.cm-highlightTab, .cm-highlightSpace, .cm-opticm-space') &&
@@ -80,8 +86,10 @@ export async function runLanguageContractTests(assert) {
 		whitespaceView.destroy();
 		whitespaceHost.remove();
 	}
-	assert(gutterLineSelection === easyLineSelection && setLineSelectionMode === setEasyLineSelectionMode,
-		'legacy gutter exports share the new extension and state effect');
+	assert(
+		gutterLineSelection === easyLineSelection && setLineSelectionMode === setEasyLineSelectionMode,
+		'legacy gutter exports share the new extension and state effect',
+	);
 	const ja = javascriptLanguage.diagnostics('var x = 1', 'ja', { esversion: 10, varstmt: true });
 	const en = javascriptLanguage.diagnostics('var x = 1', 'en', { esversion: 10, varstmt: true });
 	assert(ja.length && en.length && ja[0].message !== en[0].message, 'simultaneous localized diagnostics');
@@ -90,9 +98,11 @@ export async function runLanguageContractTests(assert) {
 	await plainClient.ready;
 	assert(await plainClient.request('text', 1) === null, 'plain analysis client returns no result');
 	plainClient.destroy();
-	assert(plainLanguage.diagnostics('invalid JS').length === 0 && plainLanguage.formatLine === null &&
-		plainLanguage.completionTrigger === null && plainLanguage.createCompletionSession === null,
-		'plain text advertises unavailable editing services');
+	assert(
+		plainLanguage.diagnostics('invalid JS').length === 0 && plainLanguage.formatLine === null &&
+			plainLanguage.completionTrigger === null && plainLanguage.createCompletionSession === null,
+		'plain text advertises unavailable editing services',
+	);
 	const source = 'function example() {\n let x = 1;\n if (x) { x++; } else { x--; }\n const y = 2;\n}';
 	const raw = analyze(source);
 	const snapshot = JSON.stringify(raw);
@@ -100,17 +110,25 @@ export async function runLanguageContractTests(assert) {
 	assert(JSON.stringify(raw) === snapshot, 'common analysis conversion preserves public analysis');
 	assert(data.complete && data.sections[0].from === 0, 'analysis supplies language-neutral function sections');
 	const branch = data.structures.find(item => item.kind === 'conditional' && item.branches.length);
-	assert(branch.from === source.indexOf('if') && branch.branches[0] > branch.from && branch.branches[0] < branch.to,
-		'conditional structures and branches use common UTF-16 offsets');
-	assert(data.declarations.filter(item => item.kind === 'variable').length === 2,
-		'variable declarations are represented as common semantic data');
-	assert(!createCommonAnalysis({ ...analyze('function unfinished( {').commonAnalysis, version: 2 }).complete,
-		'incomplete tolerant analysis does not authorize indentation');
+	assert(
+		branch.from === source.indexOf('if') && branch.branches[0] > branch.from && branch.branches[0] < branch.to,
+		'conditional structures and branches use common UTF-16 offsets',
+	);
+	assert(
+		data.declarations.filter(item => item.kind === 'variable').length === 2,
+		'variable declarations are represented as common semantic data',
+	);
+	assert(
+		!createCommonAnalysis({ ...analyze('function unfinished( {').commonAnalysis, version: 2 }).complete,
+		'incomplete tolerant analysis does not authorize indentation',
+	);
 	const classSource = 'class Example {\n method() {}\n}';
 	const classData = createCommonAnalysis({ ...analyze(classSource).commonAnalysis, version: 3 });
 	const classStructure = classData.structures.find(item => item.kind === 'class');
-	assert(classStructure?.from === 0 && classStructure.to === classSource.length && classData.sections.length === 1,
-		'JavaScript class and method data use language-neutral structure and section kinds');
+	assert(
+		classStructure?.from === 0 && classStructure.to === classSource.length && classData.sections.length === 1,
+		'JavaScript class and method data use language-neutral structure and section kinds',
+	);
 
 	const host = document.createElement('div');
 	host.style.cssText = 'height:150px;width:500px';
@@ -142,17 +160,24 @@ export async function runLanguageContractTests(assert) {
 		host.style.setProperty('--opticm-structure-overlay-z-index', '7');
 		host.style.setProperty('--opticm-structure-content-z-index', '8');
 		host.style.setProperty('--opticm-structure-scroller-z-index', '2');
-		assert(getComputedStyle(host.querySelector('.cm-structure-overlay')).zIndex === '7' &&
-			getComputedStyle(standalone.contentDOM).zIndex === '8' &&
-			getComputedStyle(standalone.scrollDOM).zIndex === '2' &&
-			getComputedStyle(otherHost.querySelector('.cm-structure-overlay')).zIndex === '0',
-			'structure CSS custom properties apply per editor');
+		assert(
+			getComputedStyle(host.querySelector('.cm-structure-overlay')).zIndex === '7' &&
+				getComputedStyle(standalone.contentDOM).zIndex === '8' &&
+				getComputedStyle(standalone.scrollDOM).zIndex === '2' &&
+				getComputedStyle(otherHost.querySelector('.cm-structure-overlay')).zIndex === '0',
+			'structure CSS custom properties apply per editor',
+		);
 		host.style.removeProperty('--opticm-structure-overlay-z-index');
 		host.style.removeProperty('--opticm-structure-content-z-index');
 		host.style.removeProperty('--opticm-structure-scroller-z-index');
 		standalone.dispatch({ effects: setStructure.of([{
-			kind: 'range', from: { line: 0, ch: 0 }, to: { line: 2, ch: 1 }, fill: 'rgba(255, 0, 0, 0.4)',
-			spineChars: 3, branchChars: 4, branches: [{ line: 1, ch: 0 }],
+			kind       : 'range',
+			from       : { line: 0, ch: 0 },
+			to         : { line: 2, ch: 1 },
+			fill       : 'rgba(255, 0, 0, 0.4)',
+			spineChars : 3,
+			branchChars: 4,
+			branches   : [{ line: 1, ch: 0 }],
 		}]) });
 		assert(await waitForPaint(true), 'standalone structure extension draws externally supplied ranges');
 		const rangeCanvas = host.querySelector('canvas');
@@ -193,12 +218,20 @@ export async function runLanguageContractTests(assert) {
 		const branchY = Math.floor(((branchLine.top + branchLine.bottom) / 2 - rangeCanvas.getBoundingClientRect().top) * scale);
 		const branchWidth = Math.max(1, standalone.coordsAtPos(5, -1).left - standalone.coordsAtPos(0).left - 8);
 		const branchEnd = startX + 4 + spineWidth + branchWidth;
-		assert(hasExpectedGradient(edges.top, rangeEnd) && hasExpectedGradient(edges.bottom, rangeEnd) &&
-			hasExpectedGradient(branchY, branchEnd),
-			'structure range caps exclude the existing spine width and all horizontal lines fade to transparency');
+		assert(
+			hasExpectedGradient(edges.top, rangeEnd) && hasExpectedGradient(edges.bottom, rangeEnd) &&
+				hasExpectedGradient(branchY, branchEnd),
+			'structure range caps exclude the existing spine width and all horizontal lines fade to transparency',
+		);
 		const classRange = [{
-			kind: 'range', from: { line: 0, ch: 0 }, to: { line: 2, ch: 1 },
-			fill: 'var(--test-class-color, #ff0000)', opacity: 0.15, spineChars: 3, branchChars: 4, branches: [],
+			kind       : 'range',
+			from       : { line: 0, ch: 0 },
+			to         : { line: 2, ch: 1 },
+			fill       : 'var(--test-class-color, #ff0000)',
+			opacity    : 0.15,
+			spineChars : 3,
+			branchChars: 4,
+			branches   : [],
 		}];
 		const hasColor = (red, blue) => {
 			const canvas = host.querySelector('canvas');
@@ -224,18 +257,30 @@ export async function runLanguageContractTests(assert) {
 		host.style.removeProperty('--test-class-color');
 		const otherCanvas = otherHost.querySelector('canvas');
 		await new Promise(resolve => setTimeout(resolve, 100));
-		assert(otherCanvas.width && !otherCanvas.getContext('2d').getImageData(0, 0, otherCanvas.width, otherCanvas.height).data.some((value, i) => i % 4 === 3 && value),
-			'structure data is isolated between standalone editors');
+		assert(
+			otherCanvas.width && !otherCanvas.getContext('2d').getImageData(0, 0, otherCanvas.width, otherCanvas.height).data.some((value, i) => i % 4 === 3 && value),
+			'structure data is isolated between standalone editors',
+		);
 		standalone.dispatch({ effects: setStructure.of([]) });
 		assert(await waitForPaint(false), 'standalone structure extension clears explicitly');
 		standalone.dispatch({ effects: setStructure.of([{
-			kind: 'token', appearance: 'declaration', from: { line: 1, ch: 2 }, to: { line: 1, ch: 6 }, fill: '#00ff00', stroke: '#000000',
+			kind      : 'token',
+			appearance: 'declaration',
+			from      : { line: 1, ch: 2 },
+			to        : { line: 1, ch: 6 },
+			fill      : '#00ff00',
+			stroke    : '#000000',
 		}]) });
 		assert(await waitForPaint(true), 'standalone structure extension draws externally supplied tokens');
 		standalone.dispatch({ changes: { from: 0, insert: ' ' } });
 		assert(await waitForPaint(false), 'document edits clear stale standalone structure');
 		standalone.dispatch({ effects: setStructure.of([{
-			kind: 'token', appearance: 'declaration', from: { line: 0, ch: 1 }, to: { line: 0, ch: 3 }, fill: '#00ff00', stroke: '#000000',
+			kind      : 'token',
+			appearance: 'declaration',
+			from      : { line: 0, ch: 1 },
+			to        : { line: 0, ch: 3 },
+			fill      : '#00ff00',
+			stroke    : '#000000',
 		}]) });
 		assert(await waitForPaint(true), 'standalone structure can be supplied again after editing');
 		standalone.dispatch({ userEvent: 'load' });
@@ -246,10 +291,18 @@ export async function runLanguageContractTests(assert) {
 			effects: compartment.reconfigure([structureView, retainStructureOnEdit]),
 		});
 		const token = (line, fill) => ({
-			kind: 'token', appearance: 'declaration', from: { line, ch: 0 }, to: { line, ch: 5 }, fill, stroke: fill,
+			kind      : 'token',
+			appearance: 'declaration',
+			from      : { line, ch: 0 },
+			to        : { line, ch: 5 },
+			fill,
+			stroke    : fill,
 		});
 		standalone.dispatch({ effects: setStructure.of([
-			token(0, '#ff0000'), token(1, '#00ff00'), token(3, '#ffff00'), token(4, '#0000ff'),
+			token(0, '#ff0000'),
+			token(1, '#00ff00'),
+			token(3, '#ffff00'),
+			token(4, '#0000ff'),
 		]) });
 		const colors = () => {
 			const canvas = host.querySelector('canvas'), ctx = canvas.getContext('2d');
@@ -287,50 +340,81 @@ export async function runLanguageContractTests(assert) {
 		for (let i = 0; i < 50 && blueTop() <= oldBlueTop; i++) {
 			await new Promise(resolve => setTimeout(resolve, 20));
 		}
-		assert(blueTop() > oldBlueTop && await waitForColors([red, green, yellow, blue]),
-			'unaffected structure follows inserted blank lines');
+		assert(
+			blueTop() > oldBlueTop && await waitForColors([red, green, yellow, blue]),
+			'unaffected structure follows inserted blank lines',
+		);
 		const middle = standalone.state.doc.line(5);
 		standalone.dispatch({ changes: { from: middle.from + 2, insert: 'x' } });
-		assert(await waitForColors([red, green, blue], [yellow]),
-			'editing invalidates affected structure while preserving unrelated items before and after');
+		assert(
+			await waitForColors([red, green, blue], [yellow]),
+			'editing invalidates affected structure while preserving unrelated items before and after',
+		);
 		standalone.dispatch({ changes: { from: middle.from + 2, insert: '/' } });
-		assert(await waitForColors([red, green], [yellow, blue]),
-			'potential lexical changes also invalidate later structure');
+		assert(
+			await waitForColors([red, green], [yellow, blue]),
+			'potential lexical changes also invalidate later structure',
+		);
 		standalone.dispatch({ effects: setStructure.of([token(5, '#0000ff')]) });
 		assert(await waitForColors([blue], [red, green]), 'fresh structure replaces retained items');
 		standalone.dispatch({
 			changes: { from: 0, to: standalone.state.doc.length, insert: 'if (x) {\n}\n\nthird' },
 			userEvent: 'load',
 		});
-		standalone.dispatch({ effects: setStructure.of([{
-			kind: 'range', from: { line: 0, ch: 0 }, to: { line: 1, ch: 1 }, fill: '#ff0000',
-			spineChars: 3, branchChars: 4, branches: [],
-		}, token(3, '#0000ff')]) });
+		standalone.dispatch({ effects: setStructure.of([
+			{
+				kind       : 'range',
+				from       : { line: 0, ch: 0 },
+				to         : { line: 1, ch: 1 },
+				fill       : '#ff0000',
+				spineChars : 3,
+				branchChars: 4,
+				branches   : [],
+			},
+			token(3, '#0000ff'),
+		]) });
 		assert(await waitForColors([red, blue]), 'conditional structure is painted before branch edits');
 		standalone.dispatch({ changes: { from: standalone.state.doc.line(3).from, insert: 'else' } });
-		assert(await waitForColors([], [red, blue]),
-			'a new branch invalidates its preceding conditional and later structure');
+		assert(
+			await waitForColors([], [red, blue]),
+			'a new branch invalidates its preceding conditional and later structure',
+		);
 		standalone.dispatch({
 			changes: { from: 0, to: standalone.state.doc.length, insert: 'start\nalpha omega\nfinish' },
 			userEvent: 'load',
 		});
-		standalone.dispatch({ effects: setStructure.of([{
-			kind: 'range', from: { line: 0, ch: 0 }, to: { line: 2, ch: 6 }, fill: '#ff0000',
-			spineChars: 3, branchChars: 4, branches: [],
-		}, token(1, '#00ff00'), {
-			...token(1, '#0000ff'), from: { line: 1, ch: 6 }, to: { line: 1, ch: 11 },
-		}]) });
+		standalone.dispatch({ effects: setStructure.of([
+			{
+				kind       : 'range',
+				from       : { line: 0, ch: 0 },
+				to         : { line: 2, ch: 6 },
+				fill       : '#ff0000',
+				spineChars : 3,
+				branchChars: 4,
+				branches   : [],
+			},
+			token(1, '#00ff00'),
+			{
+				...token(1, '#0000ff'),
+				from: { line: 1, ch: 6 },
+				to  : { line: 1, ch: 11 },
+			},
+		]) });
 		assert(await waitForColors([red, green, blue]), 'structure is painted before splitting a line');
 		const previousBlueTop = blueTop();
 		standalone.dispatch({ changes: { from: standalone.state.doc.line(2).from + 5, insert: '\n  ' } });
 		for (let i = 0; i < 50 && blueTop() <= previousBlueTop; i++) {
 			await new Promise(resolve => setTimeout(resolve, 20));
 		}
-		assert(blueTop() > previousBlueTop && await waitForColors([red, green, blue]),
-			'splitting a line moves tokens and preserves the enclosing structure');
+		assert(
+			blueTop() > previousBlueTop && await waitForColors([red, green, blue]),
+			'splitting a line moves tokens and preserves the enclosing structure',
+		);
 		standalone.dispatch({ changes: { from: standalone.state.doc.line(2).from + 2, insert: '\n' } });
-		assert(await waitForColors([], [red, green, blue]),
-			'splitting an identifier conservatively invalidates affected structure');
+		assert(
+			await waitForColors([], [red, green, blue]),
+			'splitting an identifier conservatively invalidates affected structure',
+		);
 		standalone.dispatch({
 			changes: { from: 0, to: standalone.state.doc.length, insert: 'start\n// hidden code\nfinish' },
 			userEvent: 'load',
@@ -338,13 +422,17 @@ export async function runLanguageContractTests(assert) {
 		standalone.dispatch({ effects: setStructure.of([token(0, '#ff0000'), token(2, '#0000ff')]) });
 		assert(await waitForColors([red, blue]), 'structure is painted before splitting a line comment');
 		standalone.dispatch({ changes: { from: standalone.state.doc.line(2).from + 9, insert: '\n' } });
-		assert(await waitForColors([red], [blue]),
-			'splitting a line comment invalidates later structure');
+		assert(
+			await waitForColors([red], [blue]),
+			'splitting a line comment invalidates later structure',
+		);
 		standalone.dispatch({ userEvent: 'load' });
 		assert(await waitForPaint(false), 'load clears retained structure');
 		standalone.dispatch({ effects: compartment.reconfigure([]) });
-		assert(!host.querySelector('.cm-structure-overlay') && !host.querySelector('style'),
-			'removing the structure extension removes its canvas and stylesheet');
+		assert(
+			!host.querySelector('.cm-structure-overlay') && !host.querySelector('style'),
+			'removing the structure extension removes its canvas and stylesheet',
+		);
 	} finally {
 		standalone.destroy();
 		other.destroy();
@@ -358,9 +446,13 @@ export async function runLanguageContractTests(assert) {
 	const numbers = new EditorView({
 		state: EditorState.create({
 			doc: Array.from({ length: 60 }, (_, i) => 'line ' + i).join('\n'),
-			extensions: [numbersCompartment.of(functionLineNumbers), EditorView.theme({
-				'&': { height: '150px', width: '500px' }, '.cm-scroller': { overflow: 'auto' },
-			})],
+			extensions: [
+				numbersCompartment.of(functionLineNumbers),
+				EditorView.theme({
+					'&'           : { height: '150px', width: '500px' },
+					'.cm-scroller': { overflow: 'auto' },
+				}),
+			],
 		}),
 		parent: numbersHost,
 	});
@@ -369,16 +461,24 @@ export async function runLanguageContractTests(assert) {
 		await new Promise(resolve => setTimeout(resolve, 300));
 		const gutter = numbersHost.querySelector('.cm-sectionNumbers');
 		const visible = [...gutter.querySelectorAll('.cm-gutterElement')].filter(element => element.style.visibility !== 'hidden');
-		assert(visible.slice(0, 3).map(element => element.textContent).join(',') === '1,1,2',
-			'standalone function line numbers render section starts and relative lines');
-		assert(getSectionLineNumber(numbers.state, 31).join() === '2,2',
-			'standalone function line number query works outside the viewport');
-		assert(getComputedStyle(numbersHost.querySelector('.cm-gutters'), '::after').backgroundImage.includes('repeating-linear-gradient'),
-			'standalone function line numbers provide their own gutter styling');
+		assert(
+			visible.slice(0, 3).map(element => element.textContent).join(',') === '1,1,2',
+			'standalone function line numbers render section starts and relative lines',
+		);
+		assert(
+			getSectionLineNumber(numbers.state, 31).join() === '2,2',
+			'standalone function line number query works outside the viewport',
+		);
+		assert(
+			getComputedStyle(numbersHost.querySelector('.cm-gutters'), '::after').backgroundImage.includes('repeating-linear-gradient'),
+			'standalone function line numbers provide their own gutter styling',
+		);
 		const firstSection = gutter.querySelector('.cm-function-even').parentElement;
-		assert(getComputedStyle(gutter).overflow === 'visible' &&
-			getComputedStyle(firstSection, '::before').backgroundColor !== 'rgba(0, 0, 0, 0)',
-			'standalone gutter renders the section background');
+		assert(
+			getComputedStyle(gutter).overflow === 'visible' &&
+				getComputedStyle(firstSection, '::before').backgroundColor !== 'rgba(0, 0, 0, 0)',
+			'standalone gutter renders the section background',
+		);
 		numbersHost.style.setProperty('--opticm-function-number-color', '#123456');
 		numbersHost.style.setProperty('--opticm-function-line-color', '#234567');
 		numbersHost.style.setProperty('--opticm-function-number-padding', '0 9px 0 6px');
@@ -389,29 +489,37 @@ export async function runLanguageContractTests(assert) {
 		numbersHost.style.setProperty('--opticm-function-alternate-background', '#345678');
 		numbersHost.style.setProperty('--opticm-lint-gutter-width', '8px');
 		const edge = getComputedStyle(numbersHost.querySelector('.cm-gutters'), '::after');
-		assert(getComputedStyle(gutter.querySelector('.cm-function-number')).color === 'rgb(18, 52, 86)' &&
-			getComputedStyle(gutter.querySelector('.cm-function-number')).paddingLeft === '6px' &&
-			getComputedStyle(gutter.querySelector('.cm-opticm-line-number')).color === 'rgb(35, 69, 103)' &&
-			getComputedStyle(visible[0]).minWidth === '48px' && edge.width === '21px' &&
-			edge.backgroundImage.includes('5px') && edge.backgroundImage.includes('188, 222, 240') &&
-			getComputedStyle(firstSection, '::before').backgroundColor === 'rgb(52, 86, 120)' &&
-			getComputedStyle(firstSection, '::before').left === '-8px',
-			'function gutter colors, dimensions and stripes respond to custom properties');
+		assert(
+			getComputedStyle(gutter.querySelector('.cm-function-number')).color === 'rgb(18, 52, 86)' &&
+				getComputedStyle(gutter.querySelector('.cm-function-number')).paddingLeft === '6px' &&
+				getComputedStyle(gutter.querySelector('.cm-opticm-line-number')).color === 'rgb(35, 69, 103)' &&
+				getComputedStyle(visible[0]).minWidth === '48px' && edge.width === '21px' &&
+				edge.backgroundImage.includes('5px') && edge.backgroundImage.includes('188, 222, 240') &&
+				getComputedStyle(firstSection, '::before').backgroundColor === 'rgb(52, 86, 120)' &&
+				getComputedStyle(firstSection, '::before').left === '-8px',
+			'function gutter colors, dimensions and stripes respond to custom properties',
+		);
 		numbersHost.style.setProperty('--opticm-function-gutter-edge-pattern', 'none');
 		numbersHost.style.setProperty('--opticm-function-gutter-edge-color', '#456789');
-		assert(getComputedStyle(numbersHost.querySelector('.cm-gutters'), '::after').backgroundImage === 'none' &&
-			getComputedStyle(numbersHost.querySelector('.cm-gutters'), '::after').backgroundColor === 'rgb(69, 103, 137)',
-			'function gutter edge pattern and color can be overridden');
+		assert(
+			getComputedStyle(numbersHost.querySelector('.cm-gutters'), '::after').backgroundImage === 'none' &&
+				getComputedStyle(numbersHost.querySelector('.cm-gutters'), '::after').backgroundColor === 'rgb(69, 103, 137)',
+			'function gutter edge pattern and color can be overridden',
+		);
 		numbers.dispatch({ changes: { from: 0, insert: 'x' } });
 		await new Promise(resolve => setTimeout(resolve, 100));
 		assert(getSectionLineNumber(numbers.state, 31).join() === '0,32', 'editing clears stale standalone numbering');
 		numbers.dispatch({ effects: numbersCompartment.reconfigure([]) });
-		assert(!numbersHost.querySelector('.cm-sectionNumbers'),
-			'removing the function line-number extension removes its UI');
+		assert(
+			!numbersHost.querySelector('.cm-sectionNumbers'),
+			'removing the function line-number extension removes its UI',
+		);
 		numbers.dispatch({ effects: numbersCompartment.reconfigure(functionLineNumbers) });
 		numbers.dispatch({ effects: setSectionStarts.of([1]) });
-		assert(numbersHost.querySelector('.cm-function-number')?.textContent === '1',
-			'reinstalling the function line-number extension accepts fresh section data');
+		assert(
+			numbersHost.querySelector('.cm-function-number')?.textContent === '1',
+			'reinstalling the function line-number extension accepts fresh section data',
+		);
 	} finally {
 		numbers.destroy();
 		numbersHost.remove();
@@ -440,9 +548,14 @@ export async function runLanguageContractTests(assert) {
 		markersHost.style.setProperty('--opticm-function-scroll-marker-z-index', '6');
 		markersHost.style.setProperty('--opticm-function-scroll-marker-color', '#102030');
 		markers.dispatch({ effects: setCommonAnalysis.of(createCommonAnalysis({
-			version: 1, sourceLength: markerDoc.length, complete: true,
-			structures: [], declarations: [], syntax: [], references: [],
-			sections: [
+			version     : 1,
+			sourceLength: markerDoc.length,
+			complete    : true,
+			structures  : [],
+			declarations: [],
+			syntax      : [],
+			references  : [],
+			sections    : [
 				{ kind: 'function', from: markerDoc.indexOf('line 1') },
 				{ kind: 'function', from: markerDoc.indexOf('line 30') },
 			],
@@ -450,16 +563,22 @@ export async function runLanguageContractTests(assert) {
 		await new Promise(resolve => setTimeout(resolve, 300));
 		const track = markersHost.querySelector('.cm-editor > .cm-function-scroll-markers');
 		const marker = track?.querySelector('span');
-		assert(markersHost.querySelectorAll('.cm-function-scroll-markers > span').length === 2 &&
-			!markersHost.querySelector('.cm-sectionNumbers'),
-			'standalone scroll markers consume common sections without the line-number extension');
-		assert(getComputedStyle(track).width === '16px' && getComputedStyle(track).zIndex === '6' &&
-			getComputedStyle(marker).left === '3px' && getComputedStyle(marker).borderRadius === '25%' &&
-			getComputedStyle(marker).backgroundColor === 'rgb(16, 32, 48)',
-			'standalone scroll markers respond to their independent custom properties');
+		assert(
+			markersHost.querySelectorAll('.cm-function-scroll-markers > span').length === 2 &&
+				!markersHost.querySelector('.cm-sectionNumbers'),
+			'standalone scroll markers consume common sections without the line-number extension',
+		);
+		assert(
+			getComputedStyle(track).width === '16px' && getComputedStyle(track).zIndex === '6' &&
+				getComputedStyle(marker).left === '3px' && getComputedStyle(marker).borderRadius === '25%' &&
+				getComputedStyle(marker).backgroundColor === 'rgb(16, 32, 48)',
+			'standalone scroll markers respond to their independent custom properties',
+		);
 		markers.dispatch({ effects: markersCompartment.reconfigure([]) });
-		assert(!markersHost.querySelector('.cm-function-scroll-markers'),
-			'removing the scroll-marker extension removes its DOM');
+		assert(
+			!markersHost.querySelector('.cm-function-scroll-markers'),
+			'removing the scroll-marker extension removes its DOM',
+		);
 	} finally {
 		markers.destroy();
 		markersHost.remove();
@@ -474,8 +593,12 @@ export async function runLanguageContractTests(assert) {
 	const selectionView = new EditorView({
 		state: EditorState.create({
 			doc: 'one\ntwo\nthree\nlast',
-			extensions: [gutterCompartment.of(lineNumbers()), selectionCompartment.of(gutterLineSelection), accessCompartment.of([]),
-				nonceCompartment.of(EditorView.cspNonce.of('first-nonce'))],
+			extensions: [
+				gutterCompartment.of(lineNumbers()),
+				selectionCompartment.of(gutterLineSelection),
+				accessCompartment.of([]),
+				nonceCompartment.of(EditorView.cspNonce.of('first-nonce')),
+			],
 		}),
 		parent: selectionHost,
 	});
@@ -487,8 +610,13 @@ export async function runLanguageContractTests(assert) {
 			.filter(element => element.style.visibility !== 'hidden')[index];
 		const box = lines[index].getBoundingClientRect();
 		gutter.dispatchEvent(new MouseEvent(type, {
-			bubbles: true, cancelable: true, button: 0, buttons: type === 'mouseup' ? 0 : 1,
-			clientX: gutter.getBoundingClientRect().left + 2, clientY: box.top + box.height / 2, ...options,
+			bubbles   : true,
+			cancelable: true,
+			button    : 0,
+			buttons   : type === 'mouseup' ? 0 : 1,
+			clientX   : gutter.getBoundingClientRect().left + 2,
+			clientY   : box.top + box.height / 2,
+			...options,
 		}));
 	};
 	const lineClick = (index, options = {}) => {
@@ -503,12 +631,16 @@ export async function runLanguageContractTests(assert) {
 		assert(selectionStyle.nonce === 'next-nonce', 'extension stylesheet follows CSP nonce changes');
 		selectionHost.style.setProperty('--opticm-gutter-cursor', 'crosshair');
 		selectionHost.style.setProperty('--opticm-gutter-line-selection-cursor', 'move');
-		assert(getComputedStyle(selectionHost.querySelector('.cm-lineNumbers')).cursor === 'crosshair',
-			'gutter cursor can be customized through CSS');
+		assert(
+			getComputedStyle(selectionHost.querySelector('.cm-lineNumbers')).cursor === 'crosshair',
+			'gutter cursor can be customized through CSS',
+		);
 		lineClick(1);
-		assert(selectionText() === 'two\n' && mode() &&
-			getComputedStyle(selectionHost.querySelector('.cm-lineNumbers')).cursor === 'move',
-			'standalone gutter click selects a line and uses the customized selection cursor');
+		assert(
+			selectionText() === 'two\n' && mode() &&
+				getComputedStyle(selectionHost.querySelector('.cm-lineNumbers')).cursor === 'move',
+			'standalone gutter click selects a line and uses the customized selection cursor',
+		);
 		lineClick(3);
 		assert(selectionText() === 'two\nthree\nlast' && mode(), 'line mode extends selection from the previous anchor');
 		lineClick(2);
@@ -520,8 +652,10 @@ export async function runLanguageContractTests(assert) {
 		lineMouse('mousedown', 2);
 		lineMouse('mousemove', 0);
 		lineMouse('mouseup', 0);
-		assert(selectionText() === 'one\ntwo\nthree\n' && !mode(),
-			'gutter dragging selects complete lines in reverse: ' + JSON.stringify(selectionText()) + ', mode=' + mode());
+		assert(
+			selectionText() === 'one\ntwo\nthree\n' && !mode(),
+			'gutter dragging selects complete lines in reverse: ' + JSON.stringify(selectionText()) + ', mode=' + mode(),
+		);
 		selectionView.dispatch({ effects: setLineSelectionMode.of(true) });
 		assert(mode(), 'host can set standalone line-selection mode');
 		selectionView.dispatch({ selection: { anchor: 0 } });
@@ -563,8 +697,10 @@ export async function runLanguageContractTests(assert) {
 		}
 		selectionView.dispatch({ effects: gutterCompartment.reconfigure(functionLineNumbers) });
 		selectionView.dispatch({ effects: selectionCompartment.reconfigure([]) });
-		assert(!mode() && !getComputedStyle(selectionHost.querySelector('.cm-sectionNumbers')).cursor.includes('data:image/svg+xml'),
-			'removing the extension removes its line-selection mode and cursor');
+		assert(
+			!mode() && !getComputedStyle(selectionHost.querySelector('.cm-sectionNumbers')).cursor.includes('data:image/svg+xml'),
+			'removing the extension removes its line-selection mode and cursor',
+		);
 		selectionView.dispatch({ selection: { anchor: 0 } });
 		lineClick(1);
 		assert(selectionText() === '' && !mode(), 'removing the gutter selection extension removes its handlers');
@@ -588,31 +724,45 @@ export async function runLanguageContractTests(assert) {
 		syntaxView.dispatch({ effects: setSyntaxHighlights.of([{ from: 0, to: 5, kind: 'keyword' }, { from: 6, to: 13, kind: 'type' }]) });
 		const keyword = syntaxHost.querySelector('.cm-syntax-keyword');
 		const type = syntaxHost.querySelector('.cm-syntax-type');
-		assert(keyword?.textContent === 'class' && type?.textContent === 'Example' &&
-			getComputedStyle(keyword).color === 'rgb(18, 52, 86)',
-			'standalone syntax extension renders supplied token ranges and custom colors');
+		assert(
+			keyword?.textContent === 'class' && type?.textContent === 'Example' &&
+				getComputedStyle(keyword).color === 'rgb(18, 52, 86)',
+			'standalone syntax extension renders supplied token ranges and custom colors',
+		);
 		syntaxView.dispatch({ effects: syntaxCompartment.reconfigure([
-			syntaxHighlightingExtension, syntaxHighlightingOptions({ syntax: true, semantic: false }),
+			syntaxHighlightingExtension,
+			syntaxHighlightingOptions({ syntax: true, semantic: false }),
 		]) });
 		syntaxView.dispatch({ effects: setSyntaxHighlights.of([
-			{ from: 0, to: 5, kind: 'keyword' }, { from: 6, to: 13, kind: 'local-reference' },
+			{ from: 0, to: 5, kind: 'keyword' },
+			{ from: 6, to: 13, kind: 'local-reference' },
 		]) });
-		assert(syntaxHost.querySelector('.cm-syntax-keyword') && !syntaxHost.querySelector('.cm-syntax-local-reference'),
-			'syntax coloring can be enabled without semantic highlighting');
+		assert(
+			syntaxHost.querySelector('.cm-syntax-keyword') && !syntaxHost.querySelector('.cm-syntax-local-reference'),
+			'syntax coloring can be enabled without semantic highlighting',
+		);
 		syntaxView.dispatch({ effects: syntaxCompartment.reconfigure([
-			syntaxHighlightingExtension, syntaxHighlightingOptions({ syntax: false, semantic: true }),
+			syntaxHighlightingExtension,
+			syntaxHighlightingOptions({ syntax: false, semantic: true }),
 		]) });
-		assert(!syntaxHost.querySelector('.cm-syntax-keyword') && syntaxHost.querySelector('.cm-syntax-local-reference'),
-			'semantic highlighting can be enabled without syntax coloring');
+		assert(
+			!syntaxHost.querySelector('.cm-syntax-keyword') && syntaxHost.querySelector('.cm-syntax-local-reference'),
+			'semantic highlighting can be enabled without syntax coloring',
+		);
 		syntaxView.dispatch({ effects: syntaxCompartment.reconfigure([
-			syntaxHighlightingExtension, syntaxHighlightingOptions({ syntax: false, semantic: false }),
+			syntaxHighlightingExtension,
+			syntaxHighlightingOptions({ syntax: false, semantic: false }),
 		]) });
-		assert(!syntaxHost.querySelector('.cm-syntax-keyword, .cm-syntax-local-reference'),
-			'disabling both highlighting categories removes their decorations');
+		assert(
+			!syntaxHost.querySelector('.cm-syntax-keyword, .cm-syntax-local-reference'),
+			'disabling both highlighting categories removes their decorations',
+		);
 		syntaxView.dispatch({ effects: syntaxCompartment.reconfigure(syntaxHighlightingExtension) });
 		syntaxView.dispatch({ changes: { from: 0, insert: ' ' } });
-		assert(!syntaxHost.querySelector('.cm-syntax-keyword, .cm-syntax-type'),
-			'syntax highlighting clears stale ranges on document edits');
+		assert(
+			!syntaxHost.querySelector('.cm-syntax-keyword, .cm-syntax-type'),
+			'syntax highlighting clears stale ranges on document edits',
+		);
 		syntaxView.dispatch({ effects: syntaxCompartment.reconfigure([
 			syntaxHighlightingExtension,
 			syntaxHighlightingSource(state => {
@@ -622,11 +772,15 @@ export async function runLanguageContractTests(assert) {
 		]) });
 		syntaxHost.style.setProperty('--opticm-syntax-local-variable-color', '#234567');
 		const reference = syntaxHost.querySelector('.cm-syntax-local-reference');
-		assert(reference?.textContent === 'class' && getComputedStyle(reference).color === 'rgb(35, 69, 103)',
-			'standalone syntax source supplies ranges and supports local-reference color');
+		assert(
+			reference?.textContent === 'class' && getComputedStyle(reference).color === 'rgb(35, 69, 103)',
+			'standalone syntax source supplies ranges and supports local-reference color',
+		);
 		syntaxView.dispatch({ changes: { from: 1, to: 6, insert: 'other' } });
-		assert(!syntaxHost.querySelector('.cm-syntax-local-reference'),
-			'synchronous syntax source refreshes after edits');
+		assert(
+			!syntaxHost.querySelector('.cm-syntax-local-reference'),
+			'synchronous syntax source refreshes after edits',
+		);
 		syntaxView.dispatch({
 			changes: { from: 0, to: syntaxView.state.doc.length, insert: 'class Example' },
 			userEvent: 'load',
@@ -643,29 +797,39 @@ export async function runLanguageContractTests(assert) {
 			]),
 		});
 		syntaxView.dispatch({ effects: setSyntaxHighlights.of([
-			{ from: 0, to: 5, kind: 'comment' }, { from: 6, to: 13, kind: 'local-reference' },
+			{ from: 0, to: 5, kind: 'comment' },
+			{ from: 6, to: 13, kind: 'local-reference' },
 		]) });
-		assert(syntaxHost.querySelector('.cm-syntax-comment')?.textContent === 'class' &&
-			!syntaxHost.querySelector('.cm-syntax-keyword, .cm-syntax-type'),
-			'current supplied syntax takes priority over an interim source');
+		assert(
+			syntaxHost.querySelector('.cm-syntax-comment')?.textContent === 'class' &&
+				!syntaxHost.querySelector('.cm-syntax-keyword, .cm-syntax-type'),
+			'current supplied syntax takes priority over an interim source',
+		);
 		syntaxView.dispatch({ changes: { from: syntaxView.state.doc.length, insert: ' new' } });
-		assert(syntaxHost.querySelector('.cm-syntax-comment')?.textContent === 'class' &&
-			syntaxHost.querySelector('.cm-syntax-local-reference')?.textContent === 'Example' &&
-			syntaxHost.querySelector('.cm-syntax-literal')?.textContent === 'new',
-			'retained syntax survives edits while the interim source colors uncovered text');
+		assert(
+			syntaxHost.querySelector('.cm-syntax-comment')?.textContent === 'class' &&
+				syntaxHost.querySelector('.cm-syntax-local-reference')?.textContent === 'Example' &&
+				syntaxHost.querySelector('.cm-syntax-literal')?.textContent === 'new',
+			'retained syntax survives edits while the interim source colors uncovered text',
+		);
 		syntaxView.dispatch({ effects: setSyntaxHighlights.of([
-			{ from: 0, to: 5, kind: 'keyword' }, { from: 6, to: 13, kind: 'type' },
+			{ from: 0, to: 5, kind: 'keyword' },
+			{ from: 6, to: 13, kind: 'type' },
 		]) });
-		assert(syntaxHost.querySelector('.cm-syntax-keyword')?.textContent === 'class' &&
-			!syntaxHost.querySelector('.cm-syntax-comment, .cm-syntax-local-reference, .cm-syntax-literal'),
-			'fresh supplied syntax replaces retained and interim decorations');
+		assert(
+			syntaxHost.querySelector('.cm-syntax-keyword')?.textContent === 'class' &&
+				!syntaxHost.querySelector('.cm-syntax-comment, .cm-syntax-local-reference, .cm-syntax-literal'),
+			'fresh supplied syntax replaces retained and interim decorations',
+		);
 		syntaxView.dispatch({
 			changes: { from: 0, to: syntaxView.state.doc.length, insert: 'class Example' },
 			userEvent: 'load',
 		});
-		assert(syntaxHost.querySelector('.cm-syntax-keyword')?.textContent === 'class' &&
-			syntaxHost.querySelector('.cm-syntax-type')?.textContent === 'Example',
-			'loading clears retained syntax and restores the interim source');
+		assert(
+			syntaxHost.querySelector('.cm-syntax-keyword')?.textContent === 'class' &&
+				syntaxHost.querySelector('.cm-syntax-type')?.textContent === 'Example',
+			'loading clears retained syntax and restores the interim source',
+		);
 		syntaxView.dispatch({
 			changes: { from: 0, to: syntaxView.state.doc.length, insert: 'word\nold' },
 			userEvent: 'load',
@@ -678,47 +842,68 @@ export async function runLanguageContractTests(assert) {
 			]),
 		});
 		syntaxView.dispatch({ effects: setSyntaxHighlights.of([
-			{ from: 0, to: 4, kind: 'keyword' }, { from: 5, to: 8, kind: 'comment' },
+			{ from: 0, to: 4, kind: 'keyword' },
+			{ from: 5, to: 8, kind: 'comment' },
 		]) });
 		syntaxView.dispatch({ changes: { from: 0, insert: '//' } });
-		assert([...syntaxHost.querySelectorAll('.cm-syntax-comment')].map(node => node.textContent).join('|') ===
-			'//word|old' && !syntaxHost.querySelector('.cm-syntax-keyword'),
-			'current comments override retained code without clearing comments beyond the parsed region');
+		assert(
+			[...syntaxHost.querySelectorAll('.cm-syntax-comment')].map(node => node.textContent).join('|') ===
+				'//word|old' && !syntaxHost.querySelector('.cm-syntax-keyword'),
+			'current comments override retained code without clearing comments beyond the parsed region',
+		);
 		syntaxView.dispatch({ changes: { from: 0, to: 2 } });
-		assert(syntaxHost.querySelector('.cm-syntax-keyword')?.textContent === 'word' &&
-			syntaxHost.querySelector('.cm-syntax-comment')?.textContent === 'old',
-			'removing a provisional comment restores retained code and preserves unparsed comments');
+		assert(
+			syntaxHost.querySelector('.cm-syntax-keyword')?.textContent === 'word' &&
+				syntaxHost.querySelector('.cm-syntax-comment')?.textContent === 'old',
+			'removing a provisional comment restores retained code and preserves unparsed comments',
+		);
 		syntaxView.dispatch({ effects: syntaxCompartment.reconfigure([]) });
-		assert(!syntaxHost.querySelector('style'),
-			'removing syntax highlighting removes its stylesheet');
+		assert(
+			!syntaxHost.querySelector('style'),
+			'removing syntax highlighting removes its stylesheet',
+		);
 		syntaxView.dispatch({
 			changes: { from: 0, to: syntaxView.state.doc.length, insert: 'class Example' },
 			userEvent: 'load',
 		});
 		syntaxView.dispatch({ effects: setCommonAnalysis.of({
-			version: 1, sourceLength: 13, complete: true, structures: [], declarations: [],
-			syntax: [{ from: 0, to: 5, kind: 'keyword' }], references: [
+			version     : 1,
+			sourceLength: 13,
+			complete    : true,
+			structures  : [],
+			declarations: [],
+			syntax      : [{ from: 0, to: 5, kind: 'keyword' }],
+			references  : [
 				{ from: 6, to: 13, role: 'definition', scope: 'unknown' },
-			], sections: [],
+			],
+			sections    : [],
 		}) });
 		const enabledSyntax = [
-			syntaxHighlightingExtension, syntaxHighlightingOptions({ syntax: true, semantic: true }),
+			syntaxHighlightingExtension,
+			syntaxHighlightingOptions({ syntax: true, semantic: true }),
 		];
 		syntaxView.dispatch({ effects: syntaxCompartment.reconfigure(enabledSyntax) });
 		const restoredKeyword = syntaxHost.querySelector('.cm-syntax-keyword')?.textContent;
 		const restoredDefinition = syntaxHost.querySelector('.cm-syntax-definition')?.textContent;
-		assert(restoredKeyword === 'class' && restoredDefinition === 'Example',
-			`re-enabling syntax and semantic highlighting restores current common analysis immediately (${restoredKeyword}, ${restoredDefinition})`);
+		assert(
+			restoredKeyword === 'class' && restoredDefinition === 'Example',
+			`re-enabling syntax and semantic highlighting restores current common analysis immediately (${restoredKeyword}, ${restoredDefinition})`,
+		);
 		syntaxView.dispatch({ effects: syntaxCompartment.reconfigure([
-			syntaxHighlightingExtension, syntaxHighlightingOptions({ syntax: false, semantic: true }),
+			syntaxHighlightingExtension,
+			syntaxHighlightingOptions({ syntax: false, semantic: true }),
 		]) });
-		assert(!syntaxHost.querySelector('.cm-syntax-keyword') && syntaxHost.querySelector('.cm-syntax-definition'),
-			'semantic highlights restore independently from common analysis');
+		assert(
+			!syntaxHost.querySelector('.cm-syntax-keyword') && syntaxHost.querySelector('.cm-syntax-definition'),
+			'semantic highlights restore independently from common analysis',
+		);
 		syntaxView.dispatch({ effects: syntaxCompartment.reconfigure([]) });
 		syntaxView.dispatch({ effects: syntaxCompartment.reconfigure(enabledSyntax) });
-		assert(syntaxHost.querySelector('.cm-syntax-keyword')?.textContent === 'class' &&
-			syntaxHost.querySelector('.cm-syntax-definition')?.textContent === 'Example',
-			're-adding the extension reconstructs decorations from the existing common snapshot');
+		assert(
+			syntaxHost.querySelector('.cm-syntax-keyword')?.textContent === 'class' &&
+				syntaxHost.querySelector('.cm-syntax-definition')?.textContent === 'Example',
+			're-adding the extension reconstructs decorations from the existing common snapshot',
+		);
 	} finally {
 		syntaxView.destroy();
 		syntaxHost.remove();
@@ -732,10 +917,14 @@ export async function runLanguageContractTests(assert) {
 	const rulerView = new EditorView({
 		state: EditorState.create({
 			doc: rulerSource,
-			extensions: [lineNumbers(), rulerCompartment.of(indentRulers), EditorView.theme({
-				'&': { height: '150px', width: '300px' },
-				'.cm-scroller': { overflow: 'auto' },
-			})],
+			extensions: [
+				lineNumbers(),
+				rulerCompartment.of(indentRulers),
+				EditorView.theme({
+					'&': { height: '150px', width: '300px' },
+					'.cm-scroller': { overflow: 'auto' },
+				}),
+			],
 		}),
 		parent: rulerHost,
 	});
@@ -751,30 +940,40 @@ export async function runLanguageContractTests(assert) {
 				column * rulerView.defaultCharacterWidth;
 		};
 		const aligned = (rule, column) => Math.abs(rule.getBoundingClientRect().left - expectedX(column)) < 1;
-		assert(rules.length === 3 && rules.every((rule, i) => aligned(rule, [4, 8, 12][i])) &&
-			rules.every(rule => getComputedStyle(rule).borderLeftStyle === 'dashed'),
-			'standalone rulers align with columns 4, 8 and 12, including default line padding');
-		assert(!noRulerHost.querySelector('.cm-ruler-overlay') &&
-			getComputedStyle(noRulerView.scrollDOM).zIndex === '0',
-			'ruler styles do not affect an editor without the extension');
-		assert(getComputedStyle(overlay).pointerEvents === 'none' &&
-			Number(getComputedStyle(rulerView.contentDOM).zIndex) > Number(getComputedStyle(overlay).zIndex),
-			'standalone ruler overlay stays behind text and does not intercept input');
+		assert(
+			rules.length === 3 && rules.every((rule, i) => aligned(rule, [4, 8, 12][i])) &&
+				rules.every(rule => getComputedStyle(rule).borderLeftStyle === 'dashed'),
+			'standalone rulers align with columns 4, 8 and 12, including default line padding',
+		);
+		assert(
+			!noRulerHost.querySelector('.cm-ruler-overlay') &&
+				getComputedStyle(noRulerView.scrollDOM).zIndex === '0',
+			'ruler styles do not affect an editor without the extension',
+		);
+		assert(
+			getComputedStyle(overlay).pointerEvents === 'none' &&
+				Number(getComputedStyle(rulerView.contentDOM).zIndex) > Number(getComputedStyle(overlay).zIndex),
+			'standalone ruler overlay stays behind text and does not intercept input',
+		);
 		rulerHost.style.setProperty('--opticm-indent-ruler-width', '3px');
 		rulerHost.style.setProperty('--opticm-indent-ruler-color', '#123456');
 		rulerHost.style.setProperty('--opticm-indent-ruler-style', 'solid');
 		rules[0].style.setProperty('--opticm-indent-ruler-column', '2');
-		assert(getComputedStyle(rules[0]).borderLeftWidth === '3px' &&
-			getComputedStyle(rules[0]).borderLeftColor === 'rgb(18, 52, 86)' &&
-			getComputedStyle(rules[0]).borderLeftStyle === 'solid' && aligned(rules[0], 2) && aligned(rules[1], 8),
-			'ruler color, width, style and individual columns accept custom properties');
+		assert(
+			getComputedStyle(rules[0]).borderLeftWidth === '3px' &&
+				getComputedStyle(rules[0]).borderLeftColor === 'rgb(18, 52, 86)' &&
+				getComputedStyle(rules[0]).borderLeftStyle === 'solid' && aligned(rules[0], 2) && aligned(rules[1], 8),
+			'ruler color, width, style and individual columns accept custom properties',
+		);
 		rules[0].style.removeProperty('--opticm-indent-ruler-column');
 		rulerView.scrollDOM.scrollLeft = 15;
 		rulerView.scrollDOM.scrollTop = 100;
 		await waitForRulers();
-		assert(rulerView.scrollDOM.scrollLeft > 0 && rulerView.scrollDOM.scrollTop > 0 &&
-			aligned(rules[0], 4) && Math.abs(overlay.getBoundingClientRect().top - rulerView.scrollDOM.getBoundingClientRect().top) < 1,
-			'rulers follow horizontal scrolling and remain fixed vertically');
+		assert(
+			rulerView.scrollDOM.scrollLeft > 0 && rulerView.scrollDOM.scrollTop > 0 &&
+				aligned(rules[0], 4) && Math.abs(overlay.getBoundingClientRect().top - rulerView.scrollDOM.getBoundingClientRect().top) < 1,
+			'rulers follow horizontal scrolling and remain fixed vertically',
+		);
 		rulerView.dom.style.fontSize = '24px';
 		rulerView.requestMeasure();
 		await waitForRulers();
@@ -783,19 +982,27 @@ export async function runLanguageContractTests(assert) {
 		rulerView.requestMeasure();
 		await waitForRulers();
 		const frame = rulerView.scrollDOM.getBoundingClientRect();
-		const expectedWidth = Math.max(0, Math.min(rulerView.defaultCharacterWidth * 64,
-			frame.left + rulerView.scrollDOM.clientWidth - overlay.getBoundingClientRect().left));
-		assert(Math.abs(overlay.getBoundingClientRect().width - expectedWidth) < 1 && aligned(rules[1], 8),
-			'rulers follow editor resizing and remain clipped to the scroll viewport');
+		const expectedWidth = Math.max(0, Math.min(
+			rulerView.defaultCharacterWidth * 64,
+			frame.left + rulerView.scrollDOM.clientWidth - overlay.getBoundingClientRect().left,
+		));
+		assert(
+			Math.abs(overlay.getBoundingClientRect().width - expectedWidth) < 1 && aligned(rules[1], 8),
+			'rulers follow editor resizing and remain clipped to the scroll viewport',
+		);
 		assert(rulerView.state.doc.toString() === rulerSource, 'rulers do not change document text');
 		rulerView.dispatch({ effects: rulerCompartment.reconfigure([]) });
-		assert(!rulerHost.querySelector('.cm-ruler-overlay') && !rulerHost.querySelector('style') &&
-			getComputedStyle(rulerView.scrollDOM).zIndex === '0',
-			'removing the ruler extension removes its overlay and stylesheet');
+		assert(
+			!rulerHost.querySelector('.cm-ruler-overlay') && !rulerHost.querySelector('style') &&
+				getComputedStyle(rulerView.scrollDOM).zIndex === '0',
+			'removing the ruler extension removes its overlay and stylesheet',
+		);
 		rulerView.dispatch({ effects: rulerCompartment.reconfigure(indentRulers) });
 		await waitForRulers();
-		assert(rulerHost.querySelectorAll('.cm-opticm-rulers > span').length === 3,
-			'reinstalling the ruler extension restores its guides');
+		assert(
+			rulerHost.querySelectorAll('.cm-opticm-rulers > span').length === 3,
+			'reinstalling the ruler extension restores its guides',
+		);
 	} finally {
 		rulerView.destroy();
 		noRulerView.destroy();
@@ -833,11 +1040,24 @@ export async function runLanguageContractTests(assert) {
 	const applyAnalysis = data => view.view.dispatch({ effects: setEditorCommonAnalysis.of(data) });
 	try {
 		const settings = {
-			analysis: true, functionLineNumbers: true, functionScrollMarkers: false, completion: true,
-			structureHighlight: true, declarationHighlight: true, referenceHighlight: true, syntaxHighlight: true,
-			semanticHighlight: true, bracketMatching: true, lineWrapping: false, rulers: false,
-			autoIndent: false, fontSize: 16, fontFamily: 'monospace', lineHeight: 165,
-			disabled: false, readOnly: false,
+			analysis             : true,
+			functionLineNumbers  : true,
+			functionScrollMarkers: false,
+			completion           : true,
+			structureHighlight   : true,
+			declarationHighlight : true,
+			referenceHighlight   : true,
+			syntaxHighlight      : true,
+			semanticHighlight    : true,
+			bracketMatching      : true,
+			lineWrapping         : false,
+			rulers               : false,
+			autoIndent           : false,
+			fontSize             : 16,
+			fontFamily           : 'monospace',
+			lineHeight           : 165,
+			disabled             : false,
+			readOnly             : false,
 		};
 		const diagnostics = () => [{ from: { line: 0, ch: 0 }, to: { line: 0, ch: 1 }, severity: 'error', message: 'Generic diagnostic' }];
 		const phrases = {};
@@ -847,63 +1067,90 @@ export async function runLanguageContractTests(assert) {
 		view.view.focus();
 		const activeLines = () => [...root.querySelectorAll('.cm-content .cm-activeLine')];
 		const activeGutters = () => [...root.querySelectorAll('.cm-sectionNumbers .cm-activeLineGutter')];
-		assert(activeLines().length === 1 && activeGutters().length === 1,
-			'collapsed selection highlights the current line and section gutter');
+		assert(
+			activeLines().length === 1 && activeGutters().length === 1,
+			'collapsed selection highlights the current line and section gutter',
+		);
 		for (const selection of [
-			EditorSelection.single(0, 2), EditorSelection.single(8, 1),
+			EditorSelection.single(0, 2),
+			EditorSelection.single(8, 1),
 			EditorSelection.create([EditorSelection.range(0, 2), EditorSelection.cursor(5)]),
 		]) {
 			view.view.dispatch({ selection });
-			assert(view.view.dom.classList.contains('cm-has-selection') && activeLines().length && activeGutters().length,
-				'any nonempty selection marks the editor while retaining standard active-line highlighting');
+			assert(
+				view.view.dom.classList.contains('cm-has-selection') && activeLines().length && activeGutters().length,
+				'any nonempty selection marks the editor while retaining standard active-line highlighting',
+			);
 		}
 		view.view.dispatch({ selection: EditorSelection.create([EditorSelection.cursor(0), EditorSelection.cursor(5)]) });
-		assert(!view.view.dom.classList.contains('cm-has-selection') && activeLines().length === 2 && activeGutters().length === 2,
-			'multiple empty cursors highlight their respective lines and gutters');
+		assert(
+			!view.view.dom.classList.contains('cm-has-selection') && activeLines().length === 2 && activeGutters().length === 2,
+			'multiple empty cursors highlight their respective lines and gutters',
+		);
 		view.view.dispatch({ selection: { anchor: 4 } });
-		assert(!view.view.dom.classList.contains('cm-has-selection') && activeLines().length === 1 &&
-			activeLines()[0].textContent === 'def' && activeGutters().length === 1,
-			'collapsing a selection restores the current line and gutter');
+		assert(
+			!view.view.dom.classList.contains('cm-has-selection') && activeLines().length === 1 &&
+				activeLines()[0].textContent === 'def' && activeGutters().length === 1,
+			'collapsing a selection restores the current line and gutter',
+		);
 		view.setDefinitions(['opaque definition']);
 		assert(definitions[0] === 'opaque definition', 'view forwards definitions without interpreting them');
 		applyAnalysis(createCommonAnalysis({
-			version: 1, sourceLength: 11, complete: true,
-			structures: [{ kind: 'function', from: 0, to: 11, branches: [] }],
+			version     : 1,
+			sourceLength: 11,
+			complete    : true,
+			structures  : [{ kind: 'function', from: 0, to: 11, branches: [] }],
 			declarations: [{ kind: 'variable', from: 4, to: 7, mutability: 'immutable', scope: 'lexical' }],
-			syntax: [], references: [], sections: [{ kind: 'function', from: 4 }],
+			syntax      : [],
+			references  : [],
+			sections    : [{ kind: 'function', from: 4 }],
 		}));
 		assert(!view.view.dom.classList.contains('cm-analysis-pending'), 'fresh analysis clears pending class');
 		view.view.dispatch({ changes: { from: 0, to: 1, insert: 'a' } });
 		assert(view.view.dom.classList.contains('cm-analysis-pending'), 'editing marks analysis as pending');
 		applyAnalysis(createCommonAnalysis({
-			version: 2, sourceLength: 11, complete: true,
-			structures: [{ kind: 'function', from: 0, to: 11, branches: [] }],
+			version     : 2,
+			sourceLength: 11,
+			complete    : true,
+			structures  : [{ kind: 'function', from: 0, to: 11, branches: [] }],
 			declarations: [{ kind: 'variable', from: 4, to: 7, mutability: 'immutable', scope: 'lexical' }],
-			syntax: [], references: [], sections: [{ kind: 'function', from: 4 }],
+			syntax      : [],
+			references  : [],
+			sections    : [{ kind: 'function', from: 4 }],
 		}));
 		assert(!view.view.dom.classList.contains('cm-analysis-pending'), 'next analysis clears pending class');
 		assert(view.getSectionLineNumber(0).join() === '0,1' && view.getSectionLineNumber(2).join() === '1,2', 'view numbers sections from language-neutral data');
 		assert(root.querySelector('.cm-function-number')?.textContent === '1', 'view renders section start markers');
 		view.setOptions({ ...settings, lineNumbers: false }, phrases, diagnostics);
-		assert(!root.querySelector('.cm-lineNumbers, .cm-sectionNumbers') && view.getSectionLineNumber(2).join() === '1,2',
-			'hiding line numbers keeps section coordinates available');
+		assert(
+			!root.querySelector('.cm-lineNumbers, .cm-sectionNumbers') && view.getSectionLineNumber(2).join() === '1,2',
+			'hiding line numbers keeps section coordinates available',
+		);
 		view.setOptions({ ...settings, functionLineNumbers: false }, phrases, diagnostics);
-		assert(view.getSectionLineNumber(2).join() === '1,2' && root.querySelector('.cm-lineNumbers'),
-			'section data remains available while ordinary numbering is displayed');
+		assert(
+			view.getSectionLineNumber(2).join() === '1,2' && root.querySelector('.cm-lineNumbers'),
+			'section data remains available while ordinary numbering is displayed',
+		);
 		view.setOptions(settings, phrases, diagnostics);
-		assert(root.querySelector('.cm-function-number')?.textContent === '1',
-			'switching back restores the current section numbering');
+		assert(
+			root.querySelector('.cm-function-number')?.textContent === '1',
+			'switching back restores the current section numbering',
+		);
 		await new Promise(resolve => setTimeout(resolve, 450));
 		const canvas = root.querySelector('canvas');
-		assert(canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data.some((value, i) => i % 4 === 3 && value),
-			'view draws structure and declaration data from shared analysis');
+		assert(
+			canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data.some((value, i) => i % 4 === 3 && value),
+			'view draws structure and declaration data from shared analysis',
+		);
 		view.setOptions({ ...settings, functionScrollMarkers: true }, phrases, diagnostics);
 		const scrollMarkers = root.querySelector('.cm-function-scroll-markers');
 		const canvasAfterMarkerChange = root.querySelector('canvas');
 		view.setOptions({ ...settings, functionScrollMarkers: true, fontSize: 18 }, phrases, diagnostics);
-		assert(scrollMarkers && root.querySelector('.cm-function-scroll-markers') === scrollMarkers &&
-			root.querySelector('canvas') === canvasAfterMarkerChange,
-			`font-only settings preserve existing marker and canvas plugin instances (marker=${!!scrollMarkers}/${root.querySelector('.cm-function-scroll-markers') === scrollMarkers}, canvas=${root.querySelector('canvas') === canvasAfterMarkerChange})`);
+		assert(
+			scrollMarkers && root.querySelector('.cm-function-scroll-markers') === scrollMarkers &&
+				root.querySelector('canvas') === canvasAfterMarkerChange,
+			`font-only settings preserve existing marker and canvas plugin instances (marker=${!!scrollMarkers}/${root.querySelector('.cm-function-scroll-markers') === scrollMarkers}, canvas=${root.querySelector('canvas') === canvasAfterMarkerChange})`,
+		);
 		await new Promise(resolve => setTimeout(resolve, 200));
 		assert(root.querySelector('.cm-lint-marker-error'), 'view renders generic diagnostics');
 		view.view.dispatch({ selection: { anchor: 3 } });

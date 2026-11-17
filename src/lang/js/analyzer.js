@@ -1,15 +1,13 @@
 /**
- * Code Analyzer (JS)
+ * Code Analyzer
  *
  * @author Takuto Yanagida
- * @version 2021-02-08
+ * @version 2026-11-17
  */
 
 import { acorn } from '../../lib/parser.js';
 import { buildCommonAnalysis } from './common-analysis.js';
 import { analyzeReferences } from './scope-analysis.js';
-
-'use strict';
 
 export function analyze(code) {
 	function walk(node, visitors, base, state, override) {
@@ -17,7 +15,7 @@ export function analyze(code) {
 			base = acorn.walk.base;
 		}
 		(function c(node, st, override) {
-			const type = override || node.type;
+			const type  = override || node.type;
 			const found = visitors[type];
 			if (found) {
 				found(node, st);
@@ -29,7 +27,7 @@ export function analyze(code) {
 	const PARSE_OPTION = { locations: true, ecmaVersion: 'latest' };
 
 	let ast;
-	let success = true;
+	let ok = true;
 	try {
 		ast = acorn.parse(code, PARSE_OPTION);
 	} catch (error) {
@@ -37,9 +35,9 @@ export function analyze(code) {
 			throw error;
 		}
 		ast = acorn.loose.parse(code, PARSE_OPTION);
-		success = false;
+		ok  = false;
 	}
-	return walk(ast, createVisitor()).get(code, ast, success);
+	return walk(ast, createVisitor()).get(code, ast, ok);
 }
 
 // -----------------------------------------------------------------------------
@@ -52,29 +50,35 @@ function createVisitor() {
 	const IF_STMT = 'IfStatement';
 	const ID      = 'Identifier';
 
-	const fnLocs    = [];
-	const classLocs = [];
-	const ifLocs    = [];
-	const forLocs   = [];
-	const loop2Locs = [];
-	const fnNames   = [];
-	const ifNodes   = [];
-	const varLocs   = [];
-	const letLocs   = [];
-	const constLocs = [];
+	const fnLocs      = [];
+	const classLocs   = [];
+	const ifLocs      = [];
+	const forLocs     = [];
+	const whileLocs   = [];
+	const fnNames     = [];
+	const ifNodes     = [];
+	const varLocs     = [];
+	const letLocs     = [];
+	const constLocs   = [];
+	const bindingLocs = { var: [], let: [], const: [] };
+
 	const propertyDefinitions = [];
 	const shorthandProperties = [];
-	const bindingLocs = { var: [], let: [], const: [] };
+
 	const collectBindings = (node, target) => {
 		if (!node) return;
 		switch (node.type) {
 			case 'Identifier':
-				if (node.name !== '✖' && node.start < node.end) target.push([node, node]);
+				if (node.name !== '✖' && node.start < node.end) {
+					target.push([node, node]);
+				}
 				break;
 			case 'AssignmentPattern': collectBindings(node.left, target); break;
 			case 'RestElement': collectBindings(node.argument, target); break;
 			case 'ArrayPattern':
-				for (const e of node.elements) collectBindings(e, target);
+				for (const e of node.elements) {
+					collectBindings(e, target);
+				}
 				break;
 			case 'ObjectPattern':
 				for (const property of node.properties) {
@@ -172,10 +176,10 @@ function createVisitor() {
 			forLocs.push([node, node]);
 		},
 		WhileStatement: (node, state, c) => {
-			loop2Locs.push([node, node]);
+			whileLocs.push([node, node]);
 		},
 		DoWhileStatement: (node, state, c) => {
-			loop2Locs.push([node, node]);
+			whileLocs.push([node, node]);
 		},
 		get: (source, ast, success) => {
 			const fnStarts = [];
@@ -186,9 +190,19 @@ function createVisitor() {
 					lastEnd = end.loc.end.line - 1;
 				}
 			}
-			const ranges = { fnLocs, classLocs, ifLocs, forLocs, loop2Locs, varLocs, letLocs, constLocs };
+			const ranges = {
+				fnLocs,
+				classLocs,
+				ifLocs,
+				forLocs,
+				whileLocs,
+				varLocs,
+				letLocs,
+				constLocs
+			};
 			const mapRanges = (start, end) => Object.fromEntries(Object.entries(ranges).map(([kind, entries]) => [
-				kind, entries.map(([from, to, ...branches]) => [start(from), end(to), ...branches.map(start)]),
+				kind,
+				entries.map(([from, to, ...branches]) => [start(from), end(to), ...branches.map(start)]),
 			]));
 			const legacy = mapRanges(node => node.loc.start, node => node.loc.end);
 			const offsets = mapRanges(node => node.start, node => node.end);
@@ -197,8 +211,16 @@ function createVisitor() {
 			for (const kind of ['var', 'let', 'const']) {
 				offsets[`${kind}Locs`] = bindingLocs[kind].map(([from, to]) => [from.start, to.end]);
 			}
-			const result = { ...legacy, fnStarts, fnNames: fnNames.filter(Boolean), success };
-			return { ...result, commonAnalysis: buildCommonAnalysis(result, source, offsets, analyzeReferences(ast)) };
+			const result = {
+				...legacy,
+				fnStarts,
+				fnNames: fnNames.filter(Boolean),
+				success
+			};
+			return {
+				...result,
+				commonAnalysis: buildCommonAnalysis(result, source, offsets, analyzeReferences(ast))
+			};
 		},
 	};
 }

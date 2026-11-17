@@ -36,13 +36,17 @@ class JavaScriptCompletion {
 	complete({ state, pos, allowShort }) {
 		if (!state.selection.main.empty) return null;
 		return new Promise(resolve => this.request(state.doc, {
-			type: 'completions', end: pos, types: true, includeKeywords: true,
+			type           : 'completions',
+			end            : pos,
+			types          : true,
+			includeKeywords: true,
 		}, (error, data) => {
 			if (error || data.start > data.end || data.end !== pos || (!allowShort && data.end - data.start < 3)) {
 				return resolve(null);
 			}
 			resolve({
-				from: data.start, to: data.end,
+				from: data.start,
+				to  : data.end,
 				list: data.completions.map(item => ({
 					text: item.name,
 					displayText: item.displayName || item.name,
@@ -65,7 +69,9 @@ class JavaScriptCompletion {
 			if (child.name === ',') active++;
 		}
 		return new Promise(resolve => this.request(state.doc, {
-			type: 'type', preferFunction: true, end: node.from,
+			type          : 'type',
+			preferFunction: true,
+			end           : node.from,
 		}, (error, data) => {
 			if (error || !data.type?.startsWith('fn(')) return resolve(null);
 			const { parameters, result } = parseSignature(data.type);

@@ -15,7 +15,7 @@ export function buildCommonAnalysis(analysis, source, nodes, references) {
 	addStructures(nodes.classLocs, 'class');
 	addStructures(nodes.ifLocs, 'conditional');
 	addStructures(nodes.forLocs, 'loop');
-	addStructures(nodes.loop2Locs, 'loop2');
+	addStructures(nodes.whileLocs, 'loop2');
 
 	const declarations = [];
 	for (const [sourceKind, ranges] of [
