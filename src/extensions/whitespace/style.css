@@ -20,7 +20,10 @@
 	transform-origin: left;
 	color: var(--opticm-whitespace-tab-color, var(--opticm-l-red-15, #fbdde6));
 	font-weight: normal;
-	text-shadow: #fff 0 0 2px, #fff 0 0 6px;
+	text-shadow: 1px  0px 1px #fff,  1px  1px 1px #fff,
+				-1px  0px 1px #fff, -1px -1px 1px #fff,
+				 0px  1px 1px #fff,  1px -1px 1px #fff,
+				 0px -1px 1px #fff, -1px  1px 1px #fff;
 	pointer-events: none;
 	overflow: hidden;
 	white-space: nowrap;

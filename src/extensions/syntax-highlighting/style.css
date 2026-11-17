@@ -45,7 +45,7 @@
 .cm-editor.cm-syntax-highlighting .cm-syntax-literal {
 	color: var(--opticm-syntax-literal-color, var(--opticm-l-orange, #f5a200));
 	font-weight: var(--opticm-syntax-literal-font-weight, bold);
-	text-shadow: var(--opticm-syntax-literal-text-shadow, var(--opticm-l-yellow, #fdde00) 0 0 0.25em);
+	text-shadow: var(--opticm-syntax-literal-text-shadow, var(--opticm-l-yellow, #fdde00) 0 0 0.1em);
 }
 
 .cm-editor.cm-syntax-highlighting .cm-activeLine .cm-syntax-literal {

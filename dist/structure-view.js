@@ -244,7 +244,7 @@ var structureView = [
 ];
 function commonDecorations(analysis, doc, options) {
   const colors = {
-    class: ["var(--opticm-l-red, #e61e58)", 0.12],
+    class: ["var(--opticm-l-red, #e61e58)", 0.08],
     function: ["hsla(40, 100%, 50%, 0.15)"],
     conditional: ["hsla(150, 100%, 35%, 0.15)"],
     loop: ["hsla(190, 90%, 50%, 0.20)"],

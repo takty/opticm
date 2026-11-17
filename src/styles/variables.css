@@ -6,28 +6,24 @@
  */
 
 .opticm {
-	--opticm-l-red         : #e61e58;
-	--opticm-l-red-35      : #f6b0c5;
-	--opticm-l-red-15      : #fbdde6;
-	--opticm-l-orange      : #f5a200;
-	--opticm-l-orange-b    : #f18400;
-	--opticm-l-orange-50   : #fbd290;
-	--opticm-l-yellow      : #fdde00;
-	--opticm-l-yellow-35   : #fef3a6;
-	--opticm-l-yellowgreen : #7eba2e;
-	--opticm-l-palegreen   : #4db28d;
-	--opticm-l-palegreen-25: #d2ece2;
-	--opticm-l-turquoise   : #005363;
-	--opticm-l-cyan        : #009ddf;
-	--opticm-l-aqua        : #60b3e5;
-	--opticm-l-aqua-60     : #a0d1ef;
-	--opticm-l-blue        : #2e449a;
-	--opticm-l-purple      : #9a74a3;
-	--opticm-l-brown       : #4e4138;
-	--opticm-l-bodybrown   : #7c6a5a;
-	--opticm-l-lightgray   : #e8e8e8;
-	--opticm-l-gray        : #b5b5b6;
-	--opticm-l-darkgray    : #898989;
+	--opticm-l-red        : #e61e58;
+	--opticm-l-red-35     : #f6b0c5;
+	--opticm-l-red-15     : #fbdde6;
+	--opticm-l-orange     : #f5a200;
+	--opticm-l-yellow     : #fdde00;
+	--opticm-l-yellowgreen: #7eba2e;
+	--opticm-l-palegreen  : #4db28d;
+	--opticm-l-turquoise  : #005363;
+	--opticm-l-cyan       : #009ddf;
+	--opticm-l-aqua       : #60b3e5;
+	--opticm-l-aqua-60    : #a0d1ef;
+	--opticm-l-blue       : #2e449a;
+	--opticm-l-purple     : #9a74a3;
+	--opticm-l-brown      : #4e4138;
+	--opticm-l-bodybrown  : #7c6a5a;
+	--opticm-l-lightgray  : #e8e8e8;
+	--opticm-l-gray       : #b5b5b6;
+	--opticm-l-darkgray   : #898989;
 
 	--opticm-color-editor: rgb(252.76 252.76 252.76);
 	--opticm-color-text  : #110;
