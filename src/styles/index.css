@@ -190,6 +190,8 @@
 	box-shadow: 0 0 2px rgb(0 0 0 / 15%), 0 2px 4px rgb(0 0 0 / 25%);
 }
 
+.opticm .cm-search .cm-button,
+.opticm .cm-search .cm-textfield { font-size: 85%; }
 .opticm .cm-search input { font-family: var(--opticm-font-console); }
 .opticm .cm-tern-arguments { padding: 2px 5px; }
 .opticm .cm-tern-icon::before {
