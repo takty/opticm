@@ -428,6 +428,15 @@ try {
 			const box = marker.getBoundingClientRect();
 			assert(marker.contains(document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2)), 'lint marker receives pointer over function region: ' + functionLineNumbers + ', line ' + line);
 		}
+		const originalFontSize = a.getSettings().fontSize;
+		a.setSettings({ fontSize: 48 });
+		const lintGutter = editorA.querySelector('.cm-gutter-lint');
+		const marker = lintGutter.querySelector('.cm-lint-marker-warning');
+		const gutterBox = lintGutter.getBoundingClientRect();
+		const markerBox = marker.getBoundingClientRect();
+		assert(markerBox.width >= 48 && markerBox.left >= gutterBox.left && markerBox.right <= gutterBox.right,
+			'zoomed lint marker fits inside its gutter: ' + functionLineNumbers);
+		a.setSettings({ fontSize: originalFontSize });
 		themeRoot.style.removeProperty('--opticm-function-number-color');
 	}
 	a.loadDocument('function longFunction() {\n' + '\n'.repeat(999) + '}');
