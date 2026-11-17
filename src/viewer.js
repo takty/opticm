@@ -3,7 +3,7 @@ import { Compartment, EditorState } from '@codemirror/state';
 import { EditorView, keymap } from '@codemirror/view';
 import { createAnalyzer } from './analyzer.js';
 import { setCommonAnalysis } from './analysis/common-analysis.js';
-import { createDisplayExtensions } from './display-extensions.js';
+import { createDisplayExtensions, setHighlightedLines } from './display-extensions.js';
 import { refreshIndentRulers } from './extensions/indent-rulers/index.js';
 import { refreshStructure } from './extensions/structure-view/index.js';
 import { javaLanguage } from './lang/java/index.js';
@@ -18,12 +18,14 @@ const DEFAULT_SETTINGS = {
 	declarationHighlight: true,
 	referenceHighlight  : true,
 	lineNumbers         : 'absolute',
+	lineNumberStart     : 1,
 	rulers              : true,
 	lineWrapping        : false,
 };
 
 function displayExtensions(codeLanguage, settings) {
 	for (const [key, value] of Object.entries(settings)) {
+		if (key === 'lineNumbers' && typeof value === 'boolean') continue;
 		if (!Object.hasOwn(DEFAULT_SETTINGS, key) || typeof value !== typeof DEFAULT_SETTINGS[key]) {
 			throw new TypeError(`Invalid viewer setting: ${key}`);
 		}
@@ -124,6 +126,10 @@ export async function createViewer(container, { value = '', codeLanguage = 'java
 				const next = { ...settings, ...patch };
 				view.dispatch({ effects: display.reconfigure(displayExtensions(codeLanguage, next)) });
 				settings = next;
+			},
+			setHighlightedLines(lines) {
+				assertAlive();
+				view.dispatch({ effects: setHighlightedLines.of(lines) });
 			},
 			refresh() {
 				assertAlive();

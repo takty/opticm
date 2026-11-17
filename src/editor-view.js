@@ -14,12 +14,13 @@ import { closeSearchPanel, findNext, findPrevious, highlightSelectionMatches, op
 import { commonAnalysisState } from './analysis/common-analysis.js';
 import { createStructureExtensions, createSyntaxExtensions } from './display-extensions.js';
 import { bracketMatchingExtension } from './extensions/bracket-matching/index.js';
-import { absoluteLineNumbers, functionLineNumbers, getSectionLineNumber } from './extensions/function-line-numbers/index.js';
+import { absoluteLineNumbers, createLineNumberExtensions, getSectionLineNumber } from './extensions/function-line-numbers/index.js';
 import { functionScrollMarkers, refreshFunctionScrollMarkers } from './extensions/function-scroll-markers/index.js';
 import { easyLineSelection, setEasyLineSelectionMode, standardGutterLineSelection } from './extensions/gutter-line-selection/index.js';
 import { fullLineSelection } from './extensions/full-line-selection/index.js';
 import { indentRulers, refreshIndentRulers } from './extensions/indent-rulers/index.js';
 import { refreshStructure } from './extensions/structure-view/index.js';
+import { setHighlightedLines, staticLineHighlighting } from './extensions/static-line-highlighting/index.js';
 import { whitespaceHighlighting } from './extensions/whitespace/index.js';
 
 const TAB_SIZE = 4;
@@ -101,7 +102,6 @@ export class Editor {
 		this.autoFormat          = false;
 		this.autoIndent          = false;
 		this.completion          = true;
-		this.sectionNumbers      = false;
 		this.functionMarkers     = false;
 		this.changedLine         = null;
 		this.abort               = new AbortController();
@@ -178,6 +178,7 @@ export class Editor {
 				standardGutterLineSelection,
 				this.options.gutterSelection.of([]),
 				highlightField,
+				staticLineHighlighting,
 				argumentHintField,
 				commonAnalysisState,
 				lintGutter(),
@@ -237,7 +238,7 @@ export class Editor {
 		this.readOnly             = settings.readOnly;
 		this.autoIndent           = settings.autoIndent;
 		this.completion           = settings.completion;
-		this.sectionNumbers       = settings.analysis && settings.functionLineNumbers && this.language.supportsFunctionSections;
+		const sectionNumbers = settings.analysis && settings.functionLineNumbers && this.language.supportsFunctionSections;
 		this.functionMarkers      = settings.analysis && settings.functionScrollMarkers && this.language.supportsFunctionSections;
 		if (!this.canUseCompletion()) this.closeCompletion();
 		const previous = this.optionState ?? {};
@@ -262,8 +263,10 @@ export class Editor {
 		if (previous.easyLineSelection !== settings.easyLineSelection) {
 			effects.push(this.options.gutterSelection.reconfigure(settings.easyLineSelection ? easyLineSelection : []));
 		}
-		if (previous.sectionNumbers !== this.sectionNumbers) {
-			effects.push(this.options.numbers.reconfigure(this.sectionNumbers ? functionLineNumbers : absoluteLineNumbers));
+		const { lineNumbers = true, lineNumberStart = 1 } = settings;
+		const numberMode = lineNumbers && (sectionNumbers ? 'function' : 'absolute');
+		if (previous.numberMode !== numberMode || previous.lineNumberStart !== lineNumberStart) {
+			effects.push(this.options.numbers.reconfigure(createLineNumberExtensions(numberMode, lineNumberStart)));
 		}
 		if (previous.structureHighlight !== settings.structureHighlight ||
 			previous.declarationHighlight !== settings.declarationHighlight || previous.referenceHighlight !== settings.referenceHighlight) {
@@ -330,7 +333,8 @@ export class Editor {
 			lineWrapping        : settings.lineWrapping,
 			rulers              : settings.rulers,
 			easyLineSelection   : settings.easyLineSelection,
-			sectionNumbers      : this.sectionNumbers,
+			numberMode          : numberMode,
+			lineNumberStart,
 			structureHighlight  : settings.structureHighlight,
 			declarationHighlight: settings.declarationHighlight,
 			referenceHighlight  : settings.referenceHighlight,
@@ -564,6 +568,10 @@ export class Editor {
 
 	clearHighlight(id) {
 		this.view.dispatch({ effects: removeHighlight.of(id) });
+	}
+
+	setHighlightedLines(lines) {
+		this.view.dispatch({ effects: setHighlightedLines.of(lines) });
 	}
 
 	historySize() {

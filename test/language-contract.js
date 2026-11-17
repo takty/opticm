@@ -884,6 +884,9 @@ export async function runLanguageContractTests(assert) {
 		assert(!view.view.dom.classList.contains('cm-analysis-pending'), 'next analysis clears pending class');
 		assert(view.getSectionLineNumber(0).join() === '0,1' && view.getSectionLineNumber(2).join() === '1,2', 'view numbers sections from language-neutral data');
 		assert(root.querySelector('.cm-function-number')?.textContent === '1', 'view renders section start markers');
+		view.setOptions({ ...settings, lineNumbers: false }, phrases, diagnostics);
+		assert(!root.querySelector('.cm-lineNumbers, .cm-sectionNumbers') && view.getSectionLineNumber(2).join() === '1,2',
+			'hiding line numbers keeps section coordinates available');
 		view.setOptions({ ...settings, functionLineNumbers: false }, phrases, diagnostics);
 		assert(view.getSectionLineNumber(2).join() === '1,2' && root.querySelector('.cm-lineNumbers'),
 			'section data remains available while ordinary numbering is displayed');

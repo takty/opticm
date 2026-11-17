@@ -23,8 +23,8 @@ export function analyzeReferences(ast) {
 				bind(node.argument, scope, evaluationScope);
 				break;
 			case 'ArrayPattern':
-				for (const element of node.elements) {
-					bind(element, scope, evaluationScope);
+				for (const e of node.elements) {
+					bind(e, scope, evaluationScope);
 				}
 				break;
 			case 'ObjectPattern':

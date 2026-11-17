@@ -74,7 +74,7 @@ function createVisitor() {
 			case 'AssignmentPattern': collectBindings(node.left, target); break;
 			case 'RestElement': collectBindings(node.argument, target); break;
 			case 'ArrayPattern':
-				for (const element of node.elements) collectBindings(element, target);
+				for (const e of node.elements) collectBindings(e, target);
 				break;
 			case 'ObjectPattern':
 				for (const property of node.properties) {

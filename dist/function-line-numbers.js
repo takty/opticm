@@ -88,20 +88,28 @@ var LineNumber = class extends GutterMarker {
     return element;
   }
 };
-function widestLineNumber(doc) {
-  return "9".repeat(String(doc.lines).length);
+function validateLineNumberStart(start) {
+  if (!Number.isSafeInteger(start) || start < 1) {
+    throw new RangeError("lineNumberStart must be a positive safe integer");
+  }
 }
-function numberGutter(sectionMode) {
+function absoluteNumber(start, line) {
+  const offset = line - 1;
+  const number = start + offset;
+  return Number.isSafeInteger(number) ? number : BigInt(start) + BigInt(offset);
+}
+function numberGutter(sectionMode, start = 1) {
+  const spacerNumber = (doc) => "9".repeat(String(absoluteNumber(start, doc.lines)).length);
   return gutter({
     class: sectionMode ? "cm-sectionNumbers" : "cm-lineNumbers",
     lineMarker(view, block) {
       const line = view.state.doc.lineAt(block.from).number;
-      return sectionMode ? new LineNumber(...getSectionLineNumber(view.state, line - 1)) : new LineNumber(0, line);
+      return sectionMode ? new LineNumber(...getSectionLineNumber(view.state, line - 1)) : new LineNumber(0, absoluteNumber(start, line));
     },
     lineMarkerChange: (update) => sectionMode && (update.startState.field(commonAnalysisState, false) !== update.state.field(commonAnalysisState, false) || update.startState.field(sectionNumberState) !== update.state.field(sectionNumberState)),
-    initialSpacer: (view) => new LineNumber(0, widestLineNumber(view.state.doc)),
+    initialSpacer: (view) => new LineNumber(0, spacerNumber(view.state.doc)),
     updateSpacer(spacer, { state }) {
-      const number = widestLineNumber(state.doc);
+      const number = spacerNumber(state.doc);
       return spacer.line === number ? spacer : new LineNumber(0, number);
     }
   });
@@ -113,10 +121,27 @@ var functionLineNumbers = [
   EditorView2.editorAttributes.of({ class: "cm-section-mode cm-function-line-numbers" }),
   extensionStyles(style_default)
 ];
+function createLineNumberExtensions(mode, start) {
+  validateLineNumberStart(start);
+  switch (mode) {
+    case false:
+    case "off":
+      return [];
+    case true:
+    case "absolute":
+      return start === 1 ? absoluteLineNumbers : numberGutter(false, start);
+    case "function":
+      return functionLineNumbers;
+    default:
+      throw new TypeError("lineNumbers must be a boolean, off, absolute or function");
+  }
+}
 export {
   absoluteLineNumbers,
+  createLineNumberExtensions,
   functionLineNumbers,
   getSectionLineNumber,
   sectionNumberState,
-  setSectionStarts
+  setSectionStarts,
+  validateLineNumberStart
 };

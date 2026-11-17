@@ -1,8 +1,11 @@
 import { commonAnalysisState } from './analysis/common-analysis.js';
-import { absoluteLineNumbers, functionLineNumbers } from './extensions/function-line-numbers/index.js';
+import { createLineNumberExtensions } from './extensions/function-line-numbers/index.js';
 import { indentRulers } from './extensions/indent-rulers/index.js';
 import { syntaxHighlightingExtension, syntaxHighlightingOptions } from './extensions/syntax-highlighting/index.js';
 import { structureView, structureViewOptions } from './extensions/structure-view/index.js';
+import { staticLineHighlighting } from './extensions/static-line-highlighting/index.js';
+
+export { setHighlightedLines } from './extensions/static-line-highlighting/index.js';
 
 export function createSyntaxExtensions({ syntaxHighlight, semanticHighlight }) {
 	if (!syntaxHighlight && !semanticHighlight) return [];
@@ -31,17 +34,15 @@ export function createDisplayExtensions({
 	declarationHighlight = true,
 	referenceHighlight   = true,
 	lineNumbers          = 'off',
+	lineNumberStart      = 1,
 	rulers               = false,
 } = {}) {
-	if (!['off', 'absolute', 'function'].includes(lineNumbers)) {
-		throw new TypeError('lineNumbers must be off, absolute or function');
-	}
-	const numbers = lineNumbers === 'function' ? functionLineNumbers : absoluteLineNumbers;
 	return [
 		commonAnalysisState,
 		createStructureExtensions({ structureHighlight, declarationHighlight, referenceHighlight }),
 		createSyntaxExtensions({ syntaxHighlight, semanticHighlight }),
-		lineNumbers === 'off' ? [] : numbers,
+		createLineNumberExtensions(lineNumbers, lineNumberStart),
+		staticLineHighlighting,
 		rulers ? indentRulers : [],
 	];
 }

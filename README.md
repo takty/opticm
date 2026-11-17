@@ -72,7 +72,14 @@ snapshots. For repeated analysis, reuse the analyzer, discard results for obsole
 documents, and destroy the analyzer when its owner is disposed.
 `createDisplayExtensions()` enables syntax, semantic, structure, declaration,
 and reference highlighting by default. Each can be toggled independently.
-`lineNumbers` accepts `off` (default), `absolute`, or `function`.
+`lineNumbers` accepts `'off'` (default), `'absolute'`, or `'function'`.
+Boolean values `false` and `true` select `'off'` and `'absolute'`, respectively.
+`lineNumberStart` is a positive safe integer and defaults to `1`. It applies
+to ordinary line numbers.
+
+Import the `setHighlightedLines` state effect from `opticm/display` and
+dispatch it with `view.dispatch({ effects: setHighlightedLines.of([0, 2]) })`
+to highlight document lines in an external CodeMirror instance.
 
 A host can provide `createWorker(defaultURL)`, returning a new module Worker for
 each analyzer. The default Worker and WASM URLs are resolved relative to the
@@ -97,7 +104,8 @@ const viewer = await createViewer(document.querySelector('#example'), {
 });
 
 await viewer.setValue('class Example { void run() {} }');
-viewer.setSettings({ rulers: false });
+viewer.setSettings({ rulers: false, lineNumbers: 'absolute', lineNumberStart: 20 });
+viewer.setHighlightedLines([0]);
 // On cleanup: viewer.destroy();
 ```
 
@@ -108,6 +116,14 @@ settings, `rulers`, and `lineWrapping` can be changed with `setSettings()`.
 Line numbers default to `absolute`; use `function` for per-function numbers
 or `off` to hide them. Function numbering falls back to ordinary numbering in
 plain text.
+
+`setHighlightedLines(lines)` replaces the highlighted lines. Pass zero-based
+document line indices, or an empty array to clear them. Duplicate indices are
+merged. Indices beyond the end of the document are skipped and will be
+highlighted if those lines exist after a source update. Displayed line numbers
+have no effect on these indices. Set `--opticm-color-highlighted-line` on the
+host to override the background. The default follows the inherited
+`color-scheme`.
 
 `getValue()` returns the displayed text. `setValue(text)` displays the new
 text immediately and resolves after analysis. `refresh()` requests a layout
@@ -142,6 +158,7 @@ Initialization failures reject the promise and clean up resources and DOM elemen
 | `getLineCount()` | Returns the number of document lines, including one line for an empty document |
 | `highlightLine(line)` | Highlights a line and returns an ID for clearing it |
 | `clearHighlight(id)` | Clears the specified highlight |
+| `setHighlightedLines(lines)` | Replaces persistent line highlights using the same indices as the viewer API. Existing error highlights take precedence on overlapping lines |
 | `getFunctionLineNumber(line)` | Returns `[functionNumber, lineWithinFunction]`, or `[0, line + 1]` when analysis is unavailable |
 | `refresh()` | Redraws the editor, for example after revealing a hidden container |
 | `destroy()` | Releases resources and removes the DOM; safe to call repeatedly |
@@ -177,6 +194,8 @@ Use `setDefinitions` to change additional definitions after initialization.
 | `referenceHighlight` | `true` | Canvas highlighting for variable references |
 | `syntaxHighlight` | `true` | Syntax coloring for comments, keywords, literals, and related tokens |
 | `semanticHighlight` | `true` | Semantic highlighting for definitions and variable references |
+| `lineNumbers` | `true` | Shows or hides the line number gutter |
+| `lineNumberStart` | `1` | Positive safe integer used as the first ordinary line number |
 | `functionLineNumbers` | `false` | Per-function line numbers; ordinary line numbers when analysis is disabled |
 | `functionScrollMarkers` | `false` | Independent function-position markers near the scrollbar |
 | `bracketMatching` | `true` | CodeMirror matching-bracket highlighting and gutter indicators |

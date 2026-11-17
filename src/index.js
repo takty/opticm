@@ -2,6 +2,7 @@ import { EditorSelection } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { setCommonAnalysis } from './analysis/common-analysis.js';
 import { Editor, offsetAt, positionAt } from './editor-view.js';
+import { validateLineNumberStart } from './extensions/function-line-numbers/index.js';
 import { javascriptLanguage } from './lang/js/index.js';
 import { javaLanguage } from './lang/java/index.js';
 import { plainLanguage } from './lang/plain/index.js';
@@ -27,6 +28,8 @@ const DEFAULT_SETTINGS = {
 	referenceHighlight  : true,
 	syntaxHighlight     : true,
 	semanticHighlight   : true,
+	lineNumbers         : true,
+	lineNumberStart     : 1,
 	functionLineNumbers : false,
 	functionScrollMarkers: false,
 	bracketMatching     : true,
@@ -78,6 +81,7 @@ function validate(options) {
 	if (options.fontSize !== undefined && (options.fontSize < 10 || options.fontSize > 64)) {
 		throw new RangeError('fontSize must be between 10 and 64');
 	}
+	if (Object.hasOwn(options, 'lineNumberStart')) validateLineNumberStart(options.lineNumberStart);
 }
 
 function normalizeSettings({ gutterLineSelection, ...options }) {
@@ -436,6 +440,10 @@ export async function createEditor(container, { value = '', definitions = [], ja
 			clearHighlight(id) {
 				assertAlive();
 				view.clearHighlight(id);
+			},
+			setHighlightedLines(lines) {
+				assertAlive();
+				view.setHighlightedLines(lines);
 			},
 			getFunctionLineNumber(line) {
 				assertAlive();

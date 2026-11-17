@@ -1099,14 +1099,17 @@ try {
 		document.body.append(viewerHost, editorHost);
 		let viewer, editor;
 		try {
-			viewer = await createViewer(viewerHost, { codeLanguage, value, lineNumbers: 'function' });
-			editor = await createEditor(editorHost, { codeLanguage, value, functionLineNumbers: true });
+			viewer = await createViewer(viewerHost, { codeLanguage, value, lineNumbers: 'function', lineNumberStart: 90 });
+			editor = await createEditor(editorHost, { codeLanguage, value, functionLineNumbers: true, lineNumberStart: 90 });
 			const tokenColors = host => [...host.querySelectorAll('.cm-syntax-keyword, .cm-syntax-local-reference')]
 				.map(token => [token.textContent, getComputedStyle(token).color]);
 			const viewerColors = tokenColors(viewerHost);
 			assert(viewerColors.length && JSON.stringify(viewerColors) === JSON.stringify(tokenColors(editorHost)) &&
 				viewerHost.querySelector('.code-structure-view') && viewerHost.querySelector('.cm-function-number'),
 				`${codeLanguage}: viewer matches editor token colors and displays structure and function numbers`);
+			assert([viewerHost, editorHost].every(host =>
+				host.querySelector('.cm-sectionNumbers .cm-function-number')?.textContent === '1'),
+				`${codeLanguage}: function numbers ignore the ordinary line-number start`);
 			const content = viewerHost.querySelector('.cm-content');
 			content.focus();
 			press(viewerHost, 'a', mod);
@@ -1135,6 +1138,51 @@ try {
 			viewerHost.remove();
 			editorHost.remove();
 		}
+	}
+	const excerptHost = document.createElement('div');
+	const viewerHost = document.createElement('div');
+	excerptHost.style.height = viewerHost.style.height = '200px';
+	document.body.append(excerptHost, viewerHost);
+	let excerptEditor, excerptViewer;
+	try {
+		const value = 'first\nsecond\nthird';
+		excerptEditor = await createEditor(excerptHost, { codeLanguage: null, value, lineNumberStart: 98 });
+		excerptViewer = await createViewer(viewerHost, { codeLanguage: null, value, lineNumberStart: 98 });
+		const gutterNumbers = host => [...host.querySelectorAll('.cm-lineNumbers .cm-gutterElement:not(:first-child)')]
+			.map(element => element.textContent).join(',');
+		for (const [host, component] of [[excerptHost, excerptEditor], [viewerHost, excerptViewer]]) {
+			assert(gutterNumbers(host) === '98,99,100', 'excerpt numbering starts at the configured value');
+			component.setSettings({ lineNumbers: false });
+			assert(!host.querySelector('.cm-lineNumbers'), 'the line-number gutter can be hidden');
+			component.setSettings({ lineNumbers: true, lineNumberStart: 20 });
+			assert(gutterNumbers(host) === '20,21,22', 'line numbers apply the latest settings');
+			const highlighted = () => [...host.querySelectorAll('.cm-opticm-highlighted-line')].map(line => line.textContent).join(',');
+			host.style.setProperty('--opticm-color-highlighted-line', 'rgb(10, 20, 30)');
+			component.setHighlightedLines([2, 0, 2, 5]);
+			assert(highlighted() === 'first,third' &&
+				getComputedStyle(host.querySelector('.cm-opticm-highlighted-line')).backgroundColor === 'rgb(10, 20, 30)',
+				'static highlights use unique document indices and the host color');
+			const replacement = 'one\ntwo\nthree\nfour\nfive\nsix';
+			if (component === excerptEditor) {
+				excerptEditor.replaceDocument(replacement);
+			} else {
+				await excerptViewer.setValue(replacement);
+			}
+			assert(highlighted() === 'one,three,six', 'static highlights are reapplied at the same indices after replacing source');
+			component.setHighlightedLines([]);
+			assert(highlighted() === '', 'an empty array clears static highlights');
+		}
+		excerptEditor.setHighlightedLines([0]);
+		const marker = excerptEditor.highlightLine(0);
+		assert(excerptHost.querySelector('.error-line.cm-opticm-highlighted-line'), 'error and static highlights coexist');
+		excerptEditor.clearHighlight(marker);
+		assert(excerptHost.querySelector('.cm-opticm-highlighted-line') && !excerptHost.querySelector('.error-line'),
+			'clearing an error highlight preserves the static highlight');
+	} finally {
+		excerptEditor?.destroy();
+		excerptViewer?.destroy();
+		excerptHost.remove();
+		viewerHost.remove();
 	}
 	window.testResult = { passed: true, results };
 } catch (error) {
