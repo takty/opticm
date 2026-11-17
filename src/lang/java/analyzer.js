@@ -51,7 +51,6 @@ export function analyzeJava(source, rootNode) {
 	const syntaxHighlights = [];
 	const references = [];
 	const sectionStarts = new Set();
-	const decorations = [];
 	const structures = [];
 	const declarations = [];
 	const lineStarts = [0];
@@ -59,7 +58,7 @@ export function analyzeJava(source, rootNode) {
 		if (source.charCodeAt(i) === 10) lineStarts.push(i + 1);
 	}
 
-	function positionAt(offset) {
+	function lineAt(offset) {
 		let low = 0, high = lineStarts.length;
 		while (low < high) {
 			const middle = (low + high) >>> 1;
@@ -69,8 +68,7 @@ export function analyzeJava(source, rootNode) {
 				high = middle;
 			}
 		}
-		const line = low - 1;
-		return { line, ch: offset - lineStarts[line] };
+		return low - 1;
 	}
 
 	function add(node, kind) {
@@ -80,16 +78,10 @@ export function analyzeJava(source, rootNode) {
 		if (from !== undefined && to !== undefined) syntaxHighlights.push({ from, to, kind });
 	}
 
-	function addRange(node, kind, fill, branches = [], opacity) {
+	function addRange(node, kind, branches = []) {
 		const from = toOffset(node.startIndex), to = toOffset(node.endIndex);
 		if (from === undefined || to === undefined || to <= from) return;
-		const branchOffsets = branches.filter(Number.isInteger);
-		structures.push({ kind, from, to, branches: branchOffsets });
-		decorations.push({
-			kind: 'range', from: positionAt(from), to: positionAt(to), fill,
-			...(opacity === undefined ? {} : { opacity }),
-			spineChars: 3, branchChars: 4, branches: branchOffsets.map(positionAt),
-		});
+		structures.push({ kind, from, to, branches: branches.filter(Number.isInteger) });
 	}
 
 	function addVariableDeclaration(node) {
@@ -108,11 +100,6 @@ export function analyzeJava(source, rootNode) {
 			kind: 'variable', from, to,
 			mutability: isFinal ? 'immutable' : 'mutable',
 			scope,
-		});
-		decorations.push({
-			kind: 'token', appearance: 'declaration', from: positionAt(from), to: positionAt(to),
-			fill: isFinal ? 'hsla(240, 75%, 97%, 1)' : 'hsla(205, 100%, 97%, 1)',
-			stroke: isFinal ? 'hsla(240, 75%, 65%, 0.75)' : 'hsla(205, 100%, 52%, 0.75)',
 		});
 	}
 
@@ -138,23 +125,22 @@ export function analyzeJava(source, rootNode) {
 			}
 		}
 		if (HIGHLIGHTED_TYPE_DECLARATIONS.has(node.type)) {
-			addRange(node, 'class', 'var(--opticm-l-red, #e61e58)', [], 0.08);
+			addRange(node, 'class');
 		} else if (FUNCTION_NODES.has(node.type)) {
 			const start = toOffset(node.startIndex);
 			if (start !== undefined) {
-				const position = positionAt(start);
-				sectionStarts.add(position.line);
-				addRange(node, 'function', 'hsla(40, 100%, 50%, 0.15)');
+				sectionStarts.add(lineAt(start));
+				addRange(node, 'function');
 			}
 		} else if (CONDITIONAL_NODES.has(node.type)) {
 			const alternative = node.childForFieldName('alternative');
 			const branchOffset = alternative ? toOffset(alternative.startIndex) : undefined;
 			const branches = branchOffset === undefined ? [] : [branchOffset];
-			addRange(node, 'conditional', 'hsla(150, 100%, 35%, 0.15)', branches);
+			addRange(node, 'conditional', branches);
 		} else if (LOOP_NODES.has(node.type)) {
-			addRange(node, 'loop', 'hsla(190, 90%, 50%, 0.20)');
+			addRange(node, 'loop');
 		} else if (LOOP2_NODES.has(node.type)) {
-			addRange(node, 'loop2', 'var(--opticm-l-purple, #9a74a3)', [], 0.20);
+			addRange(node, 'loop2');
 		}
 		if (node.type.includes('comment')) {
 			add(node, 'comment');
@@ -211,7 +197,6 @@ export function analyzeJava(source, rootNode) {
 		success,
 		syntaxHighlights,
 		sectionStarts: sortedSectionStarts,
-		decorations,
 		commonAnalysis: buildCommonAnalysis(source.length, success, ranges, sortedSectionStarts, lineStarts),
 	};
 }

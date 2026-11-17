@@ -85,7 +85,7 @@ test('Java array type brackets follow their element type before and after worker
 	}
 });
 
-test('Java while and do-while statements use purple loop2 structures', () => {
+test('Java while and do-while statements use loop2 structures', () => {
 	const source = 'class Example { void run() { for (;;) {} while (ready) { tick(); } do { tick(); } while (ready); } }';
 	const tree = parser.parse(source);
 	try {
@@ -97,8 +97,6 @@ test('Java while and do-while statements use purple loop2 structures', () => {
 			['loop2', 'while (ready) { tick(); }'],
 			['loop2', 'do { tick(); } while (ready);'],
 		]);
-		assert.ok(result.decorations.some(item => item.kind === 'range' &&
-			item.fill === 'var(--opticm-l-purple, #9a74a3)' && item.opacity === 0.20));
 	} finally {
 		tree.delete();
 	}
@@ -238,9 +236,10 @@ test('Java highlights lexical variable references without confusing declarations
 		assert.ok(!referenceOffsets.has(offset('this.value = value', 'value')));
 		assert.ok(!referenceOffsets.has(offset('use(value, arg, args)', 'use')));
 		assert.ok(!referenceOffsets.has(offset('args::toString', 'toString')));
-		const tokens = result.decorations.filter(item => item.kind === 'token');
-		assert.equal(tokens.length, 9);
-		assert.ok(tokens.some(item => item.from.line === 4 && item.stroke === 'hsla(240, 75%, 65%, 0.75)'));
+		const { declarations } = result.commonAnalysis;
+		assert.equal(declarations.length, 9);
+		assert.ok(declarations.some(item =>
+			item.from === offset('final int value = arg', 'value') && item.mutability === 'immutable'));
 	} finally {
 		tree.delete();
 	}
@@ -282,18 +281,17 @@ test('Java emits matching structure ranges for classes, interfaces, records, and
 	try {
 		const result = analyzeJava(source, tree.rootNode);
 		assert.equal(result.success, true);
-		const types = result.decorations.filter(item => item.fill === 'var(--opticm-l-red, #e61e58)');
-		assert.deepEqual(types.map(item => [item.from.line, item.from.ch, item.to.line, item.to.ch, item.opacity]), [
-			[0, 0, 4, 1, 0.08],
-			[2, 4, 2, 18, 0.08],
-			[5, 0, 5, 21, 0.08],
-			[6, 0, 6, 22, 0.08],
-			[7, 0, 7, 16, 0.08],
+		const { structures } = result.commonAnalysis;
+		const types = structures.filter(item => item.kind === 'class');
+		assert.deepEqual(types.map(item => source.slice(item.from, item.to)), [
+			'class Outer {\n  void run() {\n    class Inner {}\n  }\n}',
+			'class Inner {}',
+			'interface Contract {}',
+			'record Point(int x) {}',
+			'enum Mode { ON }',
 		]);
-		assert.equal(result.commonAnalysis.structures.filter(item => item.kind === 'class').length, types.length);
 		assert.deepEqual(result.sectionStarts, [1]);
-		assert.ok(result.decorations.indexOf(types[0]) < result.decorations.findIndex(item =>
-			item.fill === 'hsla(40, 100%, 50%, 0.15)'));
+		assert.deepEqual(structures.map(item => item.kind), ['class', 'function', 'class', 'class', 'class', 'class']);
 	} finally {
 		tree.delete();
 	}

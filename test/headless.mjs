@@ -382,7 +382,7 @@ try {
 					[...document.querySelectorAll('.cm-syntax-keyword')].some(node => node.textContent === 'class') &&
 					document.querySelectorAll('.cm-sectionNumbers .cm-function-number').length >= 2 &&
 					structureIsPainted() && classPainted() && count &&
-					javaAnalysis.decorations.some(item => item.fill === 'var(--opticm-l-red, #e61e58)'),
+					javaAnalysis.success && !Object.hasOwn(javaAnalysis, 'decorations'),
 					'Built docs Java renders syntax, structure, per-method line numbers, and reference highlighting');
 				document.querySelector('#code-language input[value="javascript"]').click();
 				for (let i = 0; i < 100 && !document.querySelector('#status').textContent.includes('Switched to javascript'); i++)

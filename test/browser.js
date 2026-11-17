@@ -704,7 +704,7 @@ try {
 			'Java analysis results are passed to the syntax-highlighting extension');
 		assert([...javaRoot.querySelectorAll('.cm-syntax-local-reference')].some(node =>
 			node.textContent === 'count' && getComputedStyle(node).color === 'rgb(83, 122, 31)') &&
-			javaAnalysis.decorations.some(item => item.kind === 'token' && item.from.line === 3),
+			javaRoot.querySelector('.cm-line:nth-child(4) .cm-syntax-definition')?.textContent === 'count',
 			'Java variable declarations and local references use shared visual extensions');
 		const javaReference = () => [...javaRoot.querySelectorAll('.cm-syntax-variable-reference')]
 			.find(node => node.textContent === 'count');
@@ -721,10 +721,8 @@ try {
 			'Java reference background and shadow are hidden on the active line');
 		const sectionMarkers = [...javaRoot.querySelectorAll('.cm-sectionNumbers .cm-function-number')]
 			.map(element => element.textContent).join();
-		assert(javaAnalysis.sectionStarts.join() === '1,8' && sectionMarkers === '1,2' &&
-			javaAnalysis.decorations.some(item => item.kind === 'range' && item.from.line === 1) &&
-			javaAnalysis.decorations.some(item => item.kind === 'range' && item.fill === 'hsla(150, 100%, 35%, 0.15)'),
-			`Java method and conditional structure drives per-function numbering and structure display: sections=${javaAnalysis.sectionStarts.join()}, markers=${sectionMarkers}`);
+		assert(javaAnalysis.sectionStarts.join() === '1,8' && sectionMarkers === '1,2',
+			`Java methods drive per-function numbering: sections=${javaAnalysis.sectionStarts.join()}, markers=${sectionMarkers}`);
 		const countOffset = javaSource.indexOf('count');
 		assert(countOffset >= 0 && javaAnalysis.syntaxHighlights.some(token =>
 			token.from === countOffset && token.to === countOffset + 'count'.length && token.kind === 'variable'),

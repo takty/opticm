@@ -319,7 +319,7 @@ Supply ranges as above or tokens as `{kind: 'token', appearance: 'declaration', 
 Colors can use `var(--property, fallback)` and are resolved against the editor
 when the canvas is repainted. An optional `opacity` sets the canvas alpha
 (default `1`). JavaScript and Java class ranges use `--opticm-l-red` at
-12% opacity and are drawn underneath their method decorations.
+8% opacity and are drawn underneath their method decorations.
 The caller supplies current data in drawing order and is responsible for rejecting
 stale asynchronous analysis results. Treat the supplied array and its contents
 as immutable after dispatch. Document changes or a `load` user event
