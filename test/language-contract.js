@@ -3,9 +3,9 @@ import { javascriptLanguage } from '../.build/lang/js/index.js';
 import { plainLanguage } from '../.build/lang/plain/index.js';
 import { analyze } from '../.build/lang/js/analyzer.js';
 import { createCommonAnalysis, setCommonAnalysis as setEditorCommonAnalysis } from '../.build/analysis/common-analysis.js';
-import { commonAnalysisState, setCommonAnalysis } from '../dist/analysis.js';
-import { createAnalyzer } from '../dist/analyzer.js';
-import { createDisplayExtensions } from '../dist/display-extensions.js';
+import { commonAnalysisState, setCommonAnalysis } from 'opticm/analysis';
+import { createAnalyzer } from 'opticm/analyzer';
+import { createDisplayExtensions, setHighlightedLines } from 'opticm/display';
 import { Compartment, EditorSelection, EditorState } from '@codemirror/state';
 import { EditorView, highlightActiveLine, lineNumbers } from '@codemirror/view';
 import { retainStructureOnEdit, setStructure, structureView } from '../dist/structure-view.js';
@@ -39,6 +39,21 @@ export async function runLanguageContractTests(assert) {
 				display.dom.querySelector('.cm-function-number') &&
 				display.dom.querySelector('.code-structure-view'),
 			'external CodeMirror applies Java analysis loaded with separate Worker and WASM URLs',
+		);
+		const revisedSource = 'class Updated {\n  void run() {}\n}';
+		display.dispatch({
+			changes: { from: 0, to: display.state.doc.length, insert: revisedSource },
+			effects: setHighlightedLines.of([1]),
+		});
+		display.dispatch({ effects: setCommonAnalysis.of(analysis) });
+		assert(display.state.field(commonAnalysisState)?.stale, 'external CodeMirror rejects an obsolete snapshot after editing');
+		const revised = await analyzer.analyze(revisedSource);
+		display.dispatch({ effects: setCommonAnalysis.of(revised) });
+		assert(
+			display.state.field(commonAnalysisState)?.version === revised.version &&
+				!display.state.field(commonAnalysisState).stale &&
+				display.dom.querySelector('.cm-opticm-highlighted-line')?.textContent.trim() === 'void run() {}',
+			'external CodeMirror accepts fresh analysis alongside static line highlights',
 		);
 	} finally {
 		display.destroy();

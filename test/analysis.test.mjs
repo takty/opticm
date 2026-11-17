@@ -117,6 +117,10 @@ test('destroy rejects pending and future requests', async () => {
 	client.destroy();
 	await rejected;
 	await assert.rejects(client.request('later', 2), /destroyed/);
+	assert.equal(worker.terminated, true);
+	for (const handler of ['onmessage', 'onerror', 'onmessageerror']) {
+		assert.equal(worker[handler], null);
+	}
 });
 test('worker startup and runtime failures are observable', async () => {
 	const worker = new WorkerMock();

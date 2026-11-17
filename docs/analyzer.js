@@ -53,6 +53,9 @@ var AnalysisClient = class {
       p.reject(error);
     }
     this.pending.clear();
+    this.worker.onmessage = null;
+    this.worker.onerror = null;
+    this.worker.onmessageerror = null;
     this.worker.terminate();
   }
   destroy() {

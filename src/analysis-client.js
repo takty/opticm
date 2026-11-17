@@ -5,9 +5,9 @@ export class AnalysisClient {
 		this.pending = new Map();
 		this.nextId  = 0;
 		this.failure = null;
-		this.ready = new Promise((resolve, reject) => {
+		this.ready   = new Promise((resolve, reject) => {
 			this.rejectReady = reject;
-			this.timeout = setTimeout(() => this.fail(new Error('Analysis worker initialization timed out')), 15000);
+			this.timeout     = setTimeout(() => this.fail(new Error('Analysis worker initialization timed out')), 15000);
 			worker.onmessage = ({ data }) => {
 				if (data.ready) {
 					clearTimeout(this.timeout);
@@ -55,6 +55,9 @@ export class AnalysisClient {
 			p.reject(error);
 		}
 		this.pending.clear();
+		this.worker.onmessage      = null;
+		this.worker.onerror        = null;
+		this.worker.onmessageerror = null;
 		this.worker.terminate();
 	}
 	destroy() {

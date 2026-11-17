@@ -54,6 +54,7 @@ async function buildJavaScript() {
 	await bundle({
 		entryPoints  : {
 			'opticm'    : join(stageRoot, 'index.js'),
+			'viewer'    : join(stageRoot, 'viewer.js'),
 			'analysis-worker': join(stageRoot, 'lang/js/analysis-worker.js'),
 			'analysis-worker-java': join(stageRoot, 'lang/java/analysis-worker.js'),
 		},

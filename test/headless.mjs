@@ -1,10 +1,8 @@
 import { spawn } from 'node:child_process';
-import { cp, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { preview } from 'vite';
-import { build } from 'esbuild';
+import { serveBrowserFixtures } from './browser-fixtures.mjs';
 
 function classPainted() {
 	const canvas = document.querySelector('.code-structure-view');
@@ -23,26 +21,7 @@ const browser = process.argv[2] || 'C:/Program Files/Google/Chrome/Application/c
 const name = browser.toLowerCase().includes('msedge') ? 'edge' : 'chrome';
 const profile = resolve(here, '.profiles', name);
 await mkdir(profile, { recursive: true });
-// Serve tests and built files unchanged, without development-time transforms.
-const root = resolve(here, '..');
-const fixtures = await mkdtemp(resolve(tmpdir(), 'opticm-browser-'));
-await mkdir(resolve(fixtures, 'test'));
-await Promise.all([
-	build({ entryPoints: [resolve(here, 'language-contract.js')], outfile: resolve(fixtures, 'test/language-contract.js'), bundle: true, loader: { '.svg': 'base64', '.css': 'text' }, format: 'esm', platform: 'browser', logLevel: 'silent' }),
-	cp(resolve(root, 'dist'), resolve(fixtures, 'dist'), { recursive: true }),
-	cp(resolve(root, 'docs'), resolve(fixtures, 'docs'), { recursive: true }),
-	cp(resolve(root, 'dist/analysis-worker-java.min.js'), resolve(fixtures, 'test/analysis-worker-java.min.js')),
-	...['browser.html', 'browser.js'].map(file => cp(resolve(here, file), resolve(fixtures, 'test', file))),
-]);
-const server = await preview({
-	configFile: false,
-	root,
-	publicDir: false,
-	appType: 'mpa',
-	build: { outDir: fixtures },
-	preview: { host: '127.0.0.1', port: 0, open: false },
-});
-const port = server.httpServer.address().port;
+const { port, close } = await serveBrowserFixtures();
 const child = spawn(browser, ['--headless=new', '--no-first-run', '--no-default-browser-check', '--disable-gpu', '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank'], { windowsHide: true, stdio: ['ignore', 'ignore', 'pipe'] });
 let socket;
 try {
@@ -61,8 +40,15 @@ try {
 	});
 	socket = new WebSocket(endpoint);
 	await new Promise((resolve, reject) => {
-		socket.onopen = resolve;
-		socket.onerror = reject;
+		const timeout = setTimeout(() => reject(new Error('DevTools connection timed out')), 10000);
+		socket.onopen = () => {
+			clearTimeout(timeout);
+			resolve();
+		};
+		socket.onerror = () => {
+			clearTimeout(timeout);
+			reject(new Error('DevTools connection failed'));
+		};
 	});
 	let id = 0;
 	const pending = new Map();
@@ -71,12 +57,17 @@ try {
 		const p = pending.get(result.id);
 		if (p) {
 			pending.delete(result.id);
+			clearTimeout(p.timeout);
 			result.error ? p.reject(result.error) : p.resolve(result.result);
 		}
 	};
 	const send = (method, params = {}, sessionId) => new Promise((resolve, reject) => {
 		const n = ++id;
-		pending.set(n, { resolve, reject });
+		const timeout = setTimeout(() => {
+			pending.delete(n);
+			reject(new Error(`DevTools command timed out: ${method}`));
+		}, 30000);
+		pending.set(n, { resolve, reject, timeout });
 		socket.send(JSON.stringify({ id: n, method, params, sessionId }));
 	});
 	const { targetId: fontTarget } = await send('Target.createTarget', { url: 'about:blank' });
@@ -415,6 +406,5 @@ try {
 } finally {
 	socket?.close();
 	child.kill();
-	await new Promise((resolve, reject) => server.httpServer.close(error => error ? reject(error) : resolve()));
-	await rm(fixtures, { recursive: true, force: true });
+	await close();
 }

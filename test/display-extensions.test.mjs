@@ -2,7 +2,7 @@ import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import { Compartment, EditorState } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
-import { createDisplayExtensions, setHighlightedLines } from '../dist/display-extensions.js';
+import { createDisplayExtensions, setHighlightedLines } from 'opticm/display';
 
 test('static highlights survive document replacement and display reconfiguration', () => {
 	const display = new Compartment();

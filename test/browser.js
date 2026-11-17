@@ -1,4 +1,5 @@
 import { createEditor, createViewer } from '../dist/opticm.min.js';
+import { createViewer as createStandaloneViewer } from '../dist/viewer.min.js';
 const results = [];
 const assert = (condition, message, details = '') => {
 	if (!condition) {
@@ -14,6 +15,88 @@ const waitFor = async (predicate, message) => {
 	}
 	throw new Error(message);
 };
+
+async function checkResourceCleanup() {
+	const nativeWorker = globalThis.Worker;
+	const add = EventTarget.prototype.addEventListener;
+	const remove = EventTarget.prototype.removeEventListener;
+	const workers = new Map();
+	const listeners = [];
+	const host = document.createElement('div');
+	host.className = 'host';
+	document.body.append(host);
+
+	globalThis.Worker = class extends nativeWorker {
+		constructor(...args) {
+			super(...args);
+			workers.set(this, 0);
+		}
+		terminate() {
+			workers.set(this, workers.get(this) + 1);
+			super.terminate();
+		}
+	};
+	const capture = options => typeof options === 'boolean' ? options : !!options?.capture;
+	const matches = (entry, target, type, callback, options) =>
+		entry.target === target && entry.type === type && entry.callback === callback && entry.capture === capture(options);
+	EventTarget.prototype.addEventListener = function (type, callback, options) {
+		add.call(this, type, callback, options);
+		const signal = options?.signal;
+		const trackedTarget = this === globalThis || this === document ||
+			(this instanceof Element && host.contains(this) && (signal || this.classList.contains('cm-scroller')));
+		if (trackedTarget && callback && !signal?.aborted && !options?.once &&
+			!listeners.some(entry => matches(entry, this, type, callback, options))) {
+			listeners.push({ target: this, type, callback, capture: capture(options), signal });
+		}
+	};
+	EventTarget.prototype.removeEventListener = function (type, callback, options) {
+		remove.call(this, type, callback, options);
+		const index = listeners.findIndex(entry => matches(entry, this, type, callback, options));
+		if (index !== -1) listeners.splice(index, 1);
+	};
+	const activeListeners = () => listeners.filter(entry => !entry.signal?.aborted);
+	let instance;
+	try {
+		for (const [name, create, settings] of [
+			['Editor', createEditor, { functionLineNumbers: true, functionScrollMarkers: true, easyLineSelection: true }],
+			['Viewer', createViewer, {}],
+			['standalone Viewer', createStandaloneViewer, {}],
+		]) {
+			for (const [codeLanguage, value] of [
+				['javascript', 'function run() { return 1; }'],
+				['java', 'class Example { void run() {} }'],
+			]) {
+				const previousWorkers = workers.size;
+				instance = await create(host, { codeLanguage, value, ...settings });
+				assert(workers.size === previousWorkers + 1 && activeListeners().length > 0,
+					`${name} (${codeLanguage}) starts a Worker and registers tracked listeners`);
+				const pending = name === 'Editor'
+					? instance.analyzeNow().then(() => false, error => /destroyed/i.test(error.message))
+					: instance.setValue(value + '\n').then(() => true);
+				instance.destroy();
+				instance.destroy();
+				assert(await pending, `${name} (${codeLanguage}) settles analysis interrupted by destroy`);
+				const remaining = activeListeners();
+				assert(
+					!host.childNodes.length && [...workers].every(([worker, terminations]) =>
+						terminations === 1 && worker.onmessage === null && worker.onerror === null && worker.onmessageerror === null),
+					`${name} (${codeLanguage}) removes its DOM and terminates its Worker exactly once with handlers detached`,
+				);
+				assert(!remaining.length, `${name} (${codeLanguage}) releases its tracked event listeners`,
+					remaining.length ? `: ${remaining.map(entry => entry.type).join(', ')}` : '');
+				instance = null;
+				listeners.length = 0;
+			}
+		}
+	} finally {
+		instance?.destroy();
+		globalThis.Worker = nativeWorker;
+		EventTarget.prototype.addEventListener = add;
+		EventTarget.prototype.removeEventListener = remove;
+		host.remove();
+	}
+}
+
 // Inspect rendered UI, without retrieving the underlying editor instance.
 const searchLabel = (editor, host) => {
 	editor.execute('find');
@@ -245,7 +328,17 @@ try {
 		'single-line selection fills the entire visual line height',
 	);
 	const selectionColor = () => getComputedStyle(selectionBackgrounds()[0]).backgroundColor;
-	await waitFor(() => editorA.classList.contains('cm-focused'), 'editor focus is reflected in the selection style');
+	try {
+		await waitFor(() => editorA.classList.contains('cm-focused'), 'editor focus is reflected in the selection style');
+	} catch (error) {
+		const focus = {
+			documentFocused: document.hasFocus(),
+			contentFocused : document.activeElement === editorA.querySelector('.cm-content'),
+			activeElement  : document.activeElement?.tagName,
+			editorFocused  : a.hasFocus(),
+		};
+		throw new Error(`${error.message} (${JSON.stringify(focus)})`, { cause: error });
+	}
 	const focusedSelectionColor = selectionColor();
 	a.blur();
 	await waitFor(() => !editorA.classList.contains('cm-focused'), 'editor blur is reflected in the selection style');
@@ -1400,6 +1493,45 @@ try {
 		excerptHost.remove();
 		viewerHost.remove();
 	}
+	const jsHost = document.createElement('div');
+	const javaHost = document.createElement('div');
+	jsHost.className = javaHost.className = 'host';
+	document.body.append(jsHost, javaHost);
+	let jsViewer, javaViewer;
+	try {
+		const creations = await Promise.allSettled([
+			createStandaloneViewer(jsHost, { value: 'function first() {\n  return 1;\n}', lineNumberStart: 21 })
+				.then(viewer => { jsViewer = viewer; }),
+			createStandaloneViewer(javaHost, { codeLanguage: 'java', value: 'class Example {\n  void run() {}\n}', lineNumbers: 'function' })
+				.then(viewer => { javaViewer = viewer; }),
+		]);
+		for (const creation of creations) {
+			if (creation.status === 'rejected') throw creation.reason;
+		}
+		jsViewer.setHighlightedLines([1]);
+		assert(
+			jsHost.querySelector('.cm-opticm-highlighted-line')?.textContent.trim() === 'return 1;' &&
+				jsHost.querySelector('.cm-syntax-keyword')?.textContent === 'function' &&
+				!javaHost.querySelector('.cm-opticm-highlighted-line') &&
+				javaHost.querySelector('.cm-syntax-keyword')?.textContent === 'class' &&
+				javaHost.querySelector('.cm-function-number'),
+			'standalone JavaScript and Java viewers keep their display settings and analysis separate',
+		);
+		const pending = jsViewer.setValue('function next() {}');
+		jsViewer.destroy();
+		await Promise.all([pending, javaViewer.setValue('class Revised {\n  void updated() {}\n}')]);
+		assert(
+			!jsHost.childNodes.length && javaViewer.getValue().includes('Revised') &&
+				javaHost.querySelector('.cm-function-number'),
+			'destroying a viewer during analysis does not interrupt another viewer',
+		);
+	} finally {
+		jsViewer?.destroy();
+		javaViewer?.destroy();
+		jsHost.remove();
+		javaHost.remove();
+	}
+	await checkResourceCleanup();
 	window.testResult = { passed: true, results };
 } catch (error) {
 	window.testResult = { passed: false, results, error: error.stack };

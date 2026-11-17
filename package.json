@@ -7,6 +7,8 @@
 	"type": "module",
 	"exports": {
 		".": "./dist/opticm.min.js",
+		"./viewer": "./dist/viewer.min.js",
+		"./style.css": "./dist/opticm.min.css",
 		"./analysis": "./dist/analysis.js",
 		"./analyzer": "./dist/analyzer.js",
 		"./display": "./dist/display-extensions.js",
@@ -30,7 +32,8 @@
 		"dev": "node build.mjs && vite",
 		"preview": "vite preview",
 		"test": "node build.mjs && node --test test/*.test.mjs",
-		"test:browser": "node build.mjs && vite build && node test/headless.mjs"
+		"test:browser": "node build.mjs && vite build && node test/headless.mjs",
+		"test:electron": "node build.mjs && node test/electron.mjs"
 	},
 	"dependencies": {
 		"@codemirror/autocomplete": "6.20.4",

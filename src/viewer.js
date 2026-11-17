@@ -6,15 +6,17 @@ import { setCommonAnalysis } from './analysis/common-analysis.js';
 import { createDisplayExtensions, setHighlightedLines } from './display-extensions.js';
 import { refreshIndentRulers } from './extensions/indent-rulers/index.js';
 import { refreshStructure } from './extensions/structure-view/index.js';
-import { javaLanguage } from './lang/java/index.js';
-import { javascriptLanguage } from './lang/js/index.js';
-import { plainLanguage } from './lang/plain/index.js';
+import { javaDisplayExtensions } from './lang/java/display.js';
+import { javascriptDisplayExtensions } from './lang/js/display.js';
 
-const LANGUAGES = { java: javaLanguage, javascript: javascriptLanguage };
+const LANGUAGES = {
+	java      : javaDisplayExtensions,
+	javascript: javascriptDisplayExtensions
+};
 const DEFAULT_SETTINGS = {
 	syntaxHighlight     : true,
 	semanticHighlight   : true,
-	structureHighlight   : true,
+	structureHighlight  : true,
 	declarationHighlight: true,
 	referenceHighlight  : true,
 	lineNumbers         : 'absolute',
@@ -51,9 +53,9 @@ export async function createViewer(container, { value = '', codeLanguage = 'java
 	if (typeof value !== 'string') throw new TypeError('Viewer source must be a string');
 
 	let settings = { ...DEFAULT_SETTINGS, ...options };
-	const display = new Compartment();
+	const display    = new Compartment();
 	const extensions = displayExtensions(codeLanguage, settings);
-	const root = document.createElement('div');
+	const root       = document.createElement('div');
 	root.className = 'opticm';
 	container.append(root);
 	let view;
@@ -87,7 +89,7 @@ export async function createViewer(container, { value = '', codeLanguage = 'java
 	}
 
 	try {
-		const language = codeLanguage === null ? plainLanguage : LANGUAGES[codeLanguage];
+		const languageExtensions = codeLanguage === null ? [] : LANGUAGES[codeLanguage];
 		view = new EditorView({
 			doc: value,
 			parent: root,
@@ -98,7 +100,7 @@ export async function createViewer(container, { value = '', codeLanguage = 'java
 				EditorView.theme({ '&': { fontFamily: 'monospace', fontSize: '16px', lineHeight: '165%' } }),
 				EditorState.tabSize.of(4),
 				keymap.of([{ key: 'Mod-a', run: selectAll }]),
-				language.extensions,
+				languageExtensions,
 				display.of(extensions),
 			],
 		});

@@ -40,7 +40,28 @@ console.log(snapshot.version, snapshot.complete, snapshot.structures);
 </script>
 ```
 
+## Regression tests
+
+Run `yarn test` for Node.js tests and `yarn test:browser` for the Chrome
+regression suite. An alternative Chromium browser executable can be passed
+to `node test/headless.mjs` after `yarn build`.
+Run `yarn test:electron <path-to-electron>` or set `ELECTRON_PATH` to run
+the same component regression page in an Electron renderer.
+
 ## Public API
+
+| Entry point | Use |
+| --- | --- |
+| `opticm` | Standalone Editor and Viewer with bundled CodeMirror |
+| `opticm/viewer` | Standalone read-only Viewer with bundled CodeMirror |
+| `opticm/style.css` | Shared component stylesheet |
+| `opticm/analyzer` | Worker-backed analyzer for JavaScript and Java |
+| `opticm/analysis` | Shared analysis state and effects for external CodeMirror |
+| `opticm/display` | Display extensions for external CodeMirror |
+
+For direct browser imports, use `dist/opticm.min.js` or `dist/viewer.min.js`.
+Serve the workers and WASM files from the same distribution directory.
+The individual extension entry points are documented below.
 
 ### Analysis and display for an existing CodeMirror editor
 
@@ -57,9 +78,9 @@ const display = createDisplayExtensions({ lineNumbers: 'function', rulers: true 
 const analyzer = await createAnalyzer({ codeLanguage: 'java' });
 
 try {
-    const source = view.state.doc.toString();
-    const snapshot = await analyzer.analyze(source);
-    if (view.state.doc.toString() === source) {
+    const documentAtRequest = view.state.doc;
+    const snapshot = await analyzer.analyze(documentAtRequest.toString());
+    if (view.state.doc === documentAtRequest) {
         view.dispatch({ effects: setCommonAnalysis.of(snapshot) });
     }
 } finally {
@@ -95,7 +116,8 @@ Load `opticm.min.css` and call `createViewer()` in the same way as
 `createEditor()`. The viewer supports native text selection and copying.
 
 ```js
-import { createViewer } from 'opticm';
+import { createViewer } from 'opticm/viewer';
+import 'opticm/style.css';
 
 const viewer = await createViewer(document.querySelector('#example'), {
     codeLanguage: 'java',
@@ -129,6 +151,10 @@ host to override the background. The default follows the inherited
 text immediately and resolves after analysis. `refresh()` requests a layout
 measurement, for example after revealing a hidden container. `destroy()`
 removes the viewer and terminates its analysis worker.
+
+Mount each Viewer in its own container. Display settings, line highlights,
+and analysis requests are scoped to the instance. Call `destroy()` when
+removing a Viewer, including when a source update is still in progress.
 
 ### Standalone editor
 
