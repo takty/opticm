@@ -100,7 +100,7 @@
 
 .opticm .cm-gutters::after {
 	content: '';
-	width: var(--opticm-function-gutter-edge-width, 16px);
+	width: var(--opticm-function-gutter-edge-width, 0.5em);
 	background: color-mix(in srgb, var(--opticm-l-purple) 25%, transparent);
 }
 

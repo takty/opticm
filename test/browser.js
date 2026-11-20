@@ -444,8 +444,10 @@ try {
 	for (const lineSelection of [false, true]) {
 		a.setEasyLineSelectionMode(lineSelection);
 		const cursor = getComputedStyle(editorA.querySelector('.cm-lineNumbers .cm-gutterElement:not([style*="visibility: hidden"])')).cursor;
+		const edgeCursor = getComputedStyle(editorA.querySelector('.cm-gutters'), '::after').cursor;
 		const url = cursor.match(/url\("(data:image\/svg\+xml[^"\n]+)"\)/)?.[1];
 		assert(url && cursor.endsWith('22 8, pointer'), 'embedded cursor and hotspot: ' + lineSelection);
+		assert(edgeCursor === cursor, 'gutter edge matches line-number cursor: ' + lineSelection);
 		const image = new Image();
 		image.src = url;
 		await image.decode();

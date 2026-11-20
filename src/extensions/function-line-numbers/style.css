@@ -1,6 +1,6 @@
 .cm-editor.cm-function-line-numbers.cm-section-mode .cm-gutters::after {
 	content: var(--opticm-function-gutter-edge-content, '');
-	width: var(--opticm-function-gutter-edge-width, 16px);
+	width: var(--opticm-function-gutter-edge-width, 0.5em);
 	background-color: var(--opticm-function-gutter-edge-color, color-mix(in srgb, var(--opticm-l-purple, #9a74a3) 25%, transparent));
 	background-image: var(--opticm-function-gutter-edge-pattern, repeating-linear-gradient(
 		135deg, transparent, transparent var(--opticm-function-stripe-width, 8px),
