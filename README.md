@@ -592,20 +592,27 @@ ancestor to change its appearance without affecting other editors:
 }
 ```
 
-| Extension | Custom properties |
+| Extension | Visual custom properties |
 | --- | --- |
-| Structure | `--opticm-structure-scroller-z-index`, `--opticm-structure-content-z-index`, `--opticm-structure-overlay-z-index`, `--opticm-structure-overlay-position`, `--opticm-structure-overlay-overflow`, `--opticm-structure-overlay-pointer-events`, `--opticm-structure-canvas-display`, `--opticm-structure-canvas-width`, `--opticm-structure-canvas-height` |
-| Function numbers | `--opticm-function-number-color`, `--opticm-function-active-number-color`, `--opticm-function-line-color`, `--opticm-function-number-padding`, `--opticm-function-number-display`, `--opticm-function-number-font-variant`, `--opticm-function-line-align`, `--opticm-function-gutter-min-width`, `--opticm-function-gutter-overflow`, `--opticm-function-gutter-item-position`, `--opticm-function-gutter-item-padding` |
-| Function gutter edge | `--opticm-function-gutter-edge-content`, `--opticm-function-gutter-edge-width`, `--opticm-function-gutter-edge-color`, `--opticm-function-gutter-edge-hover-color`, `--opticm-function-gutter-edge-pattern`, `--opticm-function-stripe-width`, `--opticm-function-stripe-color` |
-| Function highlighting | `--opticm-function-alternate-background`, `--opticm-function-alternate-content`, `--opticm-function-alternate-position`, `--opticm-function-alternate-inset`, `--opticm-function-alternate-z-index`, `--opticm-function-alternate-pointer-events`, `--opticm-function-lint-gutter-width` (component), `--opticm-lint-gutter-width` (standalone) |
-| Function scroll markers | `--opticm-function-scroll-marker-track-width`, `--opticm-function-scroll-track-position`, `--opticm-function-scroll-track-right`, `--opticm-function-scroll-track-pointer-events`, `--opticm-function-scroll-marker-inset`, `--opticm-function-scroll-marker-radius`, `--opticm-function-scroll-marker-color`, `--opticm-function-scroll-marker-position`, `--opticm-function-scroll-marker-aspect-ratio`, `--opticm-function-scroll-marker-z-index` |
+| Structure | — |
+| Function numbers | `--opticm-function-number-color`, `--opticm-function-active-number-color`, `--opticm-function-line-color`, `--opticm-function-number-font-variant`, `--opticm-function-line-align` |
+| Function gutter edge | `--opticm-function-gutter-edge-width`, `--opticm-function-gutter-edge-color`, `--opticm-function-gutter-edge-hover-color`, `--opticm-function-gutter-edge-pattern`, `--opticm-function-stripe-width`, `--opticm-function-stripe-color` |
+| Function highlighting | `--opticm-function-alternate-background` |
+| Function scroll markers | `--opticm-function-scroll-marker-radius`, `--opticm-function-scroll-marker-color` |
 | Gutter selection | `--opticm-gutter-cursor`, `--opticm-gutter-line-selection-cursor` (complete CSS `cursor` values) |
 | Syntax highlighting | `--opticm-syntax-comment-color`, `--opticm-syntax-comment-font-weight`, `--opticm-syntax-keyword-color`, `--opticm-syntax-keyword-font-weight`, `--opticm-syntax-type-color`, `--opticm-syntax-function-color`, `--opticm-syntax-definition-color`, `--opticm-syntax-definition-font-weight`, `--opticm-syntax-property-color`, `--opticm-syntax-variable-color`, `--opticm-syntax-local-variable-color`, `--opticm-syntax-literal-color`, `--opticm-syntax-literal-font-weight`, `--opticm-syntax-literal-text-shadow`, `--opticm-syntax-invalid-decoration` |
-| Indentation rulers | `--opticm-indent-ruler-column` (unitless character column), `--opticm-indent-ruler-width`, `--opticm-indent-ruler-style`, `--opticm-indent-ruler-color`, `--opticm-indent-ruler-scroller-z-index`, `--opticm-indent-ruler-content-z-index`, `--opticm-indent-ruler-overlay-position`, `--opticm-indent-ruler-overlay-z-index`, `--opticm-indent-ruler-overlay-overflow`, `--opticm-indent-ruler-pointer-events`, `--opticm-indent-ruler-container-position`, `--opticm-indent-ruler-container-right`, `--opticm-indent-ruler-position`, `--opticm-indent-ruler-inset-block` |
+| Indentation rulers | `--opticm-indent-ruler-width`, `--opticm-indent-ruler-style`, `--opticm-indent-ruler-color` |
 
-Defaults are specified in each extension's `style.css`, including fallbacks to
-the component's existing color variables. These properties can be changed at
-runtime; changing layout or pointer-event properties may affect functionality.
+Extension style defaults are centralized in `src/styles/variables.css`; each
+extension keeps its selectors in its own `style.css`. Standalone extensions
+install the shared defaults on their CodeMirror editor, so they do not depend
+on the Opticm component stylesheet. Only visual defaults are centralized.
+Required layering, positioning, clipping and pointer handling stay fixed in
+each extension because they are part of its behavior. The ruler column
+(`--opticm-indent-ruler-column`) and lint gutter sizing
+(`--opticm-function-lint-gutter-width` in the component, or
+`--opticm-lint-gutter-width` for standalone extensions) remain separate
+functional geometry settings.
 Structure shapes are painted on a canvas; their fill and stroke colors are
 supplied in the structure data and may reference CSS custom properties. Positions calculated
 by the extensions are applied directly and are not CSS custom properties.
@@ -615,7 +622,11 @@ by the extensions are applied directly and are not CSS custom properties.
 `src/index.js` is the component's public API entry point. Common implementation modules (`editor-view.js` and `analysis-client.js`) live directly in `src/`. `src/analysis/` defines and manages shared parser data. `src/extensions/` contains the structure view, syntax highlighting, function line numbers, function scroll markers, bracket matching, whitespace highlighting, full-line-height selection, gutter line selection, and indentation rulers. `src/lang/js/` and `src/lang/java/` contain language-specific analyzers and Lezer classifiers, and `src/lang/language-interface.md` describes the internal language contract. `src/styles/` contains the theme, and `dist/` the distribution. External library wrappers are generated in `.build/lib/` during the build.
 `build.mjs` wraps dependency browser builds in ES modules without adding globals to window.
 It organizes library preparation, JavaScript bundling, styles, and licenses into separate steps, using `tasks.mjs` for package resolution and file copying/writing.
-`src/styles/index.css` imports `variables.css`; both scope their rules to the component. The build bundles these files into the distributed stylesheet. CodeMirror 6 installs its base styles when an editor is mounted.
+`src/styles/index.css` imports `variables.css`, which scopes component tokens
+to the Opticm root and extension defaults to the editor. Extension styles also
+include those defaults when used independently. The build bundles the component
+styles into the distributed stylesheet. CodeMirror 6 installs its base styles
+when an editor is mounted.
 It uses esbuild to bundle and minify JavaScript and minify CSS. Intermediate modules are generated in `.build/`, outside the distribution.
 Each component build replaces `dist/` to remove obsolete output files.
 

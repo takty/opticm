@@ -1,7 +1,7 @@
 .cm-editor.cm-bracket-matching :is(.cm-matchingBracket, .cm-bracket-gutter-mark) {
-	background: transparent;
-	color: inherit;
-	font-weight: bold;
+	background: var(--opticm-default-bracket-matching-background);
+	color: var(--opticm-default-bracket-matching-color);
+	font-weight: var(--opticm-default-bracket-matching-font-weight);
 	position: relative;
 	isolation: isolate;
 }
@@ -23,8 +23,8 @@
 	left: -0.75em;
 	right: -0.75em;
 	bottom: -0.45em;
-	border-radius: 50%;
-	border: 0.5em solid color-mix(in srgb, var(--opticm-l-yellow) 65%, transparent);
+	border-radius: var(--opticm-default-bracket-ring-radius);
+	border: var(--opticm-default-bracket-ring-width) solid var(--opticm-default-bracket-ring-color);
 }
 
 .cm-editor.cm-bracket-matching .cm-activeLine .cm-matchingBracket::before {
@@ -32,9 +32,9 @@
 	left: 0.05em;
 	right: 0.05em;
 	bottom: 0;
-	border-radius: 0.25em;
-	border: none;
-	background-color: color-mix(in srgb, var(--opticm-l-yellow) 65%, transparent);
+	border-radius: var(--opticm-default-bracket-active-radius);
+	border: var(--opticm-default-bracket-active-border);
+	background-color: var(--opticm-default-bracket-active-background);
 }
 
 .cm-editor.cm-bracket-matching :is(

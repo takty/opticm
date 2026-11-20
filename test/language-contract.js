@@ -172,19 +172,13 @@ export async function runLanguageContractTests(assert) {
 		return !!painted() === expected;
 	};
 	try {
-		host.style.setProperty('--opticm-structure-overlay-z-index', '7');
-		host.style.setProperty('--opticm-structure-content-z-index', '8');
-		host.style.setProperty('--opticm-structure-scroller-z-index', '2');
 		assert(
-			getComputedStyle(host.querySelector('.cm-structure-overlay')).zIndex === '7' &&
-				getComputedStyle(standalone.contentDOM).zIndex === '8' &&
-				getComputedStyle(standalone.scrollDOM).zIndex === '2' &&
+			getComputedStyle(host.querySelector('.cm-structure-overlay')).zIndex === '0' &&
+				getComputedStyle(standalone.contentDOM).zIndex === '1' &&
+				getComputedStyle(standalone.scrollDOM).zIndex === 'auto' &&
 				getComputedStyle(otherHost.querySelector('.cm-structure-overlay')).zIndex === '0',
-			'structure CSS custom properties apply per editor',
+			'standalone structure extension keeps its required layer order',
 		);
-		host.style.removeProperty('--opticm-structure-overlay-z-index');
-		host.style.removeProperty('--opticm-structure-content-z-index');
-		host.style.removeProperty('--opticm-structure-scroller-z-index');
 		standalone.dispatch({ effects: setStructure.of([{
 			kind       : 'range',
 			from       : { line: 0, ch: 0 },
@@ -496,8 +490,6 @@ export async function runLanguageContractTests(assert) {
 		);
 		numbersHost.style.setProperty('--opticm-function-number-color', '#123456');
 		numbersHost.style.setProperty('--opticm-function-line-color', '#234567');
-		numbersHost.style.setProperty('--opticm-function-number-padding', '0 9px 0 6px');
-		numbersHost.style.setProperty('--opticm-function-gutter-min-width', '48px');
 		numbersHost.style.setProperty('--opticm-function-gutter-edge-width', '21px');
 		numbersHost.style.setProperty('--opticm-function-stripe-width', '5px');
 		numbersHost.style.setProperty('--opticm-function-stripe-color', '#bcdef0');
@@ -506,13 +498,12 @@ export async function runLanguageContractTests(assert) {
 		const edge = getComputedStyle(numbersHost.querySelector('.cm-gutters'), '::after');
 		assert(
 			getComputedStyle(gutter.querySelector('.cm-function-number')).color === 'rgb(18, 52, 86)' &&
-				getComputedStyle(gutter.querySelector('.cm-function-number')).paddingLeft === '6px' &&
 				getComputedStyle(gutter.querySelector('.cm-opticm-line-number')).color === 'rgb(35, 69, 103)' &&
-				getComputedStyle(visible[0]).minWidth === '48px' && edge.width === '21px' &&
+				edge.width === '21px' &&
 				edge.backgroundImage.includes('5px') && edge.backgroundImage.includes('188, 222, 240') &&
 				getComputedStyle(firstSection, '::before').backgroundColor === 'rgb(52, 86, 120)' &&
 				getComputedStyle(firstSection, '::before').left === '-8px',
-			'function gutter colors, dimensions and stripes respond to custom properties',
+			'function gutter appearance responds to custom properties',
 		);
 		numbersHost.style.setProperty('--opticm-function-gutter-edge-pattern', 'none');
 		numbersHost.style.setProperty('--opticm-function-gutter-edge-color', '#456789');
@@ -557,10 +548,7 @@ export async function runLanguageContractTests(assert) {
 		parent: markersHost,
 	});
 	try {
-		markersHost.style.setProperty('--opticm-function-scroll-marker-track-width', '16px');
-		markersHost.style.setProperty('--opticm-function-scroll-marker-inset', '3px');
 		markersHost.style.setProperty('--opticm-function-scroll-marker-radius', '25%');
-		markersHost.style.setProperty('--opticm-function-scroll-marker-z-index', '6');
 		markersHost.style.setProperty('--opticm-function-scroll-marker-color', '#102030');
 		markers.dispatch({ effects: setCommonAnalysis.of(createCommonAnalysis({
 			version     : 1,
@@ -584,10 +572,9 @@ export async function runLanguageContractTests(assert) {
 			'standalone scroll markers consume common sections without the line-number extension',
 		);
 		assert(
-			getComputedStyle(track).width === '16px' && getComputedStyle(track).zIndex === '6' &&
-				getComputedStyle(marker).left === '3px' && getComputedStyle(marker).borderRadius === '25%' &&
+			getComputedStyle(marker).borderRadius === '25%' &&
 				getComputedStyle(marker).backgroundColor === 'rgb(16, 32, 48)',
-			'standalone scroll markers respond to their independent custom properties',
+			'standalone scroll marker appearance responds to custom properties',
 		);
 		markers.dispatch({ effects: markersCompartment.reconfigure([]) });
 		assert(

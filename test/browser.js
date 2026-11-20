@@ -569,13 +569,6 @@ try {
 	const textLayer = getComputedStyle(editorA.querySelector('.cm-content'));
 	assert(getComputedStyle(editorA.querySelector('.cm-scroller')).zIndex === 'auto' &&
 		Number(textLayer.zIndex) > Number(structureLayer.zIndex), 'source text is painted above the structure canvas');
-	themeRoot.style.setProperty('--opticm-structure-overlay-z-index', '-1');
-	assert(
-		getComputedStyle(editorA.querySelector('.cm-structure-overlay')).zIndex === '-1' &&
-			getComputedStyle(editorB.querySelector('.cm-structure-overlay')).zIndex === '0',
-		'structure layering can be customized independently in the component',
-	);
-	themeRoot.style.removeProperty('--opticm-structure-overlay-z-index');
 	themeRoot.style.setProperty('--opticm-function-number-color', '#123456');
 	themeRoot.style.setProperty('--opticm-function-lint-gutter-width', '30px');
 	assert(
@@ -623,7 +616,6 @@ try {
 	const scrollbarStyle = document.createElement('style');
 	scrollbarStyle.textContent = '.cm-scroller::-webkit-scrollbar { width: 24px; }';
 	document.head.append(scrollbarStyle);
-	themeRoot.style.setProperty('--opticm-function-scroll-marker-track-width', '10px');
 	a.setSettings({ functionLineNumbers: false, functionScrollMarkers: true });
 	await waitFor(
 		() => editorA.querySelectorAll('.cm-function-scroll-markers > span').length > 0,
@@ -640,7 +632,6 @@ try {
 		Math.abs((markerBounds.left + markerBounds.right - scrollbarLeft - scrollbarRight) / 2) < 1,
 		'function markers are horizontally centered in the scrollbar',
 	);
-	themeRoot.style.removeProperty('--opticm-function-scroll-marker-track-width');
 	scrollbarStyle.remove();
 	a.setSettings({ functionLineNumbers: true });
 	assert(

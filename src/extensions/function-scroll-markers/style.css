@@ -1,16 +1,16 @@
 .cm-editor.cm-function-scroll-markers .cm-function-scroll-markers {
-	position: var(--opticm-function-scroll-track-position, absolute);
-	--opticm-function-scroll-track-width: var(--opticm-function-scroll-marker-track-width, var(--opticm-function-scrollbar-width, 10px));
-	right: var(--opticm-function-scroll-track-right, calc(var(--opticm-function-scrollbar-center-inset, 5px) - var(--opticm-function-scroll-track-width) / 2));
+	position: absolute;
+	--opticm-function-scroll-track-width: var(--opticm-function-scrollbar-width, 10px);
+	right: calc(var(--opticm-function-scrollbar-center-inset) - var(--opticm-function-scroll-track-width) / 2);
 	width: var(--opticm-function-scroll-track-width);
-	pointer-events: var(--opticm-function-scroll-track-pointer-events, none);
-	z-index: var(--opticm-function-scroll-marker-z-index, 3);
+	pointer-events: none;
+	z-index: 3;
 }
 
 .cm-editor.cm-function-scroll-markers .cm-function-scroll-markers > span {
-	position: var(--opticm-function-scroll-marker-position, absolute);
-	inset-inline: var(--opticm-function-scroll-marker-inset, 2px);
-	aspect-ratio: var(--opticm-function-scroll-marker-aspect-ratio, 1);
-	border-radius: var(--opticm-function-scroll-marker-radius, 50%);
-	background: var(--opticm-function-scroll-marker-color, hsl(40 100% 50% / 75%));
+	position: absolute;
+	inset-inline: 2px;
+	aspect-ratio: 1;
+	border-radius: var(--opticm-function-scroll-marker-radius, var(--opticm-default-function-scroll-marker-radius));
+	background: var(--opticm-function-scroll-marker-color, var(--opticm-default-function-scroll-marker-color));
 }

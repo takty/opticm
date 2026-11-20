@@ -5,7 +5,7 @@
  * @version 2026-10-24
  */
 
-.opticm {
+:where(.opticm) {
 	--opticm-l-red        : #e61e58;
 	--opticm-l-red-35     : #f6b0c5;
 	--opticm-l-red-15     : #fbdde6;
@@ -33,4 +33,78 @@
 	--opticm-font-console: 'Hiragino Sans', "Yu Gothic UI", "Meiryo UI", monospace;
 	--opticm-font-size   : 14px;
 
+}
+
+:where(.opticm .cm-editor, .cm-editor[data-opticm-extension-defaults]) {
+	--opticm-default-selection-layer-blend-mode: multiply;
+
+	--opticm-default-bracket-matching-background: transparent;
+	--opticm-default-bracket-matching-color: inherit;
+	--opticm-default-bracket-matching-font-weight: bold;
+	--opticm-default-bracket-ring-radius: 50%;
+	--opticm-default-bracket-ring-width: 0.5em;
+	--opticm-default-bracket-ring-color: color-mix(in srgb, var(--opticm-l-yellow, #fdde00) 65%, transparent);
+	--opticm-default-bracket-active-radius: 0.25em;
+	--opticm-default-bracket-active-border: none;
+	--opticm-default-bracket-active-background: color-mix(in srgb, var(--opticm-l-yellow, #fdde00) 65%, transparent);
+
+	--opticm-default-function-gutter-edge-width: 0.5em;
+	--opticm-default-function-gutter-edge-color: color-mix(in srgb, var(--opticm-l-purple, #9a74a3) 25%, transparent);
+	--opticm-default-function-gutter-edge-hover-color: color-mix(in srgb, var(--opticm-l-purple, #9a74a3) 45%, transparent);
+	--opticm-default-gutter-number-hover-background: color-mix(in srgb, var(--opticm-l-purple, #9a74a3) 25%, transparent);
+	--opticm-default-function-stripe-width: 8px;
+	--opticm-default-function-stripe-color: color-mix(in srgb, var(--opticm-l-purple, #9a74a3) 15%, transparent);
+	--opticm-default-function-gutter-edge-pattern: repeating-linear-gradient(
+		135deg, transparent, transparent var(--opticm-function-stripe-width, var(--opticm-default-function-stripe-width)),
+		var(--opticm-function-stripe-color, var(--opticm-default-function-stripe-color)) var(--opticm-function-stripe-width, var(--opticm-default-function-stripe-width)),
+		var(--opticm-function-stripe-color, var(--opticm-default-function-stripe-color)) calc(2 * var(--opticm-function-stripe-width, var(--opticm-default-function-stripe-width)))
+	);
+	--opticm-default-function-number-font-variant: tabular-nums;
+	--opticm-default-function-number-color: var(--opticm-l-brown, #4e4138);
+	--opticm-default-function-line-color: inherit;
+	--opticm-default-function-line-align: right;
+	--opticm-default-function-alternate-background: color-mix(in srgb, var(--opticm-l-lightgray, #e8e8e8) 75%, transparent);
+	--opticm-default-function-active-number-color: inherit;
+
+	--opticm-default-function-scroll-marker-radius: 50%;
+	--opticm-default-function-scroll-marker-color: hsl(40 100% 50% / 75%);
+
+	--opticm-default-indent-ruler-width: 2px;
+	--opticm-default-indent-ruler-style: dashed;
+	--opticm-default-indent-ruler-color: color-mix(in srgb, var(--opticm-l-red, #e61e58) 15%, transparent);
+
+	--opticm-default-color-highlighted-line: light-dark(rgb(255 200 0 / 20%), rgb(255 218 102 / 24%));
+
+	--opticm-default-syntax-comment-color: var(--opticm-l-gray, #777);
+	--opticm-default-syntax-comment-font-weight: bold;
+	--opticm-default-syntax-keyword-color: var(--opticm-l-bodybrown, #7c6a5a);
+	--opticm-default-syntax-keyword-font-weight: bold;
+	--opticm-default-syntax-type-color: var(--opticm-l-blue, #2e449a);
+	--opticm-default-syntax-function-color: var(--opticm-l-turquoise, #005363);
+	--opticm-default-syntax-function-definition-color: var(--opticm-color-text, #110);
+	--opticm-default-syntax-function-definition-font-weight: bold;
+	--opticm-default-syntax-definition-color: var(--opticm-color-text, #110);
+	--opticm-default-syntax-definition-inherit-color: inherit;
+	--opticm-default-syntax-definition-font-weight: bold;
+	--opticm-default-syntax-property-color: var(--opticm-l-blue, #2e449a);
+	--opticm-default-syntax-variable-color: inherit;
+	--opticm-default-syntax-literal-color: var(--opticm-l-orange, #f5a200);
+	--opticm-default-syntax-literal-font-weight: bold;
+	--opticm-default-syntax-literal-text-shadow: var(--opticm-l-yellow, #fdde00) 0 0 0.1em;
+	--opticm-default-syntax-invalid-decoration: underline wavy var(--opticm-l-red, #e61e58);
+	--opticm-default-syntax-local-variable-color: hsl(86 60% 30%);
+	--opticm-default-syntax-active-literal-text-shadow: none;
+
+	--opticm-default-whitespace-active-color: var(--opticm-l-red-35, #f6b0c5);
+	--opticm-default-whitespace-background-image: none;
+	--opticm-default-whitespace-space-background-size: calc(100% - 2px) 2px;
+	--opticm-default-whitespace-background-position: center bottom;
+	--opticm-default-whitespace-background-repeat: no-repeat;
+	--opticm-default-whitespace-full-width-background-size: calc(100% - 2px) 4px;
+	--opticm-default-whitespace-tab-color: var(--opticm-l-red-15, #fbdde6);
+	--opticm-default-whitespace-tab-font-weight: normal;
+	--opticm-default-whitespace-tab-text-shadow: 1px 0px 1px #fff, 1px 1px 1px #fff,
+		-1px 0px 1px #fff, -1px -1px 1px #fff,
+		0px 1px 1px #fff, 1px -1px 1px #fff,
+		0px -1px 1px #fff, -1px 1px 1px #fff;
 }

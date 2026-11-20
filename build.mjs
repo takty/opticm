@@ -50,6 +50,7 @@ async function buildJavaScript() {
 	await copyDirectory(join(root, 'src/lang'), join(stageRoot, 'lang'));
 	await copyDirectory(join(root, 'src/analysis'), join(stageRoot, 'analysis'));
 	await copyDirectory(join(root, 'src/extensions'), join(stageRoot, 'extensions'));
+	await copyDirectory(join(root, 'src/styles'), join(stageRoot, 'styles'));
 	await copyDirectory(join(root, 'src/res'), join(stageRoot, 'res'));
 	await bundle({
 		entryPoints  : {
