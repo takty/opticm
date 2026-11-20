@@ -1,48 +1,55 @@
-.cm-editor.cm-function-line-numbers.cm-section-mode .cm-gutters::after {
-	content: '';
-	width: var(--opticm-function-gutter-edge-width, var(--opticm-default-function-gutter-edge-width));
-	background-color: var(--opticm-function-gutter-edge-color, var(--opticm-default-function-gutter-edge-color));
-	background-image: var(--opticm-function-gutter-edge-pattern, var(--opticm-default-function-gutter-edge-pattern));
-}
+.cm-editor.cm-function-line-numbers {
+	&.cm-section-mode {
+		.cm-gutters::after {
+			content: '';
+			width  : var(--opticm-function-gutter-edge-width, var(--opticm-default-function-gutter-edge-width));
 
-.cm-editor.cm-function-line-numbers.cm-section-mode .cm-gutters:hover::after {
-	background-color: var(--opticm-function-gutter-edge-hover-color, var(--opticm-default-function-gutter-edge-hover-color));
-}
+			background-color: var(--opticm-function-gutter-edge-color, var(--opticm-default-function-gutter-edge-color));
+			background-image: var(--opticm-function-gutter-edge-pattern, var(--opticm-default-function-gutter-edge-pattern));
+		}
 
-.cm-editor.cm-function-line-numbers .cm-sectionNumbers {
-	overflow: visible;
-}
+		.cm-gutters:hover::after {
+			background-color: var(--opticm-function-gutter-edge-hover-color, var(--opticm-default-function-gutter-edge-hover-color));
+		}
+	}
 
-.cm-editor.cm-function-line-numbers .cm-sectionNumbers .cm-gutterElement {
-	position: relative;
-	min-width: 33px;
-	padding: 0;
-	font-variant-numeric: var(--opticm-function-number-font-variant, var(--opticm-default-function-number-font-variant));
-}
+	.cm-sectionNumbers {
+		overflow: visible;
+	}
 
-.cm-editor.cm-function-line-numbers :is(.cm-function-number, .cm-opticm-line-number) {
-	display: block;
-	padding: 0 7px 0 4px;
-}
+	.cm-sectionNumbers .cm-gutterElement {
+		position : relative;
+		min-width: 33px;
+		padding  : 0;
 
-.cm-editor.cm-function-line-numbers .cm-function-number {
-	color: var(--opticm-function-number-color, var(--opticm-default-function-number-color));
-}
+		font-variant-numeric: var(--opticm-function-number-font-variant, var(--opticm-default-function-number-font-variant));
+	}
 
-.cm-editor.cm-function-line-numbers .cm-opticm-line-number {
-	color: var(--opticm-function-line-color, var(--opticm-default-function-line-color));
-	text-align: var(--opticm-function-line-align, var(--opticm-default-function-line-align));
-}
+	:is(.cm-function-number, .cm-opticm-line-number) {
+		display: block;
+		padding: 0 7px 0 4px;
+	}
 
-.cm-editor.cm-function-line-numbers .cm-sectionNumbers .cm-gutterElement:has(> .cm-function-even)::before {
-	content: '';
-	position: absolute;
-	inset: 0 0 0 calc(-1 * var(--opticm-lint-gutter-width, 0px));
-	z-index: -1;
-	pointer-events: none;
-	background: var(--opticm-function-alternate-background, var(--opticm-default-function-alternate-background));
-}
+	.cm-function-number {
+		color: var(--opticm-function-number-color, var(--opticm-default-function-number-color));
+	}
 
-.cm-editor.cm-function-line-numbers .cm-activeLineGutter .cm-function-number {
-	color: var(--opticm-function-active-number-color, var(--opticm-default-function-active-number-color));
+	.cm-opticm-line-number {
+		color     : var(--opticm-function-line-color, var(--opticm-default-function-line-color));
+		text-align: var(--opticm-function-line-align, var(--opticm-default-function-line-align));
+	}
+
+	.cm-sectionNumbers .cm-gutterElement:has(> .cm-function-even)::before {
+		content : '';
+		position: absolute;
+		inset   : 0 0 0 calc(-1 * var(--opticm-lint-gutter-width, 0px));
+		z-index : -1;
+
+		pointer-events: none;
+		background    : var(--opticm-function-alternate-background, var(--opticm-default-function-alternate-background));
+	}
+
+	.cm-activeLineGutter .cm-function-number {
+		color: var(--opticm-function-active-number-color, var(--opticm-default-function-active-number-color));
+	}
 }

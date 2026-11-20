@@ -93,6 +93,15 @@ export async function runLanguageContractTests(assert) {
 				getComputedStyle(inactiveTab, '::before').color === 'rgb(101, 67, 33)',
 			'whitespace colors can be customized',
 		);
+		whitespaceHost.style.removeProperty('--opticm-whitespace-active-color');
+		whitespaceHost.style.removeProperty('--opticm-whitespace-tab-color');
+		whitespaceHost.style.setProperty('--opticm-l-red-35', '#234567');
+		whitespaceHost.style.setProperty('--opticm-l-red-15', '#345678');
+		assert(
+			getComputedStyle(activeTab, '::before').color === 'rgb(35, 69, 103)' &&
+				getComputedStyle(inactiveTab, '::before').color === 'rgb(52, 86, 120)',
+			'standalone whitespace defaults follow an inherited palette',
+		);
 		whitespaceView.dispatch({ effects: whitespaceCompartment.reconfigure([]) });
 		assert(!whitespaceView.dom.classList.contains('cm-opticm-whitespace') &&
 			!whitespaceHost.querySelector('.cm-highlightTab, .cm-highlightSpace, .cm-opticm-space') &&
@@ -182,16 +191,29 @@ export async function runLanguageContractTests(assert) {
 				getComputedStyle(otherHost.querySelector('.cm-structure-overlay')).zIndex === '0',
 			'standalone structure extension keeps its required layer order',
 		);
-		standalone.dispatch({ effects: setStructure.of([{
-			kind       : 'range',
-			from       : { line: 0, ch: 0 },
-			to         : { line: 2, ch: 1 },
-			fill       : 'rgba(255, 0, 0, 0.4)',
-			spineChars : 3,
-			branchChars: 4,
-			branches   : [{ line: 1, ch: 0 }],
-		}]) });
-		assert(await waitForPaint(true), 'standalone structure extension draws externally supplied ranges');
+		const getContext = HTMLCanvasElement.prototype.getContext;
+		let colorContextOptions;
+		try {
+			HTMLCanvasElement.prototype.getContext = function(type, ...args) {
+				if (type === '2d' && !this.isConnected && this.width === 1 && this.height === 1) {
+					colorContextOptions = args[0];
+				}
+				return getContext.call(this, type, ...args);
+			};
+			standalone.dispatch({ effects: setStructure.of([{
+				kind       : 'range',
+				from       : { line: 0, ch: 0 },
+				to         : { line: 2, ch: 1 },
+				fill       : 'rgba(255, 0, 0, 0.4)',
+				spineChars : 3,
+				branchChars: 4,
+				branches   : [{ line: 1, ch: 0 }],
+			}]) });
+			assert(await waitForPaint(true), 'standalone structure extension draws externally supplied ranges');
+		} finally {
+			HTMLCanvasElement.prototype.getContext = getContext;
+		}
+		assert(colorContextOptions?.willReadFrequently === true, 'structure color sampling requests a readback-optimized canvas');
 		const rangeCanvas = host.querySelector('canvas');
 		const rangeContext = rangeCanvas.getContext('2d');
 		const rangeEdges = () => {
@@ -786,9 +808,12 @@ export async function runLanguageContractTests(assert) {
 		const type = syntaxHost.querySelector('.cm-syntax-type');
 		assert(
 			keyword?.textContent === 'class' && type?.textContent === 'Example' &&
-				getComputedStyle(keyword).color === 'rgb(18, 52, 86)',
+				getComputedStyle(keyword).color === 'rgb(18, 52, 86)' &&
+				getComputedStyle(type).color === 'rgb(46, 68, 154)',
 			'standalone syntax extension renders supplied token ranges and custom colors',
 		);
+		syntaxHost.style.setProperty('--opticm-l-blue', '#234567');
+		assert(getComputedStyle(type).color === 'rgb(35, 69, 103)', 'standalone syntax defaults follow an inherited palette');
 		syntaxView.dispatch({ effects: syntaxCompartment.reconfigure([
 			syntaxHighlightingExtension,
 			syntaxHighlightingOptions({ syntax: true, semantic: false }),

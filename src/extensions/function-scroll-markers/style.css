@@ -1,16 +1,21 @@
-.cm-editor.cm-function-scroll-markers .cm-function-scroll-markers {
-	position: absolute;
-	--opticm-function-scroll-track-width: var(--opticm-function-scrollbar-width, 10px);
-	right: calc(var(--opticm-function-scrollbar-center-inset) - var(--opticm-function-scroll-track-width) / 2);
-	width: var(--opticm-function-scroll-track-width);
-	pointer-events: none;
-	z-index: 3;
-}
+.cm-editor.cm-function-scroll-markers {
+	.cm-function-scroll-markers {
+		--opticm-function-scroll-track-width: var(--opticm-function-scrollbar-width, 10px);
 
-.cm-editor.cm-function-scroll-markers .cm-function-scroll-markers > span {
-	position: absolute;
-	inset-inline: 2px;
-	aspect-ratio: 1;
-	border-radius: var(--opticm-function-scroll-marker-radius, var(--opticm-default-function-scroll-marker-radius));
-	background: var(--opticm-function-scroll-marker-color, var(--opticm-default-function-scroll-marker-color));
+		position: absolute;
+		right   : calc(var(--opticm-function-scrollbar-center-inset) - var(--opticm-function-scroll-track-width) / 2);
+		width   : var(--opticm-function-scroll-track-width);
+		z-index : 3;
+
+		pointer-events: none;
+	}
+
+	.cm-function-scroll-markers > span {
+		position    : absolute;
+		inset-inline: 2px;
+		aspect-ratio: 1;
+
+		border-radius: var(--opticm-function-scroll-marker-radius, var(--opticm-default-function-scroll-marker-radius));
+		background   : var(--opticm-function-scroll-marker-color, var(--opticm-default-function-scroll-marker-color));
+	}
 }

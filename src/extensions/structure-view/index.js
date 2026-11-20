@@ -388,7 +388,7 @@ function drawStructure(canvas, { width, height, charWidth, lineHeight, drawStyle
 		if (!colorContext) {
 			const colorCanvas = canvas.ownerDocument.createElement('canvas');
 			colorCanvas.width = colorCanvas.height = 1;
-			colorContext = colorCanvas.getContext('2d');
+			colorContext = colorCanvas.getContext('2d', { willReadFrequently: true });
 		}
 		colorContext.clearRect(0, 0, 1, 1);
 		colorContext.fillStyle = color;

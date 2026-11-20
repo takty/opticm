@@ -7,203 +7,170 @@
 @import "./variables.css";
 
 .opticm {
-	position: relative;
-	width: 100%;
-	height: 100%;
+	position : relative;
+	width    : 100%;
+	height   : 100%;
 	min-width: 0;
-}
 
-.opticm[aria-disabled="true"] {
-	pointer-events: none;
-}
+	&[aria-disabled="true"] {
+		pointer-events: none;
+	}
 
-.opticm .cm-editor {
-	--opticm-line-padding: var(--opticm-function-gutter-edge-width, var(--opticm-default-function-gutter-edge-width));
-	/* A 1em diagnostic marker needs 0.2em of padding on each side. */
-	--opticm-lint-gutter-width: max(1.4em, var(--opticm-function-lint-gutter-width, 24px));
-	width: 100%;
-	height: 100%;
-	max-height: 100%;
-	background-color: var(--opticm-color-editor);
-	color: var(--opticm-color-text);
-}
+	.cm-editor {
+		--opticm-line-padding: var(--opticm-function-gutter-edge-width, var(--opticm-default-function-gutter-edge-width));
+		/* A 1em diagnostic marker needs 0.2em of padding on each side. */
+		--opticm-lint-gutter-width: max(1.4em, var(--opticm-function-lint-gutter-width, 24px));
 
-.opticm .cm-editor.cm-focused { outline: none; }
-.opticm .cm-editor .cm-scroller {
-	font-family: inherit;
-	line-height: inherit;
-	/* Let the text layer stack above the structure canvas in the editor. */
-	z-index: auto;
-}
-.opticm .cm-editor .cm-line {
-	padding-inline: var(--opticm-line-padding);
-	font-variant-ligatures: contextual;
-}
-.opticm .cm-editor .cm-content { z-index: 1; }
-/* CodeMirror assigns inline z-index values to its drawing layers. */
-.opticm .cm-editor .cm-selectionLayer {
-	z-index: 2 !important;
-	pointer-events: none;
-	mix-blend-mode: multiply;
-}
-.opticm .cm-editor .cm-cursorLayer { z-index: 3 !important; }
-.opticm .cm-editor .cm-gutters { z-index: 4; }
-.opticm .cm-editor .cm-panels,
-.opticm .cm-editor .cm-tooltip { z-index: 5; }
+		width     : 100%;
+		height    : 100%;
+		max-height: 100%;
 
-.opticm .cm-editor .cm-selectionBackground,
-.opticm .cm-editor.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground {
-	background: color-mix(in srgb, var(--opticm-l-aqua-60) 50%, transparent);
-	/* Keep the previous selected color when multiplying over the new default gray. */
-	background: rgb(from var(--opticm-l-aqua-60)
-		calc((r + 253 - 252.76) * 255 / 252.76)
-		calc((g + 253 - 252.76) * 255 / 252.76)
-		calc((b + 249 - 252.76) * 255 / 252.76) / 50%);
-}
+		background-color: var(--opticm-color-editor);
+		color           : var(--opticm-color-text);
 
-.opticm .cm-editor .cm-activeLine { background: transparent; }
-.opticm .cm-editor.cm-focused .cm-activeLine {
-	background: rgb(255 255 255 / 65%);
-	box-shadow: 0 0 4px rgb(0 0 0 / 15%), 0 2px 4px rgb(0 0 0 / 10%);
-}
-.opticm .cm-editor.cm-has-selection .cm-activeLine { box-shadow: none; }
-.opticm .cm-editor .cm-line.error-line { background: hsl(350 100% 50% / 20%); }
+		&.cm-focused { outline: none; }
+		.cm-scroller {
+			font-family: inherit;
+			line-height: inherit;
+			/* Let the text layer stack above the structure canvas in the editor. */
+			z-index: auto;
+		}
+		.cm-line {
+			padding-inline: var(--opticm-line-padding);
 
-.opticm .cm-editor .cm-cursor {
-	border: 0;
-	width: 6px;
-}
-.opticm .cm-editor .cm-cursor::before {
-	content: '';
-	position: absolute;
-	top: 50%;
-	left: 0;
-	width: 100%;
-	height: 1lh;
-	transform: translateY(-50%);
-	border-left: 2px solid color-mix(in srgb, var(--opticm-l-brown) 60%, transparent);
-	border-bottom: 2px solid color-mix(in srgb, var(--opticm-l-brown) 35%, transparent);
-	border-radius: 0 0 0 2px;
-	box-sizing: border-box;
-}
+			font-variant-ligatures: contextual;
+		}
+		.cm-content { z-index: 1; }
+		/* CodeMirror assigns inline z-index values to its drawing layers. */
+		.cm-selectionLayer {
+			z-index: 2 !important;
 
-.opticm .cm-editor.ime .cm-cursor {
-	width: 12px;
-	background-color: color-mix(in srgb, var(--opticm-l-brown) 5%, transparent);
-}
+			pointer-events: none;
+			mix-blend-mode: multiply;
+		}
+		.cm-cursorLayer { z-index: 3 !important; }
+		.cm-gutters { z-index: 4; }
+		.cm-panels,
+		.cm-tooltip { z-index: 5; }
 
-.opticm .cm-editor .cm-gutters {
-	background: var(--opticm-color-window);
-	color: var(--opticm-l-darkgray);
-	border: 0;
-}
+		.cm-selectionBackground,
+		&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground {
+			background: var(--opticm-selection-background, var(--opticm-default-selection-background));
+		}
 
-.opticm .cm-gutters::after {
-	content: '';
-	width: var(--opticm-function-gutter-edge-width, var(--opticm-default-function-gutter-edge-width));
-	background: var(--opticm-function-gutter-edge-color, var(--opticm-default-function-gutter-edge-color));
-}
+		.cm-activeLine { background: var(--opticm-active-line-background, var(--opticm-default-active-line-background)); }
+		&.cm-focused .cm-activeLine {
+			background: var(--opticm-focused-line-background, var(--opticm-default-focused-line-background));
+			box-shadow: var(--opticm-focused-line-shadow, var(--opticm-default-focused-line-shadow));
+		}
+		&.cm-has-selection .cm-activeLine { box-shadow: none; }
+		.cm-line.error-line { background: var(--opticm-error-line-background, var(--opticm-default-error-line-background)); }
 
-.opticm .cm-gutters:hover::after {
-	background-color: var(--opticm-function-gutter-edge-hover-color, var(--opticm-default-function-gutter-edge-hover-color));
-}
+		.cm-cursor {
+			border: 0;
+			width : 6px;
 
-.opticm .cm-editor .cm-lineNumbers .cm-gutterElement {
-	min-width: 33px;
-	padding: 0;
-	font-variant-numeric: tabular-nums;
-}
+			&::before {
+				content   : '';
+				position  : absolute;
+				top       : 50%;
+				left      : 0;
+				width     : 100%;
+				height    : 1lh;
+				transform : translateY(-50%);
+				box-sizing: border-box;
 
-.opticm :is(.cm-lineNumbers, .cm-sectionNumbers) .cm-gutterElement:first-child {
-	font-weight: bold;
-}
+				border-left  : 2px solid var(--opticm-cursor-color, var(--opticm-default-cursor-color));
+				border-bottom: 2px solid var(--opticm-cursor-bottom-color, var(--opticm-default-cursor-bottom-color));
+				border-radius: 0 0 0 2px;
+			}
+		}
 
-.opticm .cm-lineNumbers .cm-opticm-line-number {
-	display: block;
-	padding: 0 7px 0 4px;
-}
+		&.ime .cm-cursor {
+			width: 12px;
 
-.opticm .cm-lineNumbers .cm-opticm-line-number { text-align: right; }
-.opticm .cm-editor .cm-activeLineGutter { background: transparent; color: var(--opticm-color-text); font-weight: bold; }
-.opticm .cm-lineNumbers .cm-gutterElement:hover,
-.opticm .cm-sectionNumbers .cm-gutterElement:hover {
-	background: var(--opticm-gutter-number-hover-background, var(--opticm-default-gutter-number-hover-background));
-}
+			background-color: var(--opticm-ime-cursor-background, var(--opticm-default-ime-cursor-background));
+		}
 
-.opticm .cm-editor .cm-gutter-lint { width: var(--opticm-lint-gutter-width); }
-.opticm .cm-editor .cm-lint-marker { vertical-align: middle; }
+		.cm-gutters {
+			background: var(--opticm-function-background, var(--opticm-default-function-background));
+			color     : var(--opticm-gutter-color, var(--opticm-default-gutter-color));
+			border    : 0;
+		}
+	}
 
-.opticm .cm-editor.cm-javascript .cm-syntax-comment { color: var(--opticm-syntax-comment-color, var(--opticm-l-gray)); }
-.opticm .cm-editor.cm-javascript .cm-syntax-keyword { color: var(--opticm-syntax-keyword-color, var(--opticm-l-bodybrown)); }
-.opticm .cm-editor.cm-javascript .cm-syntax-literal { color: var(--opticm-syntax-literal-color, var(--opticm-l-orange)); }
-.opticm .cm-editor.cm-javascript .cm-syntax-definition { color: var(--opticm-syntax-definition-color, var(--opticm-color-text)); }
-.opticm .cm-editor.cm-javascript .cm-syntax-property { color: var(--opticm-syntax-property-color, var(--opticm-l-blue)); }
-.opticm .cm-editor.cm-javascript .cm-syntax-variable { color: var(--opticm-syntax-variable-color, var(--opticm-l-turquoise)); }
-.opticm .cm-editor.cm-javascript :is(.cm-syntax-local-variable, .cm-syntax-local-reference, .cm-syntax-local-reference .cm-syntax-variable) {
-	color: var(--opticm-syntax-local-variable-color, hsl(86 60% 30%));
-}
-.opticm .cm-editor.cm-javascript :is(.cm-syntax-function-definition, .cm-syntax-function-definition *, .cm-syntax-class-definition, .cm-syntax-class-definition *) {
-	color: var(--opticm-syntax-function-definition-color, var(--opticm-color-text));
-	font-weight: var(--opticm-syntax-function-definition-font-weight, bold);
-}
-.opticm .cm-editor.cm-javascript :is(.cm-syntax-field-definition, .cm-syntax-field-definition *, .cm-syntax-property-definition, .cm-syntax-property-definition *) {
-	color: var(--opticm-syntax-definition-color, var(--opticm-color-text));
-	font-weight: var(--opticm-syntax-definition-font-weight, bold);
-}
-.opticm .cm-editor.cm-java .cm-syntax-variable {
-	color: var(--opticm-syntax-variable-color, var(--opticm-l-turquoise));
-}
-.opticm .cm-editor.cm-java :is(.cm-syntax-local-variable, .cm-syntax-local-reference, .cm-syntax-local-reference .cm-syntax-variable) {
-	color: var(--opticm-syntax-local-variable-color, hsl(86 60% 30%));
-}
-.opticm .cm-editor.cm-java :is(.cm-syntax-definition, .cm-syntax-definition *) {
-	color: var(--opticm-syntax-definition-color, var(--opticm-color-text));
-}
-.opticm .cm-editor.cm-java :is(.cm-syntax-function-definition, .cm-syntax-function-definition *, .cm-syntax-class-definition, .cm-syntax-class-definition *) {
-	color: var(--opticm-syntax-function-definition-color, var(--opticm-color-text));
-}
-.opticm .cm-editor.cm-analysis-pending .cm-syntax-variable:not(:is(
-	.cm-syntax-definition, .cm-syntax-definition *,
-	.cm-syntax-class-definition, .cm-syntax-class-definition *,
-	.cm-syntax-function-definition, .cm-syntax-function-definition *,
-	.cm-syntax-field-definition, .cm-syntax-field-definition *,
-	.cm-syntax-property-definition, .cm-syntax-property-definition *,
-	.cm-syntax-function, .cm-syntax-function *,
-	.cm-syntax-property, .cm-syntax-property *
-)):not(:has(.cm-syntax-definition, .cm-syntax-class-definition, .cm-syntax-function-definition,
-	.cm-syntax-field-definition, .cm-syntax-property-definition, .cm-syntax-function, .cm-syntax-property)) {
-	color: var(--opticm-syntax-local-variable-color, hsl(86 60% 30%));
-}
-.opticm .cm-editor.cm-javascript .cm-syntax-invalid { text-decoration: var(--opticm-syntax-invalid-decoration, none); border-bottom: 0.15em solid var(--opticm-l-red); }
-.opticm .cm-editor.cm-java .cm-syntax-invalid { text-decoration: var(--opticm-syntax-invalid-decoration, none); }
+	.cm-gutters::after {
+		content: '';
+		width  : var(--opticm-function-gutter-edge-width, var(--opticm-default-function-gutter-edge-width));
 
-.opticm .cm-editor .cm-selectionMatch {
-	background: transparent;
-	border-bottom: 2px dotted color-mix(in srgb, var(--opticm-l-aqua) 75%, transparent);
-}
+		background: var(--opticm-function-gutter-edge-color, var(--opticm-default-function-gutter-edge-color));
+	}
 
-.opticm .cm-editor .cm-tooltip,
-.opticm .cm-editor .cm-panels {
-	background-color: var(--opticm-color-window);
-	font-family: var(--opticm-font-ui);
-	font-size: var(--opticm-font-size);
-	box-shadow: 0 0 2px rgb(0 0 0 / 15%), 0 2px 4px rgb(0 0 0 / 25%);
-}
+	.cm-gutters:hover::after {
+		background-color: var(--opticm-function-gutter-edge-hover-color, var(--opticm-default-function-gutter-edge-hover-color));
+	}
 
-.opticm .cm-search .cm-button,
-.opticm .cm-search .cm-textfield { font-size: 85%; }
-.opticm .cm-search input { font-family: var(--opticm-font-console); }
-.opticm .cm-tern-arguments { padding: 2px 5px; }
-.opticm .cm-tern-icon::before {
-	display: inline-block;
-	min-width: 1.5em;
-	font-family: var(--opticm-font-console);
-	text-align: center;
+	.cm-editor .cm-lineNumbers .cm-gutterElement {
+		min-width: 33px;
+		padding  : 0;
+
+		font-variant-numeric: tabular-nums;
+	}
+
+	:is(.cm-lineNumbers, .cm-sectionNumbers) .cm-gutterElement:first-child {
+		font-weight: bold;
+	}
+
+	.cm-lineNumbers .cm-opticm-line-number {
+		display: block;
+		padding: 0 7px 0 4px;
+	}
+
+	.cm-lineNumbers .cm-opticm-line-number { text-align: right; }
+	.cm-editor .cm-activeLineGutter {
+		background : var(--opticm-active-gutter-background, var(--opticm-default-active-gutter-background));
+		color      : var(--opticm-color-text);
+		font-weight: bold;
+	}
+	.cm-lineNumbers .cm-gutterElement:hover,
+	.cm-sectionNumbers .cm-gutterElement:hover {
+		background: var(--opticm-gutter-number-hover-background, var(--opticm-default-gutter-number-hover-background));
+	}
+
+	.cm-editor {
+		.cm-gutter-lint { width: var(--opticm-lint-gutter-width); }
+		.cm-lint-marker { vertical-align: middle; }
+
+		.cm-selectionMatch {
+			background   : var(--opticm-selection-match-background, var(--opticm-default-selection-match-background));
+			border-bottom: 2px dotted var(--opticm-selection-match-border-color, var(--opticm-default-selection-match-border-color));
+		}
+
+		.cm-tooltip,
+		.cm-panels {
+			background-color: var(--opticm-color-window);
+			font-family     : var(--opticm-font-ui);
+			font-size       : var(--opticm-font-size);
+			box-shadow      : var(--opticm-popup-shadow, var(--opticm-default-popup-shadow));
+		}
+	}
+
+	.cm-search .cm-button,
+	.cm-search .cm-textfield { font-size: 85%; }
+	.cm-search input { font-family: var(--opticm-font-console); }
+	.cm-tern-arguments { padding: 2px 5px; }
+	.cm-tern-icon::before {
+		display  : inline-block;
+		min-width: 1.5em;
+
+		font-family: var(--opticm-font-console);
+		text-align : center;
+	}
+	.cm-tern-unknown::before { content: '?'; }
+	.cm-tern-number::before  { content: '#'; }
+	.cm-tern-string::before  { content: '""'; }
+	.cm-tern-bool::before    { content: '✓'; }
+	.cm-tern-fn::before      { content: 'ƒ'; }
+	.cm-tern-array::before   { content: '[]'; }
+	.cm-tern-object::before  { content: '{}'; }
 }
-.opticm .cm-tern-unknown::before { content: '?'; }
-.opticm .cm-tern-number::before { content: '#'; }
-.opticm .cm-tern-string::before { content: '""'; }
-.opticm .cm-tern-bool::before { content: '✓'; }
-.opticm .cm-tern-fn::before { content: 'ƒ'; }
-.opticm .cm-tern-array::before { content: '[]'; }
-.opticm .cm-tern-object::before { content: '{}'; }

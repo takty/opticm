@@ -302,6 +302,103 @@ try {
 			throw new Error('Built docs check failed: ' + JSON.stringify(docs));
 		}
 		console.log('Built docs passed: one editor, worker, read-only, recreate, default font, subdirectory URLs.');
+		const bracketSetup = await send('Runtime.evaluate', {
+			expression: `(async () => {
+				const host = document.createElement('div');
+				host.style.cssText = 'position:fixed;left:20px;top:20px;width:520px;height:200px;z-index:9999';
+				document.body.append(host);
+				const { createEditor } = await import('./opticm.min.js');
+				const editor = await createEditor(host, {
+					codeLanguage: 'javascript', analysis: false, fontSize: 24,
+					value: 'function f() {\\n}',
+				});
+				host.querySelector('.opticm').style.setProperty('--opticm-bracket-ring-color', '#ff00ff');
+				host.querySelector('.cm-editor').style.setProperty('--opticm-line-padding', '0px');
+				window.bracketPaintTest = { editor, host };
+			})()`,
+			awaitPromise: true,
+			returnByValue: true,
+		}, sessionId);
+		if (bracketSetup.exceptionDetails) throw new Error('Bracket paint setup failed: ' + JSON.stringify(bracketSetup));
+		for (const sectionMode of [false, true]) {
+			const geometry = await send('Runtime.evaluate', {
+				expression: `(async () => {
+					const { editor, host } = window.bracketPaintTest;
+					if (${sectionMode}) {
+						editor.setSettings({ analysis: true, functionLineNumbers: true });
+						await editor.analyzeNow();
+					}
+					editor.moveTo({ line: 0, ch: 13 });
+					for (let i = 0; i < 100; i++) {
+						const gutter = host.querySelector('.cm-gutters');
+						const mark = host.querySelector('.cm-bracket-gutter-mark');
+						const bracket = host.querySelectorAll('.cm-content .cm-matchingBracket')[1];
+						if (mark && bracket && (!${sectionMode} || host.querySelector('.cm-sectionNumbers'))) {
+							const gutterBox = gutter.getBoundingClientRect();
+							const box = bracket.getBoundingClientRect();
+							const numbers = host.querySelector('${sectionMode ? '.cm-sectionNumbers' : '.cm-lineNumbers'}');
+							const number = [...numbers.querySelectorAll('.cm-gutterElement')].find(element => {
+								const rect = element.getBoundingClientRect();
+								return element.textContent.trim() && rect.top <= box.top && rect.bottom >= box.bottom;
+							});
+							if (!number) throw new Error('Matching line number did not appear');
+							const numberBox = number.getBoundingClientRect();
+							const edgeWidth = parseFloat(getComputedStyle(gutter, '::after').width);
+							const x = Math.ceil(numberBox.left);
+							const y = Math.ceil(numberBox.top);
+							return { x, y, width: Math.floor(Math.min(numberBox.right, gutterBox.right - edgeWidth)) - x,
+								height: Math.floor(numberBox.bottom) - y, scale: 1 };
+						}
+						await new Promise(resolve => setTimeout(resolve, 20));
+					}
+					throw new Error('Bracket gutter mark did not appear');
+				})()`,
+				awaitPromise: true,
+				returnByValue: true,
+			}, sessionId);
+			if (geometry.exceptionDetails || !geometry.result?.value?.width) {
+				throw new Error('Bracket paint geometry failed: ' + JSON.stringify(geometry));
+			}
+			await send('Runtime.evaluate', {
+				expression: `window.bracketPaintTest.host.querySelector('.opticm').style.setProperty('--opticm-bracket-ring-color', 'transparent')`,
+			}, sessionId);
+			const baseline = await send('Page.captureScreenshot', { format: 'png', clip: geometry.result.value }, sessionId);
+			await send('Runtime.evaluate', {
+				expression: `window.bracketPaintTest.host.querySelector('.opticm').style.setProperty('--opticm-bracket-ring-color', '#ff00ff')`,
+			}, sessionId);
+			const capture = await send('Page.captureScreenshot', { format: 'png', clip: geometry.result.value }, sessionId);
+			const pixels = await send('Runtime.evaluate', {
+				expression: `(async () => {
+					const readPixels = async data => {
+						const image = new Image();
+						image.src = 'data:image/png;base64,' + data;
+						await image.decode();
+						const canvas = document.createElement('canvas');
+						canvas.width = image.width;
+						canvas.height = image.height;
+						const context = canvas.getContext('2d');
+						context.drawImage(image, 0, 0);
+						return context.getImageData(0, 0, image.width, image.height).data;
+					};
+					const before = await readPixels('${baseline.data}');
+					const after = await readPixels('${capture.data}');
+					for (let i = 0; i < after.length; i += 4) {
+						if (before[i] < 180 && before[i + 1] < 180 && before[i + 2] < 180 &&
+							after[i] > 200 && after[i + 1] < 50 && after[i + 2] > 200) return true;
+					}
+					return false;
+				})()`,
+				awaitPromise: true,
+				returnByValue: true,
+			}, sessionId);
+			if (pixels.exceptionDetails || !pixels.result?.value) {
+				throw new Error('Bracket circle was not painted over ' + (sectionMode ? 'function' : 'absolute') + ' line numbers');
+			}
+		}
+		await send('Runtime.evaluate', {
+			expression: 'window.bracketPaintTest.editor.destroy(); window.bracketPaintTest.host.remove(); delete window.bracketPaintTest',
+		}, sessionId);
+		console.log('Bracket circles are painted over both kinds of line-number gutter.');
 		const pastePoint = await send('Runtime.evaluate', {
 			expression: `(() => { const button = document.querySelector('#paste'); button.scrollIntoView(); const box = button.getBoundingClientRect(); return { x: box.x + box.width / 2, y: box.y + box.height / 2 }; })()`,
 			returnByValue: true,

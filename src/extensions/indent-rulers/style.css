@@ -1,29 +1,33 @@
-.cm-editor.cm-indent-rulers .cm-scroller {
-	z-index: auto;
-}
+.cm-editor.cm-indent-rulers {
+	.cm-scroller {
+		z-index: auto;
+	}
 
-.cm-editor.cm-indent-rulers .cm-content {
-	z-index: 1;
-}
+	.cm-content {
+		z-index: 1;
+	}
 
-.cm-editor.cm-indent-rulers .cm-ruler-overlay {
-	position: absolute;
-	z-index: 0;
-	overflow: hidden;
-	pointer-events: none;
-}
+	.cm-ruler-overlay {
+		position: absolute;
+		z-index : 0;
+		overflow: hidden;
 
-.cm-editor.cm-indent-rulers .cm-opticm-rulers {
-	position: absolute;
-	inset-block: 0;
-	right: 0;
-}
+		pointer-events: none;
+	}
 
-.cm-editor.cm-indent-rulers .cm-opticm-rulers > span {
-	position: absolute;
-	inset-block: 0;
-	left: calc(var(--opticm-indent-ruler-column, var(--ruler-column)) * var(--ruler-character-width));
-	border-left: var(--opticm-indent-ruler-width, var(--opticm-default-indent-ruler-width))
-		var(--opticm-indent-ruler-style, var(--opticm-default-indent-ruler-style))
-		var(--opticm-indent-ruler-color, var(--opticm-default-indent-ruler-color));
+	.cm-opticm-rulers {
+		position   : absolute;
+		inset-block: 0;
+		right      : 0;
+
+		& > span {
+			position   : absolute;
+			inset-block: 0;
+			left       : calc(var(--opticm-indent-ruler-column, var(--ruler-column)) * var(--ruler-character-width));
+
+			border-left: var(--opticm-indent-ruler-width, var(--opticm-default-indent-ruler-width))
+				var(--opticm-indent-ruler-style, var(--opticm-default-indent-ruler-style))
+				var(--opticm-indent-ruler-color, var(--opticm-default-indent-ruler-color));
+		}
+	}
 }

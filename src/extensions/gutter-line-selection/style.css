@@ -1,9 +1,11 @@
-.cm-editor.cm-gutter-line-selection :is(.cm-lineNumbers, .cm-sectionNumbers),
-.cm-editor.cm-gutter-line-selection .cm-gutters::after {
-	cursor: var(--opticm-gutter-cursor, url("./cursor-right.svg") 22 8, pointer);
-}
+.cm-editor.cm-gutter-line-selection {
+	:is(.cm-lineNumbers, .cm-sectionNumbers),
+	.cm-gutters::after {
+		cursor: var(--opticm-gutter-cursor, url("./cursor-right.svg") 22 8, pointer);
+	}
 
-.cm-editor.cm-gutter-line-selection.line-selection-mode :is(.cm-lineNumbers, .cm-sectionNumbers),
-.cm-editor.cm-gutter-line-selection.line-selection-mode .cm-gutters::after {
-	cursor: var(--opticm-gutter-line-selection-cursor, url("./cursor-line.svg") 22 8, pointer);
+	&.line-selection-mode :is(.cm-lineNumbers, .cm-sectionNumbers),
+	&.line-selection-mode .cm-gutters::after {
+		cursor: var(--opticm-gutter-line-selection-cursor, url("./cursor-line.svg") 22 8, pointer);
+	}
 }

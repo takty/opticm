@@ -1,61 +1,88 @@
-.cm-editor.cm-syntax-highlighting .cm-syntax-comment {
-	color: var(--opticm-syntax-comment-color, var(--opticm-default-syntax-comment-color));
-	font-weight: var(--opticm-syntax-comment-font-weight, var(--opticm-default-syntax-comment-font-weight));
-}
+.cm-editor.cm-syntax-highlighting {
+	.cm-syntax-comment {
+		color      : var(--opticm-syntax-comment-color, var(--opticm-default-syntax-comment-color));
+		font-weight: var(--opticm-syntax-comment-font-weight, var(--opticm-default-syntax-comment-font-weight));
+	}
 
-.cm-editor.cm-syntax-highlighting :is(.cm-syntax-keyword, .cm-syntax-operator) {
-	color: var(--opticm-syntax-keyword-color, var(--opticm-default-syntax-keyword-color));
-	font-weight: var(--opticm-syntax-keyword-font-weight, var(--opticm-default-syntax-keyword-font-weight));
-}
+	:is(.cm-syntax-keyword, .cm-syntax-operator) {
+		color      : var(--opticm-syntax-keyword-color, var(--opticm-default-syntax-keyword-color));
+		font-weight: var(--opticm-syntax-keyword-font-weight, var(--opticm-default-syntax-keyword-font-weight));
+	}
 
-.cm-editor.cm-syntax-highlighting .cm-syntax-type {
-	color: var(--opticm-syntax-type-color, var(--opticm-default-syntax-type-color));
-}
+	.cm-syntax-type {
+		color: var(--opticm-syntax-type-color, var(--opticm-default-syntax-type-color));
+	}
 
-.cm-editor.cm-syntax-highlighting .cm-syntax-function {
-	color: var(--opticm-syntax-function-color, var(--opticm-default-syntax-function-color));
-}
+	.cm-syntax-function {
+		color: var(--opticm-syntax-function-color, var(--opticm-default-syntax-function-color));
+	}
 
-.cm-editor.cm-syntax-highlighting :is(.cm-syntax-function-definition, .cm-syntax-function-definition *, .cm-syntax-class-definition, .cm-syntax-class-definition *) {
-	color: var(--opticm-syntax-function-definition-color, var(--opticm-default-syntax-function-definition-color));
-	font-weight: var(--opticm-syntax-function-definition-font-weight, var(--opticm-default-syntax-function-definition-font-weight));
-}
+	.cm-syntax-property {
+		color: var(--opticm-syntax-property-color, var(--opticm-default-syntax-property-color));
+	}
 
-.cm-editor.cm-syntax-highlighting :where(.cm-syntax-definition) {
-	color: var(--opticm-syntax-definition-color, var(--opticm-default-syntax-definition-inherit-color));
-}
+	.cm-syntax-variable {
+		color: var(--opticm-syntax-variable-color, var(--opticm-default-syntax-variable-color));
+	}
 
-.cm-editor.cm-syntax-highlighting .cm-syntax-definition {
-	font-weight: var(--opticm-syntax-definition-font-weight, var(--opticm-default-syntax-definition-font-weight));
-}
+	.cm-syntax-literal {
+		color      : var(--opticm-syntax-literal-color, var(--opticm-default-syntax-literal-color));
+		font-weight: var(--opticm-syntax-literal-font-weight, var(--opticm-default-syntax-literal-font-weight));
+		text-shadow: var(--opticm-syntax-literal-text-shadow, var(--opticm-default-syntax-literal-text-shadow));
+	}
 
-.cm-editor.cm-syntax-highlighting :is(.cm-syntax-field-definition, .cm-syntax-field-definition *, .cm-syntax-property-definition, .cm-syntax-property-definition *) {
-	color: var(--opticm-syntax-definition-color, var(--opticm-default-syntax-definition-color));
-	font-weight: var(--opticm-syntax-definition-font-weight, var(--opticm-default-syntax-definition-font-weight));
-}
+	.cm-activeLine .cm-syntax-literal {
+		text-shadow: var(--opticm-syntax-active-literal-text-shadow, var(--opticm-default-syntax-active-literal-text-shadow));
+	}
 
-.cm-editor.cm-syntax-highlighting .cm-syntax-property {
-	color: var(--opticm-syntax-property-color, var(--opticm-default-syntax-property-color));
-}
+	.cm-syntax-invalid {
+		text-decoration: var(--opticm-syntax-invalid-decoration, var(--opticm-default-syntax-invalid-decoration));
+	}
 
-.cm-editor.cm-syntax-highlighting .cm-syntax-variable {
-	color: var(--opticm-syntax-variable-color, var(--opticm-default-syntax-variable-color));
-}
+	:is(.cm-syntax-local-variable, .cm-syntax-local-reference, .cm-syntax-local-reference .cm-syntax-variable) {
+		color: var(--opticm-syntax-local-variable-color, var(--opticm-default-syntax-local-variable-color));
+	}
 
-.cm-editor.cm-syntax-highlighting .cm-syntax-literal {
-	color: var(--opticm-syntax-literal-color, var(--opticm-default-syntax-literal-color));
-	font-weight: var(--opticm-syntax-literal-font-weight, var(--opticm-default-syntax-literal-font-weight));
-	text-shadow: var(--opticm-syntax-literal-text-shadow, var(--opticm-default-syntax-literal-text-shadow));
-}
+	:is(.cm-syntax-definition, .cm-syntax-definition *) {
+		color      : var(--opticm-syntax-definition-color, var(--opticm-default-syntax-definition-color));
+		font-weight: var(--opticm-syntax-definition-font-weight, var(--opticm-default-syntax-definition-font-weight));
+	}
 
-.cm-editor.cm-syntax-highlighting .cm-activeLine .cm-syntax-literal {
-	text-shadow: var(--opticm-syntax-active-literal-text-shadow, var(--opticm-default-syntax-active-literal-text-shadow));
-}
+	:is(.cm-syntax-function-definition, .cm-syntax-function-definition *, .cm-syntax-class-definition, .cm-syntax-class-definition *) {
+		color      : var(--opticm-syntax-function-definition-color, var(--opticm-default-syntax-function-definition-color));
+		font-weight: var(--opticm-syntax-function-definition-font-weight, var(--opticm-default-syntax-function-definition-font-weight));
+	}
 
-.cm-editor.cm-syntax-highlighting .cm-syntax-invalid {
-	text-decoration: var(--opticm-syntax-invalid-decoration, var(--opticm-default-syntax-invalid-decoration));
-}
+	:is(.cm-syntax-field-definition, .cm-syntax-field-definition *, .cm-syntax-property-definition, .cm-syntax-property-definition *) {
+		color      : var(--opticm-syntax-definition-color, var(--opticm-default-syntax-definition-color));
+		font-weight: var(--opticm-syntax-definition-font-weight, var(--opticm-default-syntax-definition-font-weight));
+	}
 
-.cm-editor.cm-syntax-highlighting :is(.cm-syntax-local-variable, .cm-syntax-local-reference, .cm-syntax-local-reference .cm-syntax-variable) {
-	color: var(--opticm-syntax-local-variable-color, var(--opticm-default-syntax-local-variable-color));
+	&.cm-analysis-pending .cm-syntax-variable:not(:is(
+		.cm-syntax-definition, .cm-syntax-definition *,
+		.cm-syntax-class-definition, .cm-syntax-class-definition *,
+		.cm-syntax-function-definition, .cm-syntax-function-definition *,
+		.cm-syntax-field-definition, .cm-syntax-field-definition *,
+		.cm-syntax-property-definition, .cm-syntax-property-definition *,
+		.cm-syntax-function, .cm-syntax-function *,
+		.cm-syntax-property, .cm-syntax-property *
+	)):not(:has(.cm-syntax-definition, .cm-syntax-class-definition, .cm-syntax-function-definition,
+		.cm-syntax-field-definition, .cm-syntax-property-definition, .cm-syntax-function, .cm-syntax-property)) {
+		color: var(--opticm-syntax-local-variable-color, var(--opticm-default-syntax-local-variable-color));
+	}
+
+	.opticm & :where(.cm-syntax-invalid) {
+		text-decoration: var(--opticm-syntax-invalid-decoration, none);
+		border-bottom  : 0.15em solid var(--opticm-syntax-invalid-border-color, var(--opticm-default-syntax-invalid-border-color));
+	}
+
+	/* Let an overlapping lint error provide the underline. */
+	:is(
+		.cm-syntax-invalid.cm-lintRange-error,
+		.cm-lintRange-error .cm-syntax-invalid,
+		.cm-syntax-invalid:has(.cm-lintRange-error)
+	) {
+		text-decoration: none;
+		border-bottom  : 0;
+	}
 }

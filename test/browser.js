@@ -461,9 +461,69 @@ try {
 		editorA.classList.contains('cm-gutter-line-selection') && !editorA.classList.contains('cm-easy-line-selection'),
 		'legacy option turns off only easy selection',
 	);
-	const defaultEditorBackground = 'rgb(253, 253, 253)';
-	assert(getComputedStyle(editorA).backgroundColor === defaultEditorBackground && getComputedStyle(editorA).color === 'rgb(17, 17, 0)', 'default editor background is neutral gray');
 	const themeRoot = editorA.closest('.opticm');
+	const colorProbe = document.createElement('div');
+	colorProbe.className = 'cm-editor cm-syntax-highlighting cm-focused ime';
+	colorProbe.innerHTML = '<div class="cm-selectionBackground"></div><div class="cm-activeLine"></div>' +
+		'<div class="cm-line error-line"></div><div class="cm-cursor"></div><div class="cm-gutters"></div>' +
+		'<div class="cm-selectionMatch"></div><div class="cm-tooltip"></div><div class="cm-panels"></div>' +
+		'<span class="cm-syntax-keyword"></span><span class="cm-syntax-invalid"></span>';
+	themeRoot.append(colorProbe);
+	try {
+		const probeStyle = (selector, pseudo) => getComputedStyle(colorProbe.querySelector(selector), pseudo);
+		const shadowReference = document.createElement('div');
+		colorProbe.append(shadowReference);
+		shadowReference.style.boxShadow = '0 0 4px rgb(0 0 0 / 15%), 0 2px 4px rgb(0 0 0 / 10%)';
+		const defaultLineShadow = getComputedStyle(shadowReference).boxShadow;
+		shadowReference.style.boxShadow = '0 0 2px rgb(0 0 0 / 15%), 0 2px 4px rgb(0 0 0 / 25%)';
+		assert(
+			probeStyle('.cm-activeLine').boxShadow === defaultLineShadow &&
+				probeStyle('.cm-tooltip').boxShadow === getComputedStyle(shadowReference).boxShadow &&
+				probeStyle('.cm-panels').boxShadow === getComputedStyle(shadowReference).boxShadow,
+			'component shadow defaults preserve their original appearance',
+		);
+		const customShadow = 'inset 1px 2px 3px 4px rgb(10 20 30), 5px 6px 7px rgb(40 50 60)';
+		shadowReference.style.boxShadow = customShadow;
+		colorProbe.style.setProperty('--opticm-focused-line-shadow', customShadow);
+		colorProbe.style.setProperty('--opticm-popup-shadow', 'none');
+		assert(
+			probeStyle('.cm-activeLine').boxShadow === getComputedStyle(shadowReference).boxShadow &&
+				probeStyle('.cm-tooltip').boxShadow === 'none' && probeStyle('.cm-panels').boxShadow === 'none',
+			'component shadow properties accept complete box-shadow values',
+		);
+		colorProbe.classList.add('cm-has-selection');
+		assert(probeStyle('.cm-activeLine').boxShadow === 'none', 'selection still suppresses the focused line shadow');
+		colorProbe.classList.remove('cm-has-selection');
+		colorProbe.style.setProperty('--opticm-default-syntax-keyword-color', '#123456');
+		assert(probeStyle('.cm-syntax-keyword').color === 'rgb(18, 52, 86)',
+			'component syntax colors use their centralized defaults');
+		for (const name of [
+			'selection-background', 'focused-line-background', 'error-line-background', 'cursor-color',
+			'ime-cursor-background', 'function-background', 'gutter-color', 'selection-match-border-color',
+			'syntax-invalid-border-color',
+		]) colorProbe.style.setProperty('--opticm-' + name, '#234567');
+		assert(
+			probeStyle('.cm-selectionBackground').backgroundColor === 'rgb(35, 69, 103)' &&
+				probeStyle('.cm-activeLine').backgroundColor === 'rgb(35, 69, 103)' &&
+				probeStyle('.error-line').backgroundColor === 'rgb(35, 69, 103)' &&
+				probeStyle('.cm-cursor', '::before').borderLeftColor === 'rgb(35, 69, 103)' &&
+				probeStyle('.cm-cursor').backgroundColor === 'rgb(35, 69, 103)' &&
+				probeStyle('.cm-gutters').backgroundColor === 'rgb(35, 69, 103)' &&
+				probeStyle('.cm-gutters').color === 'rgb(35, 69, 103)' &&
+				probeStyle('.cm-selectionMatch').borderBottomColor === 'rgb(35, 69, 103)' &&
+				probeStyle('.cm-syntax-invalid').borderBottomColor === 'rgb(35, 69, 103)',
+			'component colors can be overridden independently through theme properties',
+		);
+		colorProbe.style.removeProperty('--opticm-cursor-color');
+		const cursorColor = probeStyle('.cm-cursor', '::before').borderLeftColor;
+		colorProbe.style.setProperty('--opticm-l-brown', '#2468ac');
+		assert(probeStyle('.cm-cursor', '::before').borderLeftColor !== cursorColor,
+			'centralized component color defaults follow the editor palette');
+	} finally {
+		colorProbe.remove();
+	}
+	const defaultEditorBackground = 'rgb(255, 255, 255)';
+	assert(getComputedStyle(editorA).backgroundColor === defaultEditorBackground && getComputedStyle(editorA).color === 'rgb(17, 17, 17)', 'default editor background is white');
 	themeRoot.style.setProperty('--opticm-color-editor', '#123456');
 	assert(getComputedStyle(editorA).backgroundColor === 'rgb(18, 52, 86)', 'theme custom properties update at runtime');
 	assert(getComputedStyle(editorB).backgroundColor === defaultEditorBackground, 'theme custom properties isolated per editor');
@@ -987,9 +1047,23 @@ try {
 		}
 		for (const root of [jsRoot, javaRoot]) {
 			const token = syntaxToken(root, 'function-definition', 'work');
-			assert(token && getComputedStyle(token).color === 'rgb(17, 17, 0)' &&
+			assert(token && getComputedStyle(token).color === 'rgb(17, 17, 17)' &&
 				getComputedStyle(token).fontWeight === '700', 'function declaration uses bold editor text color');
 			assert(!syntaxToken(root, 'function-definition', 'log'), 'function call is not styled as a declaration');
+			const cmEditor = root.querySelector('.cm-editor');
+			cmEditor.style.setProperty('--opticm-default-syntax-function-definition-font-weight', '400');
+			assert(getComputedStyle(token).fontWeight === '400', 'function declarations use the configurable default weight');
+			root.style.setProperty('--opticm-syntax-function-definition-font-weight', '600');
+			assert(getComputedStyle(token).fontWeight === '600', 'function declaration weight overrides its default');
+			root.style.removeProperty('--opticm-syntax-function-definition-font-weight');
+			cmEditor.style.removeProperty('--opticm-default-syntax-function-definition-font-weight');
+			const definition = syntaxToken(root, 'definition', 'arg');
+			cmEditor.style.setProperty('--opticm-default-syntax-definition-font-weight', '400');
+			assert(definition && getComputedStyle(definition).fontWeight === '400', 'definitions use the configurable default weight');
+			root.style.setProperty('--opticm-syntax-definition-font-weight', '600');
+			assert(getComputedStyle(definition).fontWeight === '600', 'definition weight overrides its default');
+			root.style.removeProperty('--opticm-syntax-definition-font-weight');
+			cmEditor.style.removeProperty('--opticm-default-syntax-definition-font-weight');
 		}
 		const javaCall = syntaxToken(javaRoot, 'function', 'log');
 		assert(javaCall && getComputedStyle(javaCall).color === 'rgb(0, 83, 99)' &&
@@ -1070,7 +1144,7 @@ try {
 		const objectToken = name => [...objectLine().querySelectorAll('span')]
 			.filter(node => node.textContent === name && !node.children.length).at(-1);
 		const isBoldBlack = node => node && getComputedStyle(node).fontWeight === '700' &&
-			getComputedStyle(node).color === 'rgb(17, 17, 0)';
+			getComputedStyle(node).color === 'rgb(17, 17, 17)';
 		assert(
 			isBoldBlack(objectToken('key')) && isBoldBlack(objectToken('local')),
 			'object property keys are bold black before worker analysis',
@@ -1081,6 +1155,24 @@ try {
 			isBoldBlack(objectToken('key')) && isBoldBlack(objectToken('local')),
 			'object property keys remain bold black after worker analysis',
 		);
+		const jsEditorElement = jsRoot.querySelector('.cm-editor');
+		jsEditorElement.style.setProperty('--opticm-default-syntax-definition-font-weight', '400');
+		assert(['key', 'local'].every(name => getComputedStyle(objectToken(name)).fontWeight === '400'),
+			'JavaScript property definitions use the configurable default weight');
+		jsRoot.style.setProperty('--opticm-syntax-definition-font-weight', '600');
+		assert(['key', 'local'].every(name => getComputedStyle(objectToken(name)).fontWeight === '600'),
+			'JavaScript property definition weight overrides its default');
+		jsRoot.style.removeProperty('--opticm-syntax-definition-font-weight');
+		jsEditorElement.style.removeProperty('--opticm-default-syntax-definition-font-weight');
+		a.setSettings({ analysis: false });
+		a.loadDocument('class Example { field = 1; }');
+		const field = syntaxToken(jsRoot, 'field-definition', 'field');
+		jsEditorElement.style.setProperty('--opticm-default-syntax-definition-font-weight', '400');
+		assert(field && getComputedStyle(field).fontWeight === '400', 'JavaScript field definitions use the configurable default weight');
+		jsRoot.style.setProperty('--opticm-syntax-definition-font-weight', '600');
+		assert(getComputedStyle(field).fontWeight === '600', 'JavaScript field definition weight overrides its default');
+		jsRoot.style.removeProperty('--opticm-syntax-definition-font-weight');
+		jsEditorElement.style.removeProperty('--opticm-default-syntax-definition-font-weight');
 		javaEditor.setSettings({ analysis: false });
 		javaEditor.loadDocument('enum Kind { ONE, TWO }');
 		const enumToken = () => [...javaRoot.querySelectorAll('.cm-content span')]
@@ -1106,14 +1198,14 @@ try {
 			const localDefinition = () => syntaxToken(root, 'definition', 'local');
 			assert(
 				external() && getComputedStyle(external()).color === 'rgb(83, 122, 31)' &&
-					localDefinition() && getComputedStyle(localDefinition()).color === 'rgb(17, 17, 0)',
+					localDefinition() && getComputedStyle(localDefinition()).color === 'rgb(17, 17, 17)',
 				'pending ordinary variables are green without changing declarations',
 			);
 			editor.setSettings({ analysis: true });
 			await editor.analyzeNow();
 			assert(
 				external() && getComputedStyle(external()).color === expectedColor &&
-					getComputedStyle(localDefinition()).color === 'rgb(17, 17, 0)',
+					getComputedStyle(localDefinition()).color === 'rgb(17, 17, 17)',
 				'fresh analysis restores the ordinary variable color',
 			);
 		}
@@ -1165,17 +1257,21 @@ try {
 			const overlayBox = overlay.getBoundingClientRect();
 			const bracketBox = matches[1].getBoundingClientRect();
 			const overlayMarkBox = overlay.firstElementChild.getBoundingClientRect();
+			const ringLeft = overlayMarkBox.left + parseFloat(getComputedStyle(overlay.firstElementChild, '::before').left);
+			const gutterEdgeLeft = gutterBox.right - parseFloat(getComputedStyle(gutter, '::after').width);
 			const hit = document.elementFromPoint(gutterBox.right - 2, bracketBox.top + bracketBox.height / 2);
 			const hitTestable = bracketBox.top >= 0 && bracketBox.bottom <= innerHeight;
 			assert(
 				Math.abs(overlayBox.right - gutterBox.right) < 1 &&
-					Math.abs(overlayBox.width - parseFloat(getComputedStyle(gutter, '::after').width)) < 1 &&
+					Math.abs(overlayBox.left - gutterBox.left) < 1 &&
+					ringLeft < gutterEdgeLeft && overlayBox.left <= ringLeft &&
 					Math.abs(overlayMarkBox.left - bracketBox.left) < 1 &&
 					Math.abs(overlayMarkBox.top - bracketBox.top) < 1 &&
+					Number.parseInt(getComputedStyle(overlay).zIndex, 10) > Number.parseInt(getComputedStyle(gutter).zIndex, 10) &&
 					getComputedStyle(overlay).pointerEvents === 'none' &&
 					getComputedStyle(overlay.firstElementChild, '::before').borderRadius === '50%' &&
 					(!hitTestable || hit?.closest('.cm-gutters') === gutter),
-				'bracket circle overlaps only the gutter edge without intercepting gutter input',
+				'bracket circle overlaps the line-number gutter without intercepting gutter input',
 			);
 			const currentMark = getComputedStyle(matches[0], '::before');
 			const otherMark = getComputedStyle(matches[1], '::before');
@@ -1392,7 +1488,7 @@ try {
 			javaRoot.querySelector('.cm-lint-marker-error'), 'Java syntax errors use the diagnostic underline and gutter');
 		assert(
 			[...javaRoot.querySelectorAll('.cm-syntax-invalid')].every(node =>
-				getComputedStyle(node).textDecorationLine === 'none'),
+				getComputedStyle(node).textDecorationLine === 'none' && getComputedStyle(node).borderBottomStyle === 'none'),
 			'Java syntax highlighting does not draw a second underline',
 		);
 	} finally {

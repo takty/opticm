@@ -1,46 +1,48 @@
-.cm-editor.cm-bracket-matching :is(.cm-matchingBracket, .cm-bracket-gutter-mark) {
-	background: var(--opticm-bracket-matching-background, var(--opticm-default-bracket-matching-background));
-	color: var(--opticm-bracket-matching-color, var(--opticm-default-bracket-matching-color));
-	font-weight: var(--opticm-bracket-matching-font-weight, var(--opticm-default-bracket-matching-font-weight));
-	position: relative;
-	isolation: isolate;
-}
+.cm-editor.cm-bracket-matching {
+	:is(.cm-matchingBracket, .cm-bracket-gutter-mark) {
+		position : relative;
+		isolation: isolate;
 
-.cm-editor.cm-bracket-matching .cm-bracket-gutter-overlay {
-	position: absolute;
-	z-index: 4;
-	overflow: hidden;
-	pointer-events: none;
-}
+		background : var(--opticm-bracket-matching-background, var(--opticm-default-bracket-matching-background));
+		color      : var(--opticm-bracket-matching-color, var(--opticm-default-bracket-matching-color));
+		font-weight: var(--opticm-bracket-matching-font-weight, var(--opticm-default-bracket-matching-font-weight));
+	}
 
-.cm-editor.cm-bracket-matching .cm-bracket-gutter-mark { position: absolute; }
+	.cm-bracket-gutter-overlay {
+		position: absolute;
+		z-index : 5;
+		overflow: hidden;
 
-.cm-editor.cm-bracket-matching :is(.cm-matchingBracket, .cm-bracket-gutter-mark)::before {
-	content: '';
-	position: absolute;
-	z-index: -1;
-	top: -0.45em;
-	left: -0.75em;
-	right: -0.75em;
-	bottom: -0.45em;
-	border-radius: var(--opticm-bracket-ring-radius, var(--opticm-default-bracket-ring-radius));
-	border: var(--opticm-bracket-ring-width, var(--opticm-default-bracket-ring-width)) solid var(--opticm-bracket-ring-color, var(--opticm-default-bracket-ring-color));
-}
+		pointer-events: none;
+	}
 
-.cm-editor.cm-bracket-matching .cm-activeLine .cm-matchingBracket::before {
-	top: 0;
-	left: 0.05em;
-	right: 0.05em;
-	bottom: 0;
-	border-radius: var(--opticm-bracket-active-radius, var(--opticm-default-bracket-active-radius));
-	border: var(--opticm-bracket-active-border, var(--opticm-default-bracket-active-border));
-	background-color: var(--opticm-bracket-active-background, var(--opticm-default-bracket-active-background));
-}
+	.cm-bracket-gutter-mark {
+		position: absolute;
+	}
 
-.cm-editor.cm-bracket-matching :is(
-	.cm-syntax-comment .cm-matchingBracket,
-	.cm-matchingBracket.cm-syntax-comment,
-	.cm-matchingBracket:has(.cm-syntax-comment)
-)::before {
-	content: none;
+	:is(.cm-matchingBracket, .cm-bracket-gutter-mark)::before {
+		content : '';
+		position: absolute;
+		z-index : -1;
+		inset   : -0.45em -0.75em;
+
+		border-radius: var(--opticm-bracket-ring-radius, var(--opticm-default-bracket-ring-radius));
+		border       : var(--opticm-bracket-ring-width, var(--opticm-default-bracket-ring-width)) solid var(--opticm-bracket-ring-color, var(--opticm-default-bracket-ring-color));
+	}
+
+	.cm-activeLine .cm-matchingBracket::before {
+		inset: 0 0.05em;
+
+		border-radius   : var(--opticm-bracket-active-radius, var(--opticm-default-bracket-active-radius));
+		border          : var(--opticm-bracket-active-border, var(--opticm-default-bracket-active-border));
+		background-color: var(--opticm-bracket-active-background, var(--opticm-default-bracket-active-background));
+	}
+
+	:is(
+		.cm-syntax-comment .cm-matchingBracket,
+		.cm-matchingBracket.cm-syntax-comment,
+		.cm-matchingBracket:has(.cm-syntax-comment)
+	)::before {
+		content: none;
+	}
 }

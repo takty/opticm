@@ -32,8 +32,7 @@ const bracketGutterOverlay = ViewPlugin.fromClass(class {
 		const editor    = view.dom.getBoundingClientRect();
 		const frame     = view.scrollDOM.getBoundingClientRect();
 		const gutterBox = gutter.getBoundingClientRect();
-		const width     = Math.min(gutterBox.width, parseFloat(window.getComputedStyle(gutter, '::after').width) || 0);
-		const left      = gutterBox.right - width;
+		const left      = gutterBox.left;
 		const marks     = [];
 
 		for (const bracket of view.contentDOM.querySelectorAll('.cm-matchingBracket')) {
@@ -50,7 +49,7 @@ const bracketGutterOverlay = ViewPlugin.fromClass(class {
 		return {
 			left  : left - editor.left,
 			top   : frame.top - editor.top,
-			width,
+			width : gutterBox.width,
 			height: view.scrollDOM.clientHeight,
 			marks
 		};

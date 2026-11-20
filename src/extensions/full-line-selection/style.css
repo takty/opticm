@@ -1,9 +1,12 @@
-.cm-editor.cm-full-line-selection > .cm-scroller > .cm-selectionLayer .cm-selectionBackground {
-	display: none;
-}
+.cm-editor.cm-full-line-selection > .cm-scroller {
+	& > .cm-selectionLayer .cm-selectionBackground {
+		display: none;
+	}
 
-.cm-editor.cm-full-line-selection > .cm-scroller > .cm-full-line-selectionLayer {
-	z-index: 2 !important;
-	pointer-events: none;
-	mix-blend-mode: var(--opticm-selection-layer-blend-mode, var(--opticm-default-selection-layer-blend-mode));
+	& > .cm-full-line-selectionLayer {
+		z-index: 2 !important;
+
+		pointer-events: none;
+		mix-blend-mode: var(--opticm-selection-layer-blend-mode, var(--opticm-default-selection-layer-blend-mode));
+	}
 }

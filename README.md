@@ -596,6 +596,9 @@ ancestor to change its appearance without affecting other editors:
 | --- | --- |
 | Structure | — |
 | Editor interaction | `--opticm-editor-post-edit-cursor` |
+| Editor colors | `--opticm-selection-background`, `--opticm-active-line-background`, `--opticm-focused-line-background`, `--opticm-focused-line-shadow`, `--opticm-error-line-background` |
+| Cursor and gutter colors | `--opticm-cursor-color`, `--opticm-cursor-bottom-color`, `--opticm-ime-cursor-background`, `--opticm-function-background`, `--opticm-gutter-color`, `--opticm-active-gutter-background` |
+| Search, syntax and popup colors | `--opticm-selection-match-background`, `--opticm-selection-match-border-color`, `--opticm-syntax-invalid-border-color`, `--opticm-popup-shadow` |
 | Function numbers | `--opticm-function-number-color`, `--opticm-function-active-number-color`, `--opticm-function-line-color`, `--opticm-function-number-font-variant`, `--opticm-function-line-align` |
 | Function gutter edge | `--opticm-function-gutter-edge-width`, `--opticm-function-gutter-edge-color`, `--opticm-function-gutter-edge-hover-color`, `--opticm-function-gutter-edge-pattern`, `--opticm-function-stripe-width`, `--opticm-function-stripe-color` |
 | Function highlighting | `--opticm-function-alternate-background` |
