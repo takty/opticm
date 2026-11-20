@@ -19,7 +19,7 @@ const LANGUAGES        = { en: english, ja: japanese };
 const DEFAULT_SETTINGS = {
 	language            : 'en',
 	codeLanguage        : 'javascript',
-	fontFamily          : 'monospace',
+	fontFamily          : 'ui-monospace, monospace',
 	fontSize            : 16,
 	lineHeight          : 165,
 	lineWrapping        : false,
