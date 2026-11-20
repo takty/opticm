@@ -179,8 +179,10 @@ const structurePlugin = ViewPlugin.fromClass(class {
 			declarationSideRuleWidthScale: appearance.number('--opticm-structure-declaration-side-rule-width-scale'),
 			declarationSideRuleOffset    : appearance.number('--opticm-structure-declaration-side-rule-offset'),
 		};
-		const linePadding = parseFloat(window.getComputedStyle(view.contentDOM)
-			.getPropertyValue('--opticm-line-padding')) || 0;
+		const line = view.contentDOM.querySelector('.cm-line');
+		const lineStart = line
+			? line.getBoundingClientRect().left + parseFloat(window.getComputedStyle(line).paddingLeft)
+			: content.left;
 		const left   = Math.max(frame.left, content.left);
 		const width  = Math.max(0, frame.left + scroller.clientWidth - left);
 		const height = scroller.clientHeight;
@@ -201,7 +203,7 @@ const structurePlugin = ViewPlugin.fromClass(class {
 			}
 			const columns = countColumn(doc.sliceString(block.from, offset), tabSize);
 			return {
-				x: content.left - left + linePadding + columns * view.defaultCharacterWidth,
+				x: lineStart - left + columns * view.defaultCharacterWidth,
 				y: lineTop
 			};
 		};

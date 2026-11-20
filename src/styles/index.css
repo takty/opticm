@@ -18,7 +18,7 @@
 }
 
 .opticm .cm-editor {
-	--opticm-line-padding: 4px;
+	--opticm-line-padding: var(--opticm-function-gutter-edge-width, var(--opticm-default-function-gutter-edge-width));
 	/* A 1em diagnostic marker needs 0.2em of padding on each side. */
 	--opticm-lint-gutter-width: max(1.4em, var(--opticm-function-lint-gutter-width, 24px));
 	width: 100%;

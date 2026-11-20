@@ -308,6 +308,32 @@ export async function runLanguageContractTests(assert) {
 		assert(await waitForPaint(true), 'standalone structure extension draws externally supplied tokens');
 		standalone.dispatch({ changes: { from: 0, insert: ' ' } });
 		assert(await waitForPaint(false), 'document edits clear stale standalone structure');
+		const paddedLine = host.querySelector('.cm-line');
+		paddedLine.style.paddingLeft = '4ch';
+		standalone.coordsAtPos = () => null;
+		try {
+			standalone.dispatch({ effects: setStructure.of([{
+				kind      : 'token',
+				appearance: 'reference',
+				from      : { line: 0, ch: 0 },
+				to        : { line: 0, ch: 1 },
+				fill      : '#00ff00',
+				stroke    : 'transparent',
+			}]) });
+			assert(await waitForPaint(true), 'structure fallback paints without measured coordinates');
+			const lineBox = paddedLine.getBoundingClientRect();
+			const canvasBox = rangeCanvas.getBoundingClientRect();
+			const x = Math.floor((lineBox.left + parseFloat(getComputedStyle(paddedLine).paddingLeft) +
+				standalone.defaultCharacterWidth / 2 - canvasBox.left) * scale);
+			const y = Math.floor(((lineBox.top + lineBox.bottom) / 2 - canvasBox.top) * scale);
+			const pixel = rangeContext.getImageData(x, y, 1, 1).data;
+			assert(pixel[1] > 200 && pixel[3] > 200, 'structure fallback aligns with character-unit line padding');
+		} finally {
+			delete standalone.coordsAtPos;
+			paddedLine.style.removeProperty('padding-left');
+		}
+		standalone.dispatch({ effects: setStructure.of([]) });
+		assert(await waitForPaint(false), 'structure fallback clears');
 		standalone.dispatch({ effects: setStructure.of([{
 			kind      : 'token',
 			appearance: 'declaration',
@@ -506,6 +532,13 @@ export async function runLanguageContractTests(assert) {
 		assert(
 			getComputedStyle(numbersHost.querySelector('.cm-gutters'), '::after').backgroundImage.includes('repeating-linear-gradient'),
 			'standalone function line numbers provide their own gutter styling',
+		);
+		const defaultEdge = getComputedStyle(numbersHost.querySelector('.cm-gutters'), '::after');
+		const edgeContext = document.createElement('canvas').getContext('2d');
+		edgeContext.font = `${defaultEdge.fontStyle} ${defaultEdge.fontWeight} ${defaultEdge.fontSize} ${defaultEdge.fontFamily}`;
+		assert(
+			Math.abs(parseFloat(defaultEdge.width) - edgeContext.measureText('0').width / 2) < 0.1,
+			'standalone gutter edge is half a character wide',
 		);
 		const firstSection = gutter.querySelector('.cm-function-even').parentElement;
 		assert(

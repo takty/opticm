@@ -58,7 +58,7 @@ var variables_default = `/**\r
 	--opticm-default-bracket-active-border: none;\r
 	--opticm-default-bracket-active-background: color-mix(in srgb, var(--opticm-l-yellow, #fdde00) 65%, transparent);\r
 \r
-	--opticm-default-function-gutter-edge-width: 0.5em;\r
+	--opticm-default-function-gutter-edge-width: 0.5ch;\r
 	--opticm-default-function-gutter-edge-color: color-mix(in srgb, var(--opticm-l-purple, #9a74a3) 25%, transparent);\r
 	--opticm-default-function-gutter-edge-hover-color: color-mix(in srgb, var(--opticm-l-purple, #9a74a3) 45%, transparent);\r
 	--opticm-default-gutter-number-hover-background: color-mix(in srgb, var(--opticm-l-purple, #9a74a3) 25%, transparent);\r
@@ -349,14 +349,15 @@ var structurePlugin = ViewPlugin2.fromClass(class {
       declarationSideRuleWidthScale: appearance.number("--opticm-structure-declaration-side-rule-width-scale"),
       declarationSideRuleOffset: appearance.number("--opticm-structure-declaration-side-rule-offset")
     };
-    const linePadding = parseFloat(window.getComputedStyle(view.contentDOM).getPropertyValue("--opticm-line-padding")) || 0;
+    const line = view.contentDOM.querySelector(".cm-line");
+    const lineStart = line ? line.getBoundingClientRect().left + parseFloat(window.getComputedStyle(line).paddingLeft) : content.left;
     const left = Math.max(frame.left, content.left);
     const width = Math.max(0, frame.left + scroller.clientWidth - left);
     const height = scroller.clientHeight;
     const { doc, tabSize } = view.state;
     const coords = (pos, side = 1) => {
-      const line = doc.line(Math.max(1, Math.min(doc.lines, pos.line + 1)));
-      const offset = line.from + Math.max(0, Math.min(line.length, pos.ch ?? 0));
+      const line2 = doc.line(Math.max(1, Math.min(doc.lines, pos.line + 1)));
+      const offset = line2.from + Math.max(0, Math.min(line2.length, pos.ch ?? 0));
       const measured = view.coordsAtPos(offset, side);
       const block = view.lineBlockAt(offset);
       const lineTop = view.documentTop + block.top - frame.top;
@@ -370,7 +371,7 @@ var structurePlugin = ViewPlugin2.fromClass(class {
       }
       const columns = countColumn(doc.sliceString(block.from, offset), tabSize);
       return {
-        x: content.left - left + linePadding + columns * view.defaultCharacterWidth,
+        x: lineStart - left + columns * view.defaultCharacterWidth,
         y: lineTop
       };
     };

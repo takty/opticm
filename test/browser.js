@@ -576,9 +576,20 @@ try {
 		'function lint gutter width is customizable from the component container',
 	);
 	themeRoot.style.removeProperty('--opticm-function-lint-gutter-width');
+	const gutterEdgeIsHalfCharacter = () => {
+		const strip = getComputedStyle(editorA.querySelector('.cm-gutters'), '::after');
+		const context = document.createElement('canvas').getContext('2d');
+		context.font = `${strip.fontStyle} ${strip.fontWeight} ${strip.fontSize} ${strip.fontFamily}`;
+		return Math.abs(parseFloat(strip.width) - context.measureText('0').width / 2) < 0.1;
+	};
+	const linePaddingMatchesGutterEdge = () =>
+		Math.abs(parseFloat(getComputedStyle(editorA.querySelector('.cm-line')).paddingLeft) -
+			parseFloat(getComputedStyle(editorA.querySelector('.cm-gutters'), '::after').width)) < 0.1;
 	for (const functionLineNumbers of [true, false]) {
 		a.setSettings({ functionLineNumbers });
 		assert(gutterWidth() === normalWidth, 'gutter width is stable when switching line-number modes: ' + functionLineNumbers);
+		assert(gutterEdgeIsHalfCharacter(), 'gutter edge is half a character wide: ' + functionLineNumbers);
+		assert(linePaddingMatchesGutterEdge(), 'line padding matches gutter edge: ' + functionLineNumbers);
 		const strip = getComputedStyle(editorA.querySelector('.cm-gutters'), '::after');
 		assert(
 			strip.backgroundImage.includes('repeating-linear-gradient') === functionLineNumbers,
@@ -598,6 +609,8 @@ try {
 		}
 		const originalFontSize = a.getSettings().fontSize;
 		a.setSettings({ fontSize: 48 });
+		assert(gutterEdgeIsHalfCharacter(), 'gutter edge follows the enlarged character width: ' + functionLineNumbers);
+		assert(linePaddingMatchesGutterEdge(), 'line padding follows enlarged gutter edge: ' + functionLineNumbers);
 		const lintGutter = editorA.querySelector('.cm-gutter-lint');
 		const marker = lintGutter.querySelector('.cm-lint-marker-warning');
 		const gutterBox = lintGutter.getBoundingClientRect();
@@ -607,6 +620,10 @@ try {
 			'zoomed lint marker fits inside its gutter: ' + functionLineNumbers,
 		);
 		a.setSettings({ fontSize: originalFontSize });
+		themeRoot.style.setProperty('--opticm-function-gutter-edge-width', '21px');
+		assert(parseFloat(getComputedStyle(editorA.querySelector('.cm-line')).paddingLeft) === 21 &&
+			linePaddingMatchesGutterEdge(), 'line padding follows customized gutter edge: ' + functionLineNumbers);
+		themeRoot.style.removeProperty('--opticm-function-gutter-edge-width');
 		themeRoot.style.removeProperty('--opticm-function-number-color');
 	}
 	a.loadDocument('function longFunction() {\n' + '\n'.repeat(999) + '}');

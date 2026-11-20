@@ -328,7 +328,7 @@ var variables_default = `/**\r
 	--opticm-default-bracket-active-border: none;\r
 	--opticm-default-bracket-active-background: color-mix(in srgb, var(--opticm-l-yellow, #fdde00) 65%, transparent);\r
 \r
-	--opticm-default-function-gutter-edge-width: 0.5em;\r
+	--opticm-default-function-gutter-edge-width: 0.5ch;\r
 	--opticm-default-function-gutter-edge-color: color-mix(in srgb, var(--opticm-l-purple, #9a74a3) 25%, transparent);\r
 	--opticm-default-function-gutter-edge-hover-color: color-mix(in srgb, var(--opticm-l-purple, #9a74a3) 45%, transparent);\r
 	--opticm-default-gutter-number-hover-background: color-mix(in srgb, var(--opticm-l-purple, #9a74a3) 25%, transparent);\r
