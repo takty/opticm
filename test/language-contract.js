@@ -150,7 +150,10 @@ export async function runLanguageContractTests(assert) {
 	document.body.prepend(host);
 	const compartment = new Compartment();
 	const standalone = new EditorView({
-		state: EditorState.create({ doc: 'if (x) {\n  work();\n}', extensions: [compartment.of(structureView)] }),
+		state: EditorState.create({
+			doc: 'if (x) {\n  work();\n}',
+			extensions: [commonAnalysisState, compartment.of(structureView)],
+		}),
 		parent: host,
 	});
 	const otherHost = document.createElement('div');
@@ -264,6 +267,28 @@ export async function runLanguageContractTests(assert) {
 		standalone.dispatch({ effects: setStructure.of([...classRange]) });
 		assert(await waitForColor(0, 255), 'structure resolves inherited CSS color on repaint');
 		host.style.removeProperty('--test-class-color');
+		host.style.setProperty('--opticm-structure-class-fill', '#00ff00');
+		standalone.dispatch({ effects: setCommonAnalysis.of(createCommonAnalysis({
+			version     : 4,
+			sourceLength: standalone.state.doc.length,
+			complete    : true,
+			structures  : [{ kind: 'class', from: 0, to: standalone.state.doc.length, branches: [] }],
+			declarations: [],
+			syntax      : [],
+			references  : [],
+			sections    : [],
+		})) });
+		const hasGreenStructureFill = () => {
+			const pixels = host.querySelector('canvas').getContext('2d')
+				.getImageData(0, 0, host.querySelector('canvas').width, host.querySelector('canvas').height).data;
+			return pixels.some((value, index) => index % 4 === 1 && value === 255);
+		};
+		for (let i = 0; i < 50 && !hasGreenStructureFill(); i++) {
+			await new Promise(resolve => setTimeout(resolve, 20));
+		}
+		assert(hasGreenStructureFill(), 'structure view reads its default fill color from CSS custom properties');
+		standalone.dispatch({ effects: setCommonAnalysis.of(null) });
+		host.style.removeProperty('--opticm-structure-class-fill');
 		const otherCanvas = otherHost.querySelector('canvas');
 		await new Promise(resolve => setTimeout(resolve, 100));
 		assert(

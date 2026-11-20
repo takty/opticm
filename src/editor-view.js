@@ -456,7 +456,10 @@ export class Editor {
 		const { view } = this;
 		if (view.state !== transaction.state) return;
 		if (view.hasFocus) {
-			view.contentDOM.style.cursor = 'none';
+			view.contentDOM.style.cursor = view.dom.ownerDocument.defaultView
+				.getComputedStyle(view.dom)
+				.getPropertyValue('--opticm-editor-post-edit-cursor')
+				.trim();
 			clearTimeout(this.pointerTimer);
 			this.pointerTimer = setTimeout(() => { view.contentDOM.style.cursor = ''; }, 500);
 		}

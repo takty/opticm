@@ -127,7 +127,7 @@
 .opticm .cm-editor .cm-activeLineGutter { background: transparent; color: var(--opticm-color-text); font-weight: bold; }
 .opticm .cm-lineNumbers .cm-gutterElement:hover,
 .opticm .cm-sectionNumbers .cm-gutterElement:hover {
-	background: var(--opticm-default-gutter-number-hover-background);
+	background: var(--opticm-gutter-number-hover-background, var(--opticm-default-gutter-number-hover-background));
 }
 
 .opticm .cm-editor .cm-gutter-lint { width: var(--opticm-lint-gutter-width); }

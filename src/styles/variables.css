@@ -32,6 +32,7 @@
 	--opticm-font-ui     : "Lucida Grande", "Hiragino Sans", "Yu Gothic UI", "Meiryo UI", sans-serif;
 	--opticm-font-console: 'Hiragino Sans', "Yu Gothic UI", "Meiryo UI", monospace;
 	--opticm-font-size   : 14px;
+	--opticm-editor-post-edit-cursor: none;
 
 }
 
@@ -68,6 +69,34 @@
 
 	--opticm-default-function-scroll-marker-radius: 50%;
 	--opticm-default-function-scroll-marker-color: hsl(40 100% 50% / 75%);
+
+	--opticm-default-structure-class-fill: var(--opticm-l-red, #e61e58);
+	--opticm-default-structure-class-opacity: 0.08;
+	--opticm-default-structure-function-fill: hsla(40, 100%, 50%, 0.15);
+	--opticm-default-structure-conditional-fill: hsla(150, 100%, 35%, 0.15);
+	--opticm-default-structure-loop-fill: hsla(190, 90%, 50%, 0.20);
+	--opticm-default-structure-loop2-fill: var(--opticm-l-purple, #9a74a3);
+	--opticm-default-structure-loop2-opacity: 0.20;
+	--opticm-default-structure-declaration-function-fill: hsla(0, 0%, 97%, 1);
+	--opticm-default-structure-declaration-function-stroke: hsla(0, 0%, 69%, 0.75);
+	--opticm-default-structure-declaration-immutable-fill: hsla(240, 75%, 97%, 1);
+	--opticm-default-structure-declaration-immutable-stroke: hsla(240, 75%, 65%, 0.75);
+	--opticm-default-structure-declaration-mutable-fill: hsla(205, 100%, 97%, 1);
+	--opticm-default-structure-declaration-mutable-stroke: hsla(205, 100%, 52%, 0.75);
+	--opticm-default-structure-reference-fill: rgba(253, 253, 253, 0.95);
+	--opticm-default-structure-reference-stroke: rgba(46, 68, 154, 0.30);
+	--opticm-default-structure-range-padding: 3;
+	--opticm-default-structure-spine-inset: 4;
+	--opticm-default-structure-fade-length: 16;
+	--opticm-default-structure-reference-shadow-blur: 6;
+	--opticm-default-structure-reference-shadow-offset-y: 1;
+	--opticm-default-structure-token-height-scale: 1.9;
+	--opticm-default-structure-token-radius-scale: 0.2;
+	--opticm-default-structure-declaration-inset: 2;
+	--opticm-default-structure-declaration-width-padding: 4;
+	--opticm-default-structure-declaration-border-width: 0.5;
+	--opticm-default-structure-declaration-side-rule-width-scale: 0.35;
+	--opticm-default-structure-declaration-side-rule-offset: 0.5;
 
 	--opticm-default-indent-ruler-width: 2px;
 	--opticm-default-indent-ruler-style: dashed;

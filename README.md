@@ -595,6 +595,7 @@ ancestor to change its appearance without affecting other editors:
 | Extension | Visual custom properties |
 | --- | --- |
 | Structure | — |
+| Editor interaction | `--opticm-editor-post-edit-cursor` |
 | Function numbers | `--opticm-function-number-color`, `--opticm-function-active-number-color`, `--opticm-function-line-color`, `--opticm-function-number-font-variant`, `--opticm-function-line-align` |
 | Function gutter edge | `--opticm-function-gutter-edge-width`, `--opticm-function-gutter-edge-color`, `--opticm-function-gutter-edge-hover-color`, `--opticm-function-gutter-edge-pattern`, `--opticm-function-stripe-width`, `--opticm-function-stripe-color` |
 | Function highlighting | `--opticm-function-alternate-background` |
@@ -606,16 +607,21 @@ ancestor to change its appearance without affecting other editors:
 Extension style defaults are centralized in `src/styles/variables.css`; each
 extension keeps its selectors in its own `style.css`. Standalone extensions
 install the shared defaults on their CodeMirror editor, so they do not depend
-on the Opticm component stylesheet. Only visual defaults are centralized.
+on the Opticm component stylesheet. Defaults use `--opticm-default-*` names;
+the corresponding `--opticm-*` properties take precedence and can be set on
+the editor or an ancestor. Only visual defaults are centralized.
 Required layering, positioning, clipping and pointer handling stay fixed in
 each extension because they are part of its behavior. The ruler column
 (`--opticm-indent-ruler-column`) and lint gutter sizing
 (`--opticm-function-lint-gutter-width` in the component, or
 `--opticm-lint-gutter-width` for standalone extensions) remain separate
 functional geometry settings.
-Structure shapes are painted on a canvas; their fill and stroke colors are
-supplied in the structure data and may reference CSS custom properties. Positions calculated
-by the extensions are applied directly and are not CSS custom properties.
+Structure canvas colors and drawing proportions are centralized in
+`src/styles/variables.css` and read by the JavaScript renderer. For example,
+`--opticm-structure-class-fill` overrides
+`--opticm-default-structure-class-fill` on the next canvas repaint. Supplied
+structure data can still provide custom fill and stroke colors. Positions
+calculated by extensions are runtime measurements and remain inline styles.
 
 ## Sources and build
 

@@ -1,20 +1,20 @@
-.cm-editor.cm-opticm-whitespace .cm-highlightSpace { background-image: var(--opticm-default-whitespace-background-image); }
+.cm-editor.cm-opticm-whitespace .cm-highlightSpace { background-image: var(--opticm-whitespace-background-image, var(--opticm-default-whitespace-background-image)); }
 .cm-editor.cm-opticm-whitespace .cm-activeLine .cm-opticm-space {
 	background-image: linear-gradient(var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color)), var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color)));
-	background-size: var(--opticm-default-whitespace-space-background-size);
-	background-position: var(--opticm-default-whitespace-background-position);
-	background-repeat: var(--opticm-default-whitespace-background-repeat);
+	background-size: var(--opticm-whitespace-space-background-size, var(--opticm-default-whitespace-space-background-size));
+	background-position: var(--opticm-whitespace-background-position, var(--opticm-default-whitespace-background-position));
+	background-repeat: var(--opticm-whitespace-background-repeat, var(--opticm-default-whitespace-background-repeat));
 }
 .cm-editor.cm-opticm-whitespace .cm-activeLine .cm-opticm-full-width-space {
 	background-image: linear-gradient(
 		color-mix(in srgb, var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color)) 80%, white),
 		color-mix(in srgb, var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color)) 80%, white)
 	);
-	background-size: var(--opticm-default-whitespace-full-width-background-size);
+	background-size: var(--opticm-whitespace-full-width-background-size, var(--opticm-default-whitespace-full-width-background-size));
 }
 .cm-editor.cm-opticm-whitespace .cm-highlightTab {
 	position: relative;
-	background-image: var(--opticm-default-whitespace-background-image);
+	background-image: var(--opticm-whitespace-background-image, var(--opticm-default-whitespace-background-image));
 }
 .cm-editor.cm-opticm-whitespace .cm-highlightTab::before,
 .cm-editor.cm-opticm-whitespace .cm-highlightTab::after {
@@ -22,8 +22,8 @@
 	transform: scaleX(0.8);
 	transform-origin: left;
 	color: var(--opticm-whitespace-tab-color, var(--opticm-default-whitespace-tab-color));
-	font-weight: var(--opticm-default-whitespace-tab-font-weight);
-	text-shadow: var(--opticm-default-whitespace-tab-text-shadow);
+	font-weight: var(--opticm-whitespace-tab-font-weight, var(--opticm-default-whitespace-tab-font-weight));
+	text-shadow: var(--opticm-whitespace-tab-text-shadow, var(--opticm-default-whitespace-tab-text-shadow));
 	pointer-events: none;
 	overflow: hidden;
 	white-space: nowrap;

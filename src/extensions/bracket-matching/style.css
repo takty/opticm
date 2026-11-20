@@ -1,7 +1,7 @@
 .cm-editor.cm-bracket-matching :is(.cm-matchingBracket, .cm-bracket-gutter-mark) {
-	background: var(--opticm-default-bracket-matching-background);
-	color: var(--opticm-default-bracket-matching-color);
-	font-weight: var(--opticm-default-bracket-matching-font-weight);
+	background: var(--opticm-bracket-matching-background, var(--opticm-default-bracket-matching-background));
+	color: var(--opticm-bracket-matching-color, var(--opticm-default-bracket-matching-color));
+	font-weight: var(--opticm-bracket-matching-font-weight, var(--opticm-default-bracket-matching-font-weight));
 	position: relative;
 	isolation: isolate;
 }
@@ -23,8 +23,8 @@
 	left: -0.75em;
 	right: -0.75em;
 	bottom: -0.45em;
-	border-radius: var(--opticm-default-bracket-ring-radius);
-	border: var(--opticm-default-bracket-ring-width) solid var(--opticm-default-bracket-ring-color);
+	border-radius: var(--opticm-bracket-ring-radius, var(--opticm-default-bracket-ring-radius));
+	border: var(--opticm-bracket-ring-width, var(--opticm-default-bracket-ring-width)) solid var(--opticm-bracket-ring-color, var(--opticm-default-bracket-ring-color));
 }
 
 .cm-editor.cm-bracket-matching .cm-activeLine .cm-matchingBracket::before {
@@ -32,9 +32,9 @@
 	left: 0.05em;
 	right: 0.05em;
 	bottom: 0;
-	border-radius: var(--opticm-default-bracket-active-radius);
-	border: var(--opticm-default-bracket-active-border);
-	background-color: var(--opticm-default-bracket-active-background);
+	border-radius: var(--opticm-bracket-active-radius, var(--opticm-default-bracket-active-radius));
+	border: var(--opticm-bracket-active-border, var(--opticm-default-bracket-active-border));
+	background-color: var(--opticm-bracket-active-background, var(--opticm-default-bracket-active-background));
 }
 
 .cm-editor.cm-bracket-matching :is(

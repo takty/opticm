@@ -49,7 +49,7 @@
 }
 
 .cm-editor.cm-syntax-highlighting .cm-activeLine .cm-syntax-literal {
-	text-shadow: var(--opticm-default-syntax-active-literal-text-shadow);
+	text-shadow: var(--opticm-syntax-active-literal-text-shadow, var(--opticm-default-syntax-active-literal-text-shadow));
 }
 
 .cm-editor.cm-syntax-highlighting .cm-syntax-invalid {

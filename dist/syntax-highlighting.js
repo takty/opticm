@@ -311,6 +311,7 @@ var variables_default = `/**\r
 	--opticm-font-ui     : "Lucida Grande", "Hiragino Sans", "Yu Gothic UI", "Meiryo UI", sans-serif;\r
 	--opticm-font-console: 'Hiragino Sans', "Yu Gothic UI", "Meiryo UI", monospace;\r
 	--opticm-font-size   : 14px;\r
+	--opticm-editor-post-edit-cursor: none;\r
 \r
 }\r
 \r
@@ -347,6 +348,34 @@ var variables_default = `/**\r
 \r
 	--opticm-default-function-scroll-marker-radius: 50%;\r
 	--opticm-default-function-scroll-marker-color: hsl(40 100% 50% / 75%);\r
+\r
+	--opticm-default-structure-class-fill: var(--opticm-l-red, #e61e58);\r
+	--opticm-default-structure-class-opacity: 0.08;\r
+	--opticm-default-structure-function-fill: hsla(40, 100%, 50%, 0.15);\r
+	--opticm-default-structure-conditional-fill: hsla(150, 100%, 35%, 0.15);\r
+	--opticm-default-structure-loop-fill: hsla(190, 90%, 50%, 0.20);\r
+	--opticm-default-structure-loop2-fill: var(--opticm-l-purple, #9a74a3);\r
+	--opticm-default-structure-loop2-opacity: 0.20;\r
+	--opticm-default-structure-declaration-function-fill: hsla(0, 0%, 97%, 1);\r
+	--opticm-default-structure-declaration-function-stroke: hsla(0, 0%, 69%, 0.75);\r
+	--opticm-default-structure-declaration-immutable-fill: hsla(240, 75%, 97%, 1);\r
+	--opticm-default-structure-declaration-immutable-stroke: hsla(240, 75%, 65%, 0.75);\r
+	--opticm-default-structure-declaration-mutable-fill: hsla(205, 100%, 97%, 1);\r
+	--opticm-default-structure-declaration-mutable-stroke: hsla(205, 100%, 52%, 0.75);\r
+	--opticm-default-structure-reference-fill: rgba(253, 253, 253, 0.95);\r
+	--opticm-default-structure-reference-stroke: rgba(46, 68, 154, 0.30);\r
+	--opticm-default-structure-range-padding: 3;\r
+	--opticm-default-structure-spine-inset: 4;\r
+	--opticm-default-structure-fade-length: 16;\r
+	--opticm-default-structure-reference-shadow-blur: 6;\r
+	--opticm-default-structure-reference-shadow-offset-y: 1;\r
+	--opticm-default-structure-token-height-scale: 1.9;\r
+	--opticm-default-structure-token-radius-scale: 0.2;\r
+	--opticm-default-structure-declaration-inset: 2;\r
+	--opticm-default-structure-declaration-width-padding: 4;\r
+	--opticm-default-structure-declaration-border-width: 0.5;\r
+	--opticm-default-structure-declaration-side-rule-width-scale: 0.35;\r
+	--opticm-default-structure-declaration-side-rule-offset: 0.5;\r
 \r
 	--opticm-default-indent-ruler-width: 2px;\r
 	--opticm-default-indent-ruler-style: dashed;\r
@@ -439,7 +468,7 @@ function extensionStyles(css) {
 }
 
 // .build/extensions/syntax-highlighting/style.css
-var style_default = ".cm-editor.cm-syntax-highlighting .cm-syntax-comment {\r\n	color: var(--opticm-syntax-comment-color, var(--opticm-default-syntax-comment-color));\r\n	font-weight: var(--opticm-syntax-comment-font-weight, var(--opticm-default-syntax-comment-font-weight));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting :is(.cm-syntax-keyword, .cm-syntax-operator) {\r\n	color: var(--opticm-syntax-keyword-color, var(--opticm-default-syntax-keyword-color));\r\n	font-weight: var(--opticm-syntax-keyword-font-weight, var(--opticm-default-syntax-keyword-font-weight));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-type {\r\n	color: var(--opticm-syntax-type-color, var(--opticm-default-syntax-type-color));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-function {\r\n	color: var(--opticm-syntax-function-color, var(--opticm-default-syntax-function-color));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting :is(.cm-syntax-function-definition, .cm-syntax-function-definition *, .cm-syntax-class-definition, .cm-syntax-class-definition *) {\r\n	color: var(--opticm-syntax-function-definition-color, var(--opticm-default-syntax-function-definition-color));\r\n	font-weight: var(--opticm-syntax-function-definition-font-weight, var(--opticm-default-syntax-function-definition-font-weight));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting :where(.cm-syntax-definition) {\r\n	color: var(--opticm-syntax-definition-color, var(--opticm-default-syntax-definition-inherit-color));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-definition {\r\n	font-weight: var(--opticm-syntax-definition-font-weight, var(--opticm-default-syntax-definition-font-weight));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting :is(.cm-syntax-field-definition, .cm-syntax-field-definition *, .cm-syntax-property-definition, .cm-syntax-property-definition *) {\r\n	color: var(--opticm-syntax-definition-color, var(--opticm-default-syntax-definition-color));\r\n	font-weight: var(--opticm-syntax-definition-font-weight, var(--opticm-default-syntax-definition-font-weight));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-property {\r\n	color: var(--opticm-syntax-property-color, var(--opticm-default-syntax-property-color));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-variable {\r\n	color: var(--opticm-syntax-variable-color, var(--opticm-default-syntax-variable-color));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-literal {\r\n	color: var(--opticm-syntax-literal-color, var(--opticm-default-syntax-literal-color));\r\n	font-weight: var(--opticm-syntax-literal-font-weight, var(--opticm-default-syntax-literal-font-weight));\r\n	text-shadow: var(--opticm-syntax-literal-text-shadow, var(--opticm-default-syntax-literal-text-shadow));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-activeLine .cm-syntax-literal {\r\n	text-shadow: var(--opticm-default-syntax-active-literal-text-shadow);\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-invalid {\r\n	text-decoration: var(--opticm-syntax-invalid-decoration, var(--opticm-default-syntax-invalid-decoration));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting :is(.cm-syntax-local-variable, .cm-syntax-local-reference, .cm-syntax-local-reference .cm-syntax-variable) {\r\n	color: var(--opticm-syntax-local-variable-color, var(--opticm-default-syntax-local-variable-color));\r\n}\r\n";
+var style_default = ".cm-editor.cm-syntax-highlighting .cm-syntax-comment {\r\n	color: var(--opticm-syntax-comment-color, var(--opticm-default-syntax-comment-color));\r\n	font-weight: var(--opticm-syntax-comment-font-weight, var(--opticm-default-syntax-comment-font-weight));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting :is(.cm-syntax-keyword, .cm-syntax-operator) {\r\n	color: var(--opticm-syntax-keyword-color, var(--opticm-default-syntax-keyword-color));\r\n	font-weight: var(--opticm-syntax-keyword-font-weight, var(--opticm-default-syntax-keyword-font-weight));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-type {\r\n	color: var(--opticm-syntax-type-color, var(--opticm-default-syntax-type-color));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-function {\r\n	color: var(--opticm-syntax-function-color, var(--opticm-default-syntax-function-color));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting :is(.cm-syntax-function-definition, .cm-syntax-function-definition *, .cm-syntax-class-definition, .cm-syntax-class-definition *) {\r\n	color: var(--opticm-syntax-function-definition-color, var(--opticm-default-syntax-function-definition-color));\r\n	font-weight: var(--opticm-syntax-function-definition-font-weight, var(--opticm-default-syntax-function-definition-font-weight));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting :where(.cm-syntax-definition) {\r\n	color: var(--opticm-syntax-definition-color, var(--opticm-default-syntax-definition-inherit-color));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-definition {\r\n	font-weight: var(--opticm-syntax-definition-font-weight, var(--opticm-default-syntax-definition-font-weight));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting :is(.cm-syntax-field-definition, .cm-syntax-field-definition *, .cm-syntax-property-definition, .cm-syntax-property-definition *) {\r\n	color: var(--opticm-syntax-definition-color, var(--opticm-default-syntax-definition-color));\r\n	font-weight: var(--opticm-syntax-definition-font-weight, var(--opticm-default-syntax-definition-font-weight));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-property {\r\n	color: var(--opticm-syntax-property-color, var(--opticm-default-syntax-property-color));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-variable {\r\n	color: var(--opticm-syntax-variable-color, var(--opticm-default-syntax-variable-color));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-literal {\r\n	color: var(--opticm-syntax-literal-color, var(--opticm-default-syntax-literal-color));\r\n	font-weight: var(--opticm-syntax-literal-font-weight, var(--opticm-default-syntax-literal-font-weight));\r\n	text-shadow: var(--opticm-syntax-literal-text-shadow, var(--opticm-default-syntax-literal-text-shadow));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-activeLine .cm-syntax-literal {\r\n	text-shadow: var(--opticm-syntax-active-literal-text-shadow, var(--opticm-default-syntax-active-literal-text-shadow));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting .cm-syntax-invalid {\r\n	text-decoration: var(--opticm-syntax-invalid-decoration, var(--opticm-default-syntax-invalid-decoration));\r\n}\r\n\r\n.cm-editor.cm-syntax-highlighting :is(.cm-syntax-local-variable, .cm-syntax-local-reference, .cm-syntax-local-reference .cm-syntax-variable) {\r\n	color: var(--opticm-syntax-local-variable-color, var(--opticm-default-syntax-local-variable-color));\r\n}\r\n";
 
 // .build/extensions/syntax-highlighting/index.js
 var syntaxKinds2 = /* @__PURE__ */ new Set([

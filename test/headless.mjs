@@ -292,7 +292,7 @@ try {
 				assert(document.querySelector('.cm-editor.cm-easy-line-selection'), 'Recreate must retain extension settings');
 				toggle('easyLineSelection').click();
 				assert(document.querySelector('.cm-editor.cm-gutter-line-selection'), 'Standard gutter selection remains enabled');
-				assert(getComputedStyle(document.querySelector('.cm-editor')).fontFamily === 'monospace', 'Example editor uses the default font');
+				assert(getComputedStyle(document.querySelector('.cm-editor')).fontFamily.startsWith('ui-monospace'), 'Example editor uses the default font');
 				return true;
 			})()`,
 			awaitPromise: true,

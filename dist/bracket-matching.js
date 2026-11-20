@@ -40,6 +40,7 @@ var variables_default = `/**\r
 	--opticm-font-ui     : "Lucida Grande", "Hiragino Sans", "Yu Gothic UI", "Meiryo UI", sans-serif;\r
 	--opticm-font-console: 'Hiragino Sans', "Yu Gothic UI", "Meiryo UI", monospace;\r
 	--opticm-font-size   : 14px;\r
+	--opticm-editor-post-edit-cursor: none;\r
 \r
 }\r
 \r
@@ -76,6 +77,34 @@ var variables_default = `/**\r
 \r
 	--opticm-default-function-scroll-marker-radius: 50%;\r
 	--opticm-default-function-scroll-marker-color: hsl(40 100% 50% / 75%);\r
+\r
+	--opticm-default-structure-class-fill: var(--opticm-l-red, #e61e58);\r
+	--opticm-default-structure-class-opacity: 0.08;\r
+	--opticm-default-structure-function-fill: hsla(40, 100%, 50%, 0.15);\r
+	--opticm-default-structure-conditional-fill: hsla(150, 100%, 35%, 0.15);\r
+	--opticm-default-structure-loop-fill: hsla(190, 90%, 50%, 0.20);\r
+	--opticm-default-structure-loop2-fill: var(--opticm-l-purple, #9a74a3);\r
+	--opticm-default-structure-loop2-opacity: 0.20;\r
+	--opticm-default-structure-declaration-function-fill: hsla(0, 0%, 97%, 1);\r
+	--opticm-default-structure-declaration-function-stroke: hsla(0, 0%, 69%, 0.75);\r
+	--opticm-default-structure-declaration-immutable-fill: hsla(240, 75%, 97%, 1);\r
+	--opticm-default-structure-declaration-immutable-stroke: hsla(240, 75%, 65%, 0.75);\r
+	--opticm-default-structure-declaration-mutable-fill: hsla(205, 100%, 97%, 1);\r
+	--opticm-default-structure-declaration-mutable-stroke: hsla(205, 100%, 52%, 0.75);\r
+	--opticm-default-structure-reference-fill: rgba(253, 253, 253, 0.95);\r
+	--opticm-default-structure-reference-stroke: rgba(46, 68, 154, 0.30);\r
+	--opticm-default-structure-range-padding: 3;\r
+	--opticm-default-structure-spine-inset: 4;\r
+	--opticm-default-structure-fade-length: 16;\r
+	--opticm-default-structure-reference-shadow-blur: 6;\r
+	--opticm-default-structure-reference-shadow-offset-y: 1;\r
+	--opticm-default-structure-token-height-scale: 1.9;\r
+	--opticm-default-structure-token-radius-scale: 0.2;\r
+	--opticm-default-structure-declaration-inset: 2;\r
+	--opticm-default-structure-declaration-width-padding: 4;\r
+	--opticm-default-structure-declaration-border-width: 0.5;\r
+	--opticm-default-structure-declaration-side-rule-width-scale: 0.35;\r
+	--opticm-default-structure-declaration-side-rule-offset: 0.5;\r
 \r
 	--opticm-default-indent-ruler-width: 2px;\r
 	--opticm-default-indent-ruler-style: dashed;\r
@@ -168,7 +197,7 @@ function extensionStyles(css) {
 }
 
 // .build/extensions/bracket-matching/style.css
-var style_default = ".cm-editor.cm-bracket-matching :is(.cm-matchingBracket, .cm-bracket-gutter-mark) {\r\n	background: var(--opticm-default-bracket-matching-background);\r\n	color: var(--opticm-default-bracket-matching-color);\r\n	font-weight: var(--opticm-default-bracket-matching-font-weight);\r\n	position: relative;\r\n	isolation: isolate;\r\n}\r\n\r\n.cm-editor.cm-bracket-matching .cm-bracket-gutter-overlay {\r\n	position: absolute;\r\n	z-index: 4;\r\n	overflow: hidden;\r\n	pointer-events: none;\r\n}\r\n\r\n.cm-editor.cm-bracket-matching .cm-bracket-gutter-mark { position: absolute; }\r\n\r\n.cm-editor.cm-bracket-matching :is(.cm-matchingBracket, .cm-bracket-gutter-mark)::before {\r\n	content: '';\r\n	position: absolute;\r\n	z-index: -1;\r\n	top: -0.45em;\r\n	left: -0.75em;\r\n	right: -0.75em;\r\n	bottom: -0.45em;\r\n	border-radius: var(--opticm-default-bracket-ring-radius);\r\n	border: var(--opticm-default-bracket-ring-width) solid var(--opticm-default-bracket-ring-color);\r\n}\r\n\r\n.cm-editor.cm-bracket-matching .cm-activeLine .cm-matchingBracket::before {\r\n	top: 0;\r\n	left: 0.05em;\r\n	right: 0.05em;\r\n	bottom: 0;\r\n	border-radius: var(--opticm-default-bracket-active-radius);\r\n	border: var(--opticm-default-bracket-active-border);\r\n	background-color: var(--opticm-default-bracket-active-background);\r\n}\r\n\r\n.cm-editor.cm-bracket-matching :is(\r\n	.cm-syntax-comment .cm-matchingBracket,\r\n	.cm-matchingBracket.cm-syntax-comment,\r\n	.cm-matchingBracket:has(.cm-syntax-comment)\r\n)::before {\r\n	content: none;\r\n}\r\n";
+var style_default = ".cm-editor.cm-bracket-matching :is(.cm-matchingBracket, .cm-bracket-gutter-mark) {\r\n	background: var(--opticm-bracket-matching-background, var(--opticm-default-bracket-matching-background));\r\n	color: var(--opticm-bracket-matching-color, var(--opticm-default-bracket-matching-color));\r\n	font-weight: var(--opticm-bracket-matching-font-weight, var(--opticm-default-bracket-matching-font-weight));\r\n	position: relative;\r\n	isolation: isolate;\r\n}\r\n\r\n.cm-editor.cm-bracket-matching .cm-bracket-gutter-overlay {\r\n	position: absolute;\r\n	z-index: 4;\r\n	overflow: hidden;\r\n	pointer-events: none;\r\n}\r\n\r\n.cm-editor.cm-bracket-matching .cm-bracket-gutter-mark { position: absolute; }\r\n\r\n.cm-editor.cm-bracket-matching :is(.cm-matchingBracket, .cm-bracket-gutter-mark)::before {\r\n	content: '';\r\n	position: absolute;\r\n	z-index: -1;\r\n	top: -0.45em;\r\n	left: -0.75em;\r\n	right: -0.75em;\r\n	bottom: -0.45em;\r\n	border-radius: var(--opticm-bracket-ring-radius, var(--opticm-default-bracket-ring-radius));\r\n	border: var(--opticm-bracket-ring-width, var(--opticm-default-bracket-ring-width)) solid var(--opticm-bracket-ring-color, var(--opticm-default-bracket-ring-color));\r\n}\r\n\r\n.cm-editor.cm-bracket-matching .cm-activeLine .cm-matchingBracket::before {\r\n	top: 0;\r\n	left: 0.05em;\r\n	right: 0.05em;\r\n	bottom: 0;\r\n	border-radius: var(--opticm-bracket-active-radius, var(--opticm-default-bracket-active-radius));\r\n	border: var(--opticm-bracket-active-border, var(--opticm-default-bracket-active-border));\r\n	background-color: var(--opticm-bracket-active-background, var(--opticm-default-bracket-active-background));\r\n}\r\n\r\n.cm-editor.cm-bracket-matching :is(\r\n	.cm-syntax-comment .cm-matchingBracket,\r\n	.cm-matchingBracket.cm-syntax-comment,\r\n	.cm-matchingBracket:has(.cm-syntax-comment)\r\n)::before {\r\n	content: none;\r\n}\r\n";
 
 // .build/extensions/bracket-matching/index.js
 var bracketGutterOverlay = ViewPlugin2.fromClass(class {

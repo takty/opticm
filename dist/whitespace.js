@@ -39,6 +39,7 @@ var variables_default = `/**\r
 	--opticm-font-ui     : "Lucida Grande", "Hiragino Sans", "Yu Gothic UI", "Meiryo UI", sans-serif;\r
 	--opticm-font-console: 'Hiragino Sans', "Yu Gothic UI", "Meiryo UI", monospace;\r
 	--opticm-font-size   : 14px;\r
+	--opticm-editor-post-edit-cursor: none;\r
 \r
 }\r
 \r
@@ -75,6 +76,34 @@ var variables_default = `/**\r
 \r
 	--opticm-default-function-scroll-marker-radius: 50%;\r
 	--opticm-default-function-scroll-marker-color: hsl(40 100% 50% / 75%);\r
+\r
+	--opticm-default-structure-class-fill: var(--opticm-l-red, #e61e58);\r
+	--opticm-default-structure-class-opacity: 0.08;\r
+	--opticm-default-structure-function-fill: hsla(40, 100%, 50%, 0.15);\r
+	--opticm-default-structure-conditional-fill: hsla(150, 100%, 35%, 0.15);\r
+	--opticm-default-structure-loop-fill: hsla(190, 90%, 50%, 0.20);\r
+	--opticm-default-structure-loop2-fill: var(--opticm-l-purple, #9a74a3);\r
+	--opticm-default-structure-loop2-opacity: 0.20;\r
+	--opticm-default-structure-declaration-function-fill: hsla(0, 0%, 97%, 1);\r
+	--opticm-default-structure-declaration-function-stroke: hsla(0, 0%, 69%, 0.75);\r
+	--opticm-default-structure-declaration-immutable-fill: hsla(240, 75%, 97%, 1);\r
+	--opticm-default-structure-declaration-immutable-stroke: hsla(240, 75%, 65%, 0.75);\r
+	--opticm-default-structure-declaration-mutable-fill: hsla(205, 100%, 97%, 1);\r
+	--opticm-default-structure-declaration-mutable-stroke: hsla(205, 100%, 52%, 0.75);\r
+	--opticm-default-structure-reference-fill: rgba(253, 253, 253, 0.95);\r
+	--opticm-default-structure-reference-stroke: rgba(46, 68, 154, 0.30);\r
+	--opticm-default-structure-range-padding: 3;\r
+	--opticm-default-structure-spine-inset: 4;\r
+	--opticm-default-structure-fade-length: 16;\r
+	--opticm-default-structure-reference-shadow-blur: 6;\r
+	--opticm-default-structure-reference-shadow-offset-y: 1;\r
+	--opticm-default-structure-token-height-scale: 1.9;\r
+	--opticm-default-structure-token-radius-scale: 0.2;\r
+	--opticm-default-structure-declaration-inset: 2;\r
+	--opticm-default-structure-declaration-width-padding: 4;\r
+	--opticm-default-structure-declaration-border-width: 0.5;\r
+	--opticm-default-structure-declaration-side-rule-width-scale: 0.35;\r
+	--opticm-default-structure-declaration-side-rule-offset: 0.5;\r
 \r
 	--opticm-default-indent-ruler-width: 2px;\r
 	--opticm-default-indent-ruler-style: dashed;\r
@@ -167,7 +196,7 @@ function extensionStyles(css) {
 }
 
 // .build/extensions/whitespace/style.css
-var style_default = ".cm-editor.cm-opticm-whitespace .cm-highlightSpace { background-image: var(--opticm-default-whitespace-background-image); }\r\n.cm-editor.cm-opticm-whitespace .cm-activeLine .cm-opticm-space {\r\n	background-image: linear-gradient(var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color)), var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color)));\r\n	background-size: var(--opticm-default-whitespace-space-background-size);\r\n	background-position: var(--opticm-default-whitespace-background-position);\r\n	background-repeat: var(--opticm-default-whitespace-background-repeat);\r\n}\r\n.cm-editor.cm-opticm-whitespace .cm-activeLine .cm-opticm-full-width-space {\r\n	background-image: linear-gradient(\r\n		color-mix(in srgb, var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color)) 80%, white),\r\n		color-mix(in srgb, var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color)) 80%, white)\r\n	);\r\n	background-size: var(--opticm-default-whitespace-full-width-background-size);\r\n}\r\n.cm-editor.cm-opticm-whitespace .cm-highlightTab {\r\n	position: relative;\r\n	background-image: var(--opticm-default-whitespace-background-image);\r\n}\r\n.cm-editor.cm-opticm-whitespace .cm-highlightTab::before,\r\n.cm-editor.cm-opticm-whitespace .cm-highlightTab::after {\r\n	position: absolute;\r\n	transform: scaleX(0.8);\r\n	transform-origin: left;\r\n	color: var(--opticm-whitespace-tab-color, var(--opticm-default-whitespace-tab-color));\r\n	font-weight: var(--opticm-default-whitespace-tab-font-weight);\r\n	text-shadow: var(--opticm-default-whitespace-tab-text-shadow);\r\n	pointer-events: none;\r\n	overflow: hidden;\r\n	white-space: nowrap;\r\n}\r\n.cm-editor.cm-opticm-whitespace .cm-highlightTab::before {\r\n	content: '-';\r\n	left: 5%;\r\n	right: 0;\r\n}\r\n.cm-editor.cm-opticm-whitespace .cm-highlightTab::after {\r\n	content: '>';\r\n	left: min(0.8ch, max(0px, calc(100% - 0.8ch)));\r\n	right: 0;\r\n}\r\n.cm-editor.cm-opticm-whitespace .cm-activeLine .cm-highlightTab::before,\r\n.cm-editor.cm-opticm-whitespace .cm-activeLine .cm-highlightTab::after {\r\n	color: var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color));\r\n}\r\n";
+var style_default = ".cm-editor.cm-opticm-whitespace .cm-highlightSpace { background-image: var(--opticm-whitespace-background-image, var(--opticm-default-whitespace-background-image)); }\r\n.cm-editor.cm-opticm-whitespace .cm-activeLine .cm-opticm-space {\r\n	background-image: linear-gradient(var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color)), var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color)));\r\n	background-size: var(--opticm-whitespace-space-background-size, var(--opticm-default-whitespace-space-background-size));\r\n	background-position: var(--opticm-whitespace-background-position, var(--opticm-default-whitespace-background-position));\r\n	background-repeat: var(--opticm-whitespace-background-repeat, var(--opticm-default-whitespace-background-repeat));\r\n}\r\n.cm-editor.cm-opticm-whitespace .cm-activeLine .cm-opticm-full-width-space {\r\n	background-image: linear-gradient(\r\n		color-mix(in srgb, var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color)) 80%, white),\r\n		color-mix(in srgb, var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color)) 80%, white)\r\n	);\r\n	background-size: var(--opticm-whitespace-full-width-background-size, var(--opticm-default-whitespace-full-width-background-size));\r\n}\r\n.cm-editor.cm-opticm-whitespace .cm-highlightTab {\r\n	position: relative;\r\n	background-image: var(--opticm-whitespace-background-image, var(--opticm-default-whitespace-background-image));\r\n}\r\n.cm-editor.cm-opticm-whitespace .cm-highlightTab::before,\r\n.cm-editor.cm-opticm-whitespace .cm-highlightTab::after {\r\n	position: absolute;\r\n	transform: scaleX(0.8);\r\n	transform-origin: left;\r\n	color: var(--opticm-whitespace-tab-color, var(--opticm-default-whitespace-tab-color));\r\n	font-weight: var(--opticm-whitespace-tab-font-weight, var(--opticm-default-whitespace-tab-font-weight));\r\n	text-shadow: var(--opticm-whitespace-tab-text-shadow, var(--opticm-default-whitespace-tab-text-shadow));\r\n	pointer-events: none;\r\n	overflow: hidden;\r\n	white-space: nowrap;\r\n}\r\n.cm-editor.cm-opticm-whitespace .cm-highlightTab::before {\r\n	content: '-';\r\n	left: 5%;\r\n	right: 0;\r\n}\r\n.cm-editor.cm-opticm-whitespace .cm-highlightTab::after {\r\n	content: '>';\r\n	left: min(0.8ch, max(0px, calc(100% - 0.8ch)));\r\n	right: 0;\r\n}\r\n.cm-editor.cm-opticm-whitespace .cm-activeLine .cm-highlightTab::before,\r\n.cm-editor.cm-opticm-whitespace .cm-activeLine .cm-highlightTab::after {\r\n	color: var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color));\r\n}\r\n";
 
 // .build/extensions/whitespace/index.js
 var spaceMarks = [

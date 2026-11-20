@@ -145,11 +145,39 @@ const structurePlugin = ViewPlugin.fromClass(class {
 		const frame    = scroller.getBoundingClientRect();
 		const content  = view.contentDOM.getBoundingClientRect();
 		const window   = view.dom.ownerDocument.defaultView;
-		const colors   = window.getComputedStyle(view.dom);
+		const styles   = window.getComputedStyle(view.dom);
 
 		const resolveColor = value => {
 			const match = /^var\(\s*(--[\w-]+)\s*,\s*(.+)\)$/.exec(value);
-			return match ? colors.getPropertyValue(match[1]).trim() || match[2] : value;
+			return match ? styles.getPropertyValue(match[1]).trim() || match[2] : value;
+		};
+		const readValue = name => styles.getPropertyValue(name).trim() ||
+			styles.getPropertyValue(name.replace('--opticm-', '--opticm-default-')).trim();
+		const readNumber = name => {
+			const value = readValue(name);
+			const number = Number(value);
+			if (!value || !Number.isFinite(number)) {
+				throw new TypeError(`CSS custom property ${name} must be a finite number`);
+			}
+			return number;
+		};
+		const appearance = {
+			color : name => resolveColor(readValue(name)),
+			number: readNumber,
+		};
+		const drawStyle = {
+			rangePadding                 : appearance.number('--opticm-structure-range-padding'),
+			spineInset                   : appearance.number('--opticm-structure-spine-inset'),
+			fadeLength                   : appearance.number('--opticm-structure-fade-length'),
+			referenceShadowBlur          : appearance.number('--opticm-structure-reference-shadow-blur'),
+			referenceShadowOffsetY       : appearance.number('--opticm-structure-reference-shadow-offset-y'),
+			tokenHeightScale             : appearance.number('--opticm-structure-token-height-scale'),
+			tokenRadiusScale             : appearance.number('--opticm-structure-token-radius-scale'),
+			declarationInset             : appearance.number('--opticm-structure-declaration-inset'),
+			declarationWidthPadding      : appearance.number('--opticm-structure-declaration-width-padding'),
+			declarationBorderWidth       : appearance.number('--opticm-structure-declaration-border-width'),
+			declarationSideRuleWidthScale: appearance.number('--opticm-structure-declaration-side-rule-width-scale'),
+			declarationSideRuleOffset    : appearance.number('--opticm-structure-declaration-side-rule-offset'),
 		};
 		const linePadding = parseFloat(window.getComputedStyle(view.contentDOM)
 			.getPropertyValue('--opticm-line-padding')) || 0;
@@ -179,7 +207,7 @@ const structurePlugin = ViewPlugin.fromClass(class {
 		};
 		const analysis    = view.state.field(commonAnalysisState, false);
 		const options     = view.state.facet(displayOptions);
-		const source      = analysis ? commonDecorations(analysis, doc, options) : view.state.field(structureField);
+		const source      = analysis ? commonDecorations(analysis, doc, options, appearance) : view.state.field(structureField);
 		const decorations = source.map(item => {
 			const start = coords(item.from);
 			const end   = coords(item.to, -1);
@@ -202,8 +230,9 @@ const structurePlugin = ViewPlugin.fromClass(class {
 			top       : frame.top - root.top,
 			width,
 			height,
-			charWidth : view.defaultCharacterWidth,
-			lineHeight: view.defaultLineHeight,
+			charWidth  : view.defaultCharacterWidth,
+			lineHeight : view.defaultLineHeight,
+			drawStyle,
 			decorations,
 		};
 	}
@@ -219,13 +248,14 @@ const structurePlugin = ViewPlugin.fromClass(class {
 			}
 		);
 		const scale = this.canvas.ownerDocument.defaultView.devicePixelRatio;
-		const { width, height, charWidth, lineHeight, decorations } = data;
+		const { width, height, charWidth, lineHeight, drawStyle, decorations } = data;
 		const drawing = JSON.stringify([
 			scale,
 			width,
 			height,
 			charWidth,
 			lineHeight,
+			drawStyle,
 			decorations.map(item => (
 				item.kind === 'range'
 					? [
@@ -266,13 +296,13 @@ export const structureView = [
 	extensionStyles(css),
 ];
 
-function commonDecorations(analysis, doc, options) {
+function commonDecorations(analysis, doc, options, appearance) {
 	const colors = {
-		class      : ['var(--opticm-l-red, #e61e58)', 0.08],
-		function   : ['hsla(40, 100%, 50%, 0.15)'],
-		conditional: ['hsla(150, 100%, 35%, 0.15)'],
-		loop       : ['hsla(190, 90%, 50%, 0.20)'],
-		loop2      : ['var(--opticm-l-purple, #9a74a3)', 0.20],
+		class      : [appearance.color('--opticm-structure-class-fill'), appearance.number('--opticm-structure-class-opacity')],
+		function   : [appearance.color('--opticm-structure-function-fill')],
+		conditional: [appearance.color('--opticm-structure-conditional-fill')],
+		loop       : [appearance.color('--opticm-structure-loop-fill')],
+		loop2      : [appearance.color('--opticm-structure-loop2-fill'), appearance.number('--opticm-structure-loop2-opacity')],
 	};
 	const position = offset => {
 		const line = doc.lineAt(offset);
@@ -297,10 +327,19 @@ function commonDecorations(analysis, doc, options) {
 	if (options.declarations) {
 		for (const it of analysis.declarations) {
 			const colors = it.scope === 'function'
-				? ['hsla(0, 0%, 97%, 1)', 'hsla(0, 0%, 69%, 0.75)']
+				? [
+					appearance.color('--opticm-structure-declaration-function-fill'),
+					appearance.color('--opticm-structure-declaration-function-stroke'),
+				]
 				: it.mutability === 'immutable'
-					? ['hsla(240, 75%, 97%, 1)', 'hsla(240, 75%, 65%, 0.75)']
-					: ['hsla(205, 100%, 97%, 1)', 'hsla(205, 100%, 52%, 0.75)'];
+					? [
+						appearance.color('--opticm-structure-declaration-immutable-fill'),
+						appearance.color('--opticm-structure-declaration-immutable-stroke'),
+					]
+					: [
+						appearance.color('--opticm-structure-declaration-mutable-fill'),
+						appearance.color('--opticm-structure-declaration-mutable-stroke'),
+					];
 			decorations.push({
 				kind      : 'token',
 				appearance: 'declaration',
@@ -319,8 +358,8 @@ function commonDecorations(analysis, doc, options) {
 				appearance: 'reference',
 				from      : position(it.from),
 				to        : position(it.to),
-				fill      : 'rgba(253, 253, 253, 0.95)',
-				stroke    : 'rgba(46, 68, 154, 0.30)',
+				fill      : appearance.color('--opticm-structure-reference-fill'),
+				stroke    : appearance.color('--opticm-structure-reference-stroke'),
 			});
 		}
 	}
@@ -331,7 +370,7 @@ export function refreshStructure(view) {
 	view.plugin(structurePlugin)?.refresh();
 }
 
-function drawStructure(canvas, { width, height, charWidth, lineHeight, decorations }, scale) {
+function drawStructure(canvas, { width, height, charWidth, lineHeight, drawStyle, decorations }, scale) {
 	const pixelsWide = Math.round(width * scale), pixelsHigh = Math.round(height * scale);
 	if (canvas.width !== pixelsWide) canvas.width = pixelsWide;
 	if (canvas.height !== pixelsHigh) canvas.height = pixelsHigh;
@@ -340,7 +379,7 @@ function drawStructure(canvas, { width, height, charWidth, lineHeight, decoratio
 	ctx.clearRect(0, 0, width, height);
 	if (!width || !height) return;
 
-	const padding = Math.min(3, lineHeight / 4);
+	const padding = Math.min(drawStyle.rangePadding, lineHeight / 4);
 	const band = lineHeight - padding * 2;
 	let colorContext;
 	const transparentColor = color => {
@@ -361,13 +400,13 @@ function drawStructure(canvas, { width, height, charWidth, lineHeight, decoratio
 		ctx.fillStyle   = it.fill;
 
 		if (it.kind === 'range') {
-			const left   = start.x + 4;
-			const spine  = Math.max(1, it.spine - 4);
+			const left   = start.x + drawStyle.spineInset;
+			const spine  = Math.max(1, it.spine - drawStyle.spineInset);
 			const top    = start.y + padding;
 			const bottom = end.y + padding;
 			fill(ctx, left, top, spine, bottom - top + band, [band / 2, 0, 0, band / 2]);
 
-			const capWidth       = Math.max(0, charWidth * 16 - spine);
+			const capWidth       = Math.max(0, charWidth * drawStyle.fadeLength - spine);
 			const fadeColor      = transparentColor(it.fill);
 			const fillHorizontal = (x, y, width, radii) => {
 				if (width <= 0) return;
@@ -386,32 +425,34 @@ function drawStructure(canvas, { width, height, charWidth, lineHeight, decoratio
 				fillHorizontal(
 					left + spine,
 					row + padding,
-					Math.max(1, it.branchWidth - 4),
+					Math.max(1, it.branchWidth - drawStyle.spineInset),
 					[0, band / 2, band / 2, 0],
 				);
 			}
 		} else if (it.appearance === 'reference') {
-			const x = start.x, h = charWidth * 1.9;
+			const x = start.x, h = charWidth * drawStyle.tokenHeightScale;
 			const y = start.y + (lineHeight - h) / 2;
 			ctx.save();
 			ctx.shadowColor   = it.stroke;
-			ctx.shadowBlur    = 6;
-			ctx.shadowOffsetY = 1;
-			fill(ctx, x, y, end.x - x, h, [0, lineHeight / 5, lineHeight / 5, 0]);
+			ctx.shadowBlur    = drawStyle.referenceShadowBlur;
+			ctx.shadowOffsetY = drawStyle.referenceShadowOffsetY;
+			fill(ctx, x, y, end.x - x, h, [0, lineHeight * drawStyle.tokenRadiusScale, lineHeight * drawStyle.tokenRadiusScale, 0]);
 			ctx.restore();
 		} else if (it.appearance === 'declaration') {
-			const x           = start.x - 2;
-			const tokenHeight = charWidth * 1.9;
+			const x           = start.x - drawStyle.declarationInset;
+			const tokenHeight = charWidth * drawStyle.tokenHeightScale;
 			const y           = start.y + (lineHeight - tokenHeight) / 2;
 			const h           = end.y - start.y + tokenHeight;
-			if (fill(ctx, x, y, end.x - x + 4, h, [0, lineHeight / 5, lineHeight / 5, 0])) {
+			const radius = lineHeight * drawStyle.tokenRadiusScale;
+
+			if (fill(ctx, x, y, end.x - x + drawStyle.declarationWidthPadding, h, [0, radius, radius, 0])) {
 				ctx.strokeStyle = it.stroke;
-				ctx.lineWidth   = 0.5;
+				ctx.lineWidth   = drawStyle.declarationBorderWidth;
 				ctx.stroke();
-				ctx.lineWidth = charWidth * 0.35;
+				ctx.lineWidth = charWidth * drawStyle.declarationSideRuleWidthScale;
 				ctx.beginPath();
-				ctx.moveTo(x - ctx.lineWidth / 2, y - 0.5);
-				ctx.lineTo(x - ctx.lineWidth / 2, y + h + 0.5);
+				ctx.moveTo(x - ctx.lineWidth / 2, y - drawStyle.declarationSideRuleOffset);
+				ctx.lineTo(x - ctx.lineWidth / 2, y + h + drawStyle.declarationSideRuleOffset);
 				ctx.stroke();
 			}
 		}
