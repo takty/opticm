@@ -134,10 +134,23 @@ viewer.setHighlightedLines([0]);
 Use an empty, sized container. `codeLanguage` is fixed at creation and accepts
 `javascript` (default), `java`, or `null` for plain text. Java accepts the same
 `javaAnalysis` options as the standalone editor. The five highlighting
-settings, `rulers`, and `lineWrapping` can be changed with `setSettings()`.
+settings, `rulers`, `lineWrapping`, and `colorScheme` can be changed with `setSettings()`.
 Line numbers default to `absolute`; use `function` for per-function numbers
 or `off` to hide them. Function numbering falls back to ordinary numbering in
 plain text.
+
+### Color scheme
+
+Both `createEditor()` and `createViewer()` accept `colorScheme`. The default
+is `'light'`. Choose `'dark'` for a fixed dark appearance or `'auto'` to
+follow changes to the browser's `prefers-color-scheme` preference.
+When the preference is unavailable, `'auto'` uses light.
+
+Call `setSettings({ colorScheme: 'dark' })` to update an existing instance
+while keeping its document, selection, and scroll position. The editor's
+`getSettings()` returns the configured value, including `'auto'`.
+Each instance has its own setting. The host application can provide a
+theme selector and persist the user's choice.
 
 `setHighlightedLines(lines)` replaces the highlighted lines. Pass zero-based
 document line indices, or an empty array to clear them. Duplicate indices are
@@ -215,6 +228,7 @@ Use `setDefinitions` to change additional definitions after initialization.
 | `fontSize` | `16` | 10-64 px |
 | `lineHeight` | `165` | Positive percentage |
 | `lineWrapping` | `false` | Line wrapping |
+| `colorScheme` | `'light'` | Light (`'light'`), dark (`'dark'`), or browser preference (`'auto'`) |
 | `structureHighlight` | `true` | Canvas highlighting for functions, classes, branches, and loops |
 | `declarationHighlight` | `true` | Canvas highlighting for variable declarations |
 | `referenceHighlight` | `true` | Canvas highlighting for variable references |

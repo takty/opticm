@@ -94,7 +94,7 @@ export function positionAt(doc, offset) {
 }
 
 export class Editor {
-	constructor({ language, phrases, onFontSizeChange, onUpdate, allowChanges = () => true }, parent) {
+	constructor({ language, colorScheme = [], phrases, onFontSizeChange, onUpdate, allowChanges = () => true }, parent) {
 		this.language            = language;
 		this.enabled             = true;
 		this.readOnly            = false;
@@ -138,6 +138,7 @@ export class Editor {
 		this.view = new EditorView({
 			parent,
 			extensions: [
+				colorScheme,
 				this.options.font.of([]),
 				this.options.phrases.of(EditorState.phrases.of(phrases)),
 				this.options.wrapping.of([]),

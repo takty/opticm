@@ -455,9 +455,20 @@ try {
 						throw new Error(message);
 					}
 				};
+				const setAppearance = mode => document.querySelector('#appearance input[value="' + mode + '"]').click();
+				const appearance = () => getComputedStyle(document.querySelector('.cm-editor')).colorScheme;
+				assert(appearance() === 'light', 'The demo starts in light mode');
+				setAppearance('dark');
+				assert(appearance() === 'dark', 'The Dark control updates the demo editor');
 				document.querySelector('#code-language input[value="java"]').click();
 				for (let i = 0; i < 100 && !document.querySelector('#status').textContent.includes('Switched to java'); i++)
 					await new Promise(resolve => setTimeout(resolve, 20));
+				assert(appearance() === 'dark', 'Switching to Java keeps the selected appearance');
+				setAppearance('auto');
+				assert(appearance() === (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
+					'The Auto control follows the browser preference');
+				setAppearance('light');
+				assert(appearance() === 'light', 'The Light control restores the light appearance');
 				const structureIsPainted = () => {
 					const canvas = document.querySelector('.code-structure-view');
 					if (!canvas?.width || !canvas?.height) return false;
@@ -493,7 +504,7 @@ try {
 		if (languageSwitch.exceptionDetails || languageSwitch.result?.value !== true) {
 			throw new Error('Built docs language switch failed: ' + JSON.stringify(languageSwitch));
 		}
-		console.log('Built docs passed: switch source language between JavaScript and Java.');
+		console.log('Built docs passed: switch source language and editor appearance.');
 		if (process.argv.includes('--screenshot')) {
 			const capture = await send('Page.captureScreenshot', { format: 'png' }, sessionId);
 			await writeFile(resolve(here, `${name}-example.png`), Buffer.from(capture.data, 'base64'));

@@ -1,6 +1,7 @@
 import { EditorSelection } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { createCommonAnalysis, setCommonAnalysis } from './analysis/common-analysis.js';
+import { createColorScheme, validateColorScheme } from './color-scheme.js';
 import { Editor, offsetAt, positionAt } from './editor-view.js';
 import { validateLineNumberStart } from './extensions/function-line-numbers/index.js';
 import { javascriptLanguage } from './lang/js/index.js';
@@ -19,6 +20,7 @@ const LANGUAGES        = { en: english, ja: japanese };
 const DEFAULT_SETTINGS = {
 	language            : 'en',
 	codeLanguage        : 'javascript',
+	colorScheme         : 'light',
 	fontFamily          : 'ui-monospace, monospace',
 	fontSize            : 16,
 	lineHeight          : 165,
@@ -82,6 +84,7 @@ function validate(options) {
 		throw new RangeError('fontSize must be between 10 and 64');
 	}
 	if (Object.hasOwn(options, 'lineNumberStart')) validateLineNumberStart(options.lineNumberStart);
+	if (Object.hasOwn(options, 'colorScheme')) validateColorScheme(options.colorScheme);
 }
 
 function normalizeSettings({ gutterLineSelection, ...options }) {
@@ -113,6 +116,7 @@ export async function createEditor(container, { value = '', definitions = [], ja
 	const language = options.codeLanguage === null ? plainLanguage : options.codeLanguage === 'java' ? javaLanguage : javascriptLanguage;
 	let view, client, observer, timer, destroyed = false;
 	let settings = { ...DEFAULT_SETTINGS, ...normalizeSettings(options) };
+	const colorScheme = createColorScheme(root);
 	const diagnosticSource = text => language.diagnostics(text, settings.language, undefined, client);
 	let version      = 0;
 	let analysis     = null;
@@ -145,6 +149,7 @@ export async function createEditor(container, { value = '', definitions = [], ja
 		clearTimeout(timer);
 		abort.abort();
 		observer?.disconnect();
+		colorScheme.destroy();
 		client?.destroy();
 		view?.destroy();
 		listeners.clear();
@@ -167,6 +172,7 @@ export async function createEditor(container, { value = '', definitions = [], ja
 		}
 		view = new Editor({
 			language,
+			colorScheme: colorScheme.extension,
 			phrases: LANGUAGES[settings.language].editorPhrase,
 			allowChanges: () => loading || programmatic || (!settings.readOnly && !settings.disabled),
 			onUpdate: handleUpdate,
@@ -175,6 +181,7 @@ export async function createEditor(container, { value = '', definitions = [], ja
 			},
 		}, root);
 		const cm = view.view;
+		colorScheme.set(cm, settings.colorScheme);
 		view.setDefinitions(initialDefinitions);
 
 		const state = () => ({
@@ -361,6 +368,7 @@ export async function createEditor(container, { value = '', definitions = [], ja
 				const wasAnalyzing = settings.analysis;
 				const delayChanged = Object.hasOwn(patch, 'analysisDelay') && patch.analysisDelay !== settings.analysisDelay;
 				settings = { ...settings, ...normalizeSettings(patch) };
+				colorScheme.set(cm, settings.colorScheme);
 				if (!settings.analysis) {
 					clearTimeout(timer);
 					analysis = null;

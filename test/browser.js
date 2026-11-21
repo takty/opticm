@@ -16,6 +16,57 @@ const waitFor = async (predicate, message) => {
 	throw new Error(message);
 };
 
+async function checkColorSchemes() {
+	const nativeMatchMedia = window.matchMedia;
+	const preference = new EventTarget();
+	preference.matches = true;
+	window.matchMedia = query => query === '(prefers-color-scheme: dark)' ? preference : nativeMatchMedia.call(window, query);
+	const editorHost = document.createElement('div');
+	const viewerHost = document.createElement('div');
+	editorHost.className = viewerHost.className = 'host';
+	document.body.append(editorHost, viewerHost);
+	const appearance = host => getComputedStyle(host.querySelector('.cm-editor')).colorScheme;
+	const pixels = () => editorHost.querySelector('.code-structure-view')?.toDataURL();
+	let editor, viewer;
+	try {
+		const value = 'function run() { return 1; }';
+		editor = await createEditor(editorHost, { value, colorScheme: 'auto' });
+		viewer = await createStandaloneViewer(viewerHost, { value });
+		assert(appearance(editorHost) === 'dark' && appearance(viewerHost) === 'light',
+			'auto follows the initial browser preference while the default viewer stays light');
+		await waitFor(() => editorHost.querySelector('.code-structure-view')?.getContext('2d')
+			.getImageData(0, 0, 120, 40).data.some(value => value !== 0), 'dark structure canvas was not painted');
+		const darkPixels = pixels();
+		preference.matches = false;
+		preference.dispatchEvent(new Event('change'));
+		assert(appearance(editorHost) === 'light' && editor.getSettings().colorScheme === 'auto',
+			'live browser changes update the appearance and keep the auto setting');
+		await waitFor(() => pixels() !== darkPixels, 'structure canvas did not repaint after a preference change');
+
+		editor.setSettings({ colorScheme: 'dark' });
+		viewer.setSettings({ colorScheme: 'auto' });
+		assert(appearance(editorHost) === 'dark' && appearance(viewerHost) === 'light',
+			'editor and viewer can change modes independently');
+		preference.matches = true;
+		preference.dispatchEvent(new Event('change'));
+		editor.setSettings({ colorScheme: 'light' });
+		assert(appearance(editorHost) === 'light' && appearance(viewerHost) === 'dark' && viewer.getValue() === value,
+			'standalone viewer follows browser changes and retains its document');
+		const viewerRoot = viewerHost.firstElementChild;
+		viewer.destroy();
+		viewer = null;
+		preference.matches = false;
+		preference.dispatchEvent(new Event('change'));
+		assert(viewerRoot.dataset.opticmColorScheme === 'dark', 'destroy stops listening for browser preference changes');
+	} finally {
+		editor?.destroy();
+		viewer?.destroy();
+		editorHost.remove();
+		viewerHost.remove();
+		window.matchMedia = nativeMatchMedia;
+	}
+}
+
 async function checkResourceCleanup() {
 	const nativeWorker = globalThis.Worker;
 	const add = EventTarget.prototype.addEventListener;
@@ -119,6 +170,7 @@ const press = (host, key, modifiers = {}) => host.querySelector('.cm-content').d
 );
 let a, b;
 try {
+	await checkColorSchemes();
 	a = await createEditor(document.querySelector('#a'), { value: 'function one() { return 1; }', language: 'ja', autoFormat: false });
 	b = await createEditor(document.querySelector('#b'), { value: 'function two() { return 2; }', language: 'en', autoFormat: false });
 	assert(!window.CodeMirror && !window.acorn && !window.JSHINT && !window.tern, 'no library globals');

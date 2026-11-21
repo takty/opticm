@@ -15,6 +15,7 @@ button {
 
 #language,
 #code-language,
+#appearance,
 #extensions {
 	display: flex;
 	flex-wrap: wrap;

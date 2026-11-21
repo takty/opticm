@@ -12,8 +12,8 @@
 
 	.cm-activeLine .cm-opticm-full-width-space {
 		background-image: linear-gradient(
-			color-mix(in srgb, var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color)) 80%, white),
-			color-mix(in srgb, var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color)) 80%, white)
+			color-mix(in srgb, var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color)) 80%, var(--opticm-default-whitespace-mix-color)),
+			color-mix(in srgb, var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color)) 80%, var(--opticm-default-whitespace-mix-color))
 		);
 		background-size: var(--opticm-whitespace-full-width-background-size, var(--opticm-default-whitespace-full-width-background-size));
 	}

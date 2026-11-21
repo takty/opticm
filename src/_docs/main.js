@@ -5,6 +5,7 @@ const { createEditor } = await import(/* @vite-ignore */ new URL('opticm.min.js'
 const status = document.querySelector('#status');
 const selectedLanguage = () => document.querySelector('input[name="language"]:checked').value;
 const selectedCodeLanguage = () => document.querySelector('input[name="code-language"]:checked').value;
+const selectedColorScheme = () => document.querySelector('input[name="color-scheme"]:checked').value;
 const extensionControls = document.querySelector('#extensions');
 const extensionSettings = () => Object.fromEntries(
 	Array.from(extensionControls.querySelectorAll('input[type="checkbox"]'), input => [input.name, input.checked]),
@@ -90,15 +91,17 @@ try {
 		const instance = await createEditor(document.querySelector('#editor'), {
 			language: selectedLanguage(),
 			codeLanguage,
+			colorScheme: selectedColorScheme(),
 			value,
 			fontSize: 18,
 			...extensionSettings(),
 		});
-		instance.setSettings(extensionSettings());
+		instance.setSettings({ ...extensionSettings(), colorScheme: selectedColorScheme() });
 		return instance;
 	};
 	editor = await createDemoEditor(samples[activeCodeLanguage], activeCodeLanguage);
 	document.querySelector('#language').onchange = () => editor.setSettings({ language: selectedLanguage() });
+	document.querySelector('#appearance').onchange = () => editor?.setSettings({ colorScheme: selectedColorScheme() });
 	document.querySelector('#code-language').onchange = async () => {
 		const nextLanguage = selectedCodeLanguage();
 		if (nextLanguage === activeCodeLanguage) return;

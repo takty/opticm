@@ -3,6 +3,7 @@ import { Compartment, EditorState } from '@codemirror/state';
 import { EditorView, keymap } from '@codemirror/view';
 import { createAnalyzer } from './analyzer.js';
 import { setCommonAnalysis } from './analysis/common-analysis.js';
+import { createColorScheme, validateColorScheme } from './color-scheme.js';
 import { createDisplayExtensions, setHighlightedLines } from './display-extensions.js';
 import { refreshIndentRulers } from './extensions/indent-rulers/index.js';
 import { refreshStructure } from './extensions/structure-view/index.js';
@@ -14,6 +15,7 @@ const LANGUAGES = {
 	javascript: javascriptDisplayExtensions
 };
 const DEFAULT_SETTINGS = {
+	colorScheme         : 'light',
 	syntaxHighlight     : true,
 	semanticHighlight   : true,
 	structureHighlight  : true,
@@ -32,10 +34,11 @@ function displayExtensions(codeLanguage, settings) {
 			throw new TypeError(`Invalid viewer setting: ${key}`);
 		}
 	}
-	const { lineNumbers, lineWrapping } = settings;
+	const { colorScheme, lineNumbers, lineWrapping, ...displaySettings } = settings;
+	validateColorScheme(colorScheme);
 	return [
 		createDisplayExtensions({
-			...settings,
+			...displaySettings,
 			lineNumbers: codeLanguage === null && lineNumbers === 'function' ? 'absolute' : lineNumbers,
 		}),
 		lineWrapping ? EditorView.lineWrapping : [],
@@ -57,6 +60,7 @@ export async function createViewer(container, { value = '', codeLanguage = 'java
 	const extensions = displayExtensions(codeLanguage, settings);
 	const root       = document.createElement('div');
 	root.className = 'opticm';
+	const colorScheme = createColorScheme(root);
 	container.append(root);
 	let view;
 	let analyzer;
@@ -83,6 +87,7 @@ export async function createViewer(container, { value = '', codeLanguage = 'java
 	function destroy() {
 		if (destroyed) return;
 		destroyed = true;
+		colorScheme.destroy();
 		analyzer?.destroy();
 		view?.destroy();
 		root.remove();
@@ -94,6 +99,7 @@ export async function createViewer(container, { value = '', codeLanguage = 'java
 			doc: value,
 			parent: root,
 			extensions: [
+				colorScheme.extension,
 				EditorState.readOnly.of(true),
 				EditorView.editable.of(false),
 				EditorView.contentAttributes.of({ tabindex: '0', 'aria-readonly': 'true' }),
@@ -104,6 +110,7 @@ export async function createViewer(container, { value = '', codeLanguage = 'java
 				display.of(extensions),
 			],
 		});
+		colorScheme.set(view, settings.colorScheme);
 		if (codeLanguage !== null) {
 			analyzer = await createAnalyzer({ ...(codeLanguage === 'java' ? javaAnalysis : {}), codeLanguage });
 			await analyze();
@@ -127,6 +134,7 @@ export async function createViewer(container, { value = '', codeLanguage = 'java
 				assertAlive();
 				const next = { ...settings, ...patch };
 				view.dispatch({ effects: display.reconfigure(displayExtensions(codeLanguage, next)) });
+				colorScheme.set(view, next.colorScheme);
 				settings = next;
 			},
 			setHighlightedLines(lines) {

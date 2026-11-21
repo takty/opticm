@@ -46,7 +46,7 @@
 			z-index: 2 !important;
 
 			pointer-events: none;
-			mix-blend-mode: multiply;
+			mix-blend-mode: var(--opticm-selection-layer-blend-mode, var(--opticm-default-selection-layer-blend-mode));
 		}
 		.cm-cursorLayer { z-index: 3 !important; }
 		.cm-gutters { z-index: 4; }

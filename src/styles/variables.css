@@ -140,6 +140,7 @@
 
 	--opticm-default-whitespace-active-color              : var(--opticm-l-red-35, #f6b0c5);
 	--opticm-default-whitespace-background-image          : none;
+	--opticm-default-whitespace-mix-color                 : white;
 	--opticm-default-whitespace-space-background-size     : calc(100% - 2px) 2px;
 	--opticm-default-whitespace-background-position       : center bottom;
 	--opticm-default-whitespace-background-repeat         : no-repeat;
@@ -160,4 +161,63 @@
 			calc((g + 253 - 252.76) * 255 / 252.76)
 			calc((b + 249 - 252.76) * 255 / 252.76) / 50%);
 	}
+}
+
+:where(.opticm[data-opticm-color-scheme="light"]) {
+	color-scheme: light;
+}
+
+:where(.opticm[data-opticm-color-scheme="dark"]) {
+	color-scheme: dark;
+
+	--opticm-color-editor: #202124;
+	--opticm-color-text  : #e8eaed;
+	--opticm-color-window: #292b30;
+
+	--opticm-l-red       : #ff7995;
+	--opticm-l-red-35    : #cf8598;
+	--opticm-l-red-15    : #896270;
+	--opticm-l-orange    : #efbb76;
+	--opticm-l-yellow    : #e5c76b;
+	--opticm-l-turquoise : #80d8cb;
+	--opticm-l-aqua      : #81c7f2;
+	--opticm-l-blue      : #a9bfff;
+	--opticm-l-purple    : #c0a1da;
+	--opticm-l-brown     : #d7c5b9;
+	--opticm-l-bodybrown : #dfbda7;
+	--opticm-l-lightgray : #25262a;
+	--opticm-l-gray      : #303136;
+	--opticm-l-darkgray  : #a5a8af;
+}
+
+:where(.opticm[data-opticm-color-scheme="dark"] > .cm-editor) {
+	--opticm-default-selection-layer-blend-mode: normal;
+	--opticm-default-selection-background     : rgb(91 156 230 / 34%);
+	--opticm-default-focused-line-background  : rgb(255 255 255 / 7%);
+	--opticm-default-focused-line-shadow      : none;
+	--opticm-default-error-line-background    : rgb(255 92 124 / 22%);
+	--opticm-default-ime-cursor-background    : rgb(255 255 255 / 12%);
+	--opticm-default-bracket-ring-color       : rgb(229 199 107 / 48%);
+	--opticm-default-bracket-active-background : rgb(229 199 107 / 24%);
+	--opticm-default-function-scroll-marker-color: rgb(239 187 118 / 80%);
+	--opticm-default-indent-ruler-color          : rgb(255 121 149 / 34%);
+	--opticm-default-color-highlighted-line     : rgb(255 218 102 / 24%);
+
+	--opticm-default-structure-class-opacity                : 0.14;
+	--opticm-default-structure-function-fill                : rgb(239 187 118 / 16%);
+	--opticm-default-structure-conditional-fill             : rgb(96 201 143 / 18%);
+	--opticm-default-structure-loop-fill                    : rgb(103 188 226 / 20%);
+	--opticm-default-structure-declaration-function-fill    : #34363c;
+	--opticm-default-structure-declaration-function-stroke  : #858a94;
+	--opticm-default-structure-declaration-immutable-fill   : #38304e;
+	--opticm-default-structure-declaration-immutable-stroke : #a897e2;
+	--opticm-default-structure-declaration-mutable-fill     : #263c4c;
+	--opticm-default-structure-declaration-mutable-stroke   : #76b9e6;
+	--opticm-default-structure-reference-fill               : rgb(44 48 61 / 96%);
+	--opticm-default-structure-reference-stroke             : rgb(169 191 255 / 55%);
+
+	--opticm-default-syntax-literal-text-shadow   : none;
+	--opticm-default-syntax-local-variable-color : #b5d58b;
+	--opticm-default-whitespace-mix-color        : var(--opticm-color-editor);
+	--opticm-default-whitespace-tab-text-shadow  : none;
 }
