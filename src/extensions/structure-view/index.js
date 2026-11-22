@@ -300,11 +300,11 @@ export const structureView = [
 
 function commonDecorations(analysis, doc, options, appearance) {
 	const colors = {
-		class      : [appearance.color('--opticm-structure-class-fill'), appearance.number('--opticm-structure-class-opacity')],
-		function   : [appearance.color('--opticm-structure-function-fill')],
-		conditional: [appearance.color('--opticm-structure-conditional-fill')],
-		loop       : [appearance.color('--opticm-structure-loop-fill')],
-		loop2      : [appearance.color('--opticm-structure-loop2-fill'), appearance.number('--opticm-structure-loop2-opacity')],
+		class      : appearance.color('--opticm-structure-class-fill'),
+		function   : appearance.color('--opticm-structure-function-fill'),
+		conditional: appearance.color('--opticm-structure-conditional-fill'),
+		loop       : appearance.color('--opticm-structure-loop-fill'),
+		loop2      : appearance.color('--opticm-structure-loop2-fill'),
 	};
 	const position = offset => {
 		const line = doc.lineAt(offset);
@@ -313,13 +313,11 @@ function commonDecorations(analysis, doc, options, appearance) {
 	const decorations = [];
 	if (options.structures) {
 		for (const it of analysis.structures) {
-			const [fill, opacity] = colors[it.kind];
 			decorations.push({
 				kind       : 'range',
 				from       : position(it.from),
 				to         : position(it.to),
-				fill,
-				...(opacity === undefined ? {} : { opacity }),
+				fill       : colors[it.kind],
 				spineChars : 3,
 				branchChars: 4,
 				branches   : it.branches.map(position),
@@ -398,8 +396,7 @@ function drawStructure(canvas, { width, height, charWidth, lineHeight, drawStyle
 	};
 	for (const it of decorations) {
 		const { start, end } = it;
-		ctx.globalAlpha = it.opacity ?? 1;
-		ctx.fillStyle   = it.fill;
+		ctx.fillStyle = it.fill;
 
 		if (it.kind === 'range') {
 			const left   = start.x + drawStyle.spineInset;
@@ -458,7 +455,6 @@ function drawStructure(canvas, { width, height, charWidth, lineHeight, drawStyle
 				ctx.stroke();
 			}
 		}
-		ctx.globalAlpha = 1;
 	}
 }
 
