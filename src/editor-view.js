@@ -214,8 +214,10 @@ export class Editor {
 		});
 
 		this.listen(this.view.dom, 'wheel', event => {
-			if (this.enabled && event.ctrlKey) onFontSizeChange(event.deltaY > 0 ? -2 : 2);
-		}, { passive: true });
+			if (!this.enabled || !this.view.hasFocus || !event.ctrlKey || event.deltaY === 0) return;
+			event.preventDefault();
+			onFontSizeChange(event.deltaY > 0 ? -2 : 2);
+		}, { passive: false });
 		this.listen(this.view.contentDOM, 'keypress', event => this.scheduleCompletion(event));
 		this.listen(this.view.contentDOM, 'mousemove', () => { this.view.contentDOM.style.cursor = ''; });
 		this.refresh();
