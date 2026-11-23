@@ -7,6 +7,8 @@ const selectedLanguage = () => document.querySelector('input[name="language"]:ch
 const selectedCodeLanguage = () => document.querySelector('input[name="code-language"]:checked').value;
 const selectedColorScheme = () => document.querySelector('input[name="color-scheme"]:checked').value;
 const extensionControls = document.querySelector('#extensions');
+const highlightForm = document.querySelector('#static-line-highlighting');
+const highlightInput = document.querySelector('#highlight-lines');
 const extensionSettings = () => Object.fromEntries(
 	Array.from(extensionControls.querySelectorAll('input[type="checkbox"]'), input => [input.name, input.checked]),
 );
@@ -85,6 +87,7 @@ class Greeter implements Greeting {
 }`,
 };
 let editor;
+let highlightedLines = [];
 let activeCodeLanguage = selectedCodeLanguage();
 try {
 	const createDemoEditor = async (value, codeLanguage) => {
@@ -97,9 +100,26 @@ try {
 			...extensionSettings(),
 		});
 		instance.setSettings({ ...extensionSettings(), colorScheme: selectedColorScheme() });
+		instance.setHighlightedLines(highlightedLines);
 		return instance;
 	};
 	editor = await createDemoEditor(samples[activeCodeLanguage], activeCodeLanguage);
+	highlightForm.onsubmit = event => {
+		event.preventDefault();
+		if (!editor) return;
+		const value = highlightInput.value.trim();
+		const entries = value ? value.split(',').map(entry => entry.trim()) : [];
+		const lines = entries.map(Number);
+		if (entries.some(entry => !/^\d+$/.test(entry)) ||
+			lines.some(line => !Number.isSafeInteger(line) || line < 1 || line > editor.getLineCount())) {
+			status.textContent = `Enter line numbers from 1 to ${editor.getLineCount()}, separated by commas.`;
+			return;
+		}
+		highlightedLines = [...new Set(lines)].map(line => line - 1);
+		editor.setHighlightedLines(highlightedLines);
+		status.textContent = highlightedLines.length ? 'Line highlights applied.' : 'Line highlights cleared.';
+	};
+	highlightForm.querySelector('button').disabled = false;
 	document.querySelector('#language').onchange = () => editor.setSettings({ language: selectedLanguage() });
 	document.querySelector('#appearance').onchange = () => editor?.setSettings({ colorScheme: selectedColorScheme() });
 	document.querySelector('#code-language').onchange = async () => {

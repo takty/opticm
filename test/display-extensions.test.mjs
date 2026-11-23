@@ -1,7 +1,7 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import { Compartment, EditorState } from '@codemirror/state';
-import { EditorView } from '@codemirror/view';
+import { EditorView, gutterLineClass } from '@codemirror/view';
 import { createDisplayExtensions, setHighlightedLines } from 'opticm/display';
 
 test('static highlights survive document replacement and display reconfiguration', () => {
@@ -19,6 +19,13 @@ test('static highlights survive document replacement and display reconfiguration
 		for (const decorations of state.facet(EditorView.decorations)) {
 			decorations.between(0, state.doc.length, from => result.push(from));
 		}
+		const gutterPositions = [];
+		for (const markers of state.facet(gutterLineClass)) {
+			markers.between(0, state.doc.length, (from, _to, marker) => {
+				if (marker.elementClass === 'cm-opticm-highlighted-line-number') gutterPositions.push(from);
+			});
+		}
+		assert.deepEqual(gutterPositions, result);
 		return result;
 	};
 	let state = EditorState.create({ doc: 'a\nbb', extensions: [display.of(extensions())] });

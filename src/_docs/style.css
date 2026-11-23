@@ -16,11 +16,16 @@ button {
 #language,
 #code-language,
 #appearance,
-#extensions {
+#extensions,
+#static-line-highlighting fieldset {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 16px;
 	margin-bottom: 12px;
+}
+
+#static-line-highlighting fieldset {
+	align-items: center;
 }
 
 #status {

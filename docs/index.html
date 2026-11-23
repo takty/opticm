@@ -6,8 +6,8 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1">
 	<title>opticm - standalone example</title>
 	<link rel="stylesheet" href="./opticm.min.css">
-  <script type="module" crossorigin src="./assets/index-DLInOidN.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-6EWpe3Tw.css">
+  <script type="module" crossorigin src="./assets/index-MfH_XExF.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DKx49HFf.css">
 </head>
 
 <body>
@@ -45,6 +45,15 @@
 			<label><input type="checkbox" name="easyLineSelection"> Easy line selection</label>
 			<label><input type="checkbox" name="rulers" checked> Indentation guides</label>
 		</fieldset>
+		<form id="static-line-highlighting">
+			<fieldset>
+				<legend>Static line highlighting</legend>
+				<label for="highlight-lines">Document line numbers (from 1)</label>
+				<input id="highlight-lines" type="text" placeholder="2, 3, 6" aria-describedby="highlight-lines-help">
+				<button type="submit" disabled>Apply</button>
+				<small id="highlight-lines-help">Separate numbers with commas. Apply an empty field to clear highlights.</small>
+			</fieldset>
+		</form>
 		<div id="editor" class="container"></div>
 		<button id="undo">Undo</button>
 		<button id="paste">Paste</button>

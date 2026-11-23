@@ -1,21 +1,25 @@
 .cm-editor.cm-opticm-whitespace {
 	.cm-highlightSpace {
-		background-image: var(--opticm-whitespace-background-image, var(--opticm-default-whitespace-background-image));
+		background-image: none;
 	}
 
 	.cm-activeLine .cm-opticm-space {
-		background-image   : linear-gradient(var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color)), var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color)));
-		background-size    : var(--opticm-whitespace-space-background-size, var(--opticm-default-whitespace-space-background-size));
-		background-position: var(--opticm-whitespace-background-position, var(--opticm-default-whitespace-background-position));
-		background-repeat  : var(--opticm-whitespace-background-repeat, var(--opticm-default-whitespace-background-repeat));
+		background-position: center bottom;
+		background-repeat  : no-repeat;
+
+		background-size : var(--opticm-whitespace-space-background-size, var(--opticm-default-whitespace-space-background-size));
+		background-image: linear-gradient(
+			var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color)),
+			var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color))
+		);
 	}
 
 	.cm-activeLine .cm-opticm-full-width-space {
+		background-size : var(--opticm-whitespace-full-width-background-size, var(--opticm-default-whitespace-full-width-background-size));
 		background-image: linear-gradient(
-			color-mix(in srgb, var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color)) 80%, var(--opticm-default-whitespace-mix-color)),
-			color-mix(in srgb, var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color)) 80%, var(--opticm-default-whitespace-mix-color))
+			var(--opticm-whitespace-full-width-active-color, var(--opticm-default-whitespace-full-width-active-color)),
+			var(--opticm-whitespace-full-width-active-color, var(--opticm-default-whitespace-full-width-active-color))
 		);
-		background-size: var(--opticm-whitespace-full-width-background-size, var(--opticm-default-whitespace-full-width-background-size));
 	}
 
 	.cm-highlightTab {
@@ -26,29 +30,31 @@
 		&::before,
 		&::after {
 			position        : absolute;
+			right           : 0;
 			transform       : scaleX(0.8);
 			transform-origin: left;
-			pointer-events  : none;
 			overflow        : hidden;
+			pointer-events  : none;
 			white-space     : nowrap;
 
 			color      : var(--opticm-whitespace-tab-color, var(--opticm-default-whitespace-tab-color));
-			font-weight: var(--opticm-whitespace-tab-font-weight, var(--opticm-default-whitespace-tab-font-weight));
-			text-shadow: var(--opticm-whitespace-tab-text-shadow, var(--opticm-default-whitespace-tab-text-shadow));
+			font-weight: var(--opticm-whitespace-tab-weight, var(--opticm-default-whitespace-tab-weight));
+			text-shadow: var(--opticm-whitespace-tab-shadow, var(--opticm-default-whitespace-tab-shadow));
 		}
 		&::before {
 			content: '-';
 			left   : 5%;
-			right  : 0;
 		}
 		&::after {
 			content: '>';
 			left   : min(0.8ch, max(0px, calc(100% - 0.8ch)));
-			right  : 0;
 		}
 	}
-	.cm-activeLine .cm-highlightTab::before,
-	.cm-activeLine .cm-highlightTab::after {
-		color: var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color));
+
+	.cm-activeLine .cm-highlightTab {
+		&::before,
+		&::after {
+			color: var(--opticm-whitespace-active-color, var(--opticm-default-whitespace-active-color));
+		}
 	}
 }

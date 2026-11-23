@@ -1,12 +1,12 @@
 .cm-editor.cm-syntax-highlighting {
 	.cm-syntax-comment {
 		color      : var(--opticm-syntax-comment-color, var(--opticm-default-syntax-comment-color));
-		font-weight: var(--opticm-syntax-comment-font-weight, var(--opticm-default-syntax-comment-font-weight));
+		font-weight: var(--opticm-syntax-comment-weight, var(--opticm-default-syntax-comment-weight));
 	}
 
 	:is(.cm-syntax-keyword, .cm-syntax-operator) {
 		color      : var(--opticm-syntax-keyword-color, var(--opticm-default-syntax-keyword-color));
-		font-weight: var(--opticm-syntax-keyword-font-weight, var(--opticm-default-syntax-keyword-font-weight));
+		font-weight: var(--opticm-syntax-keyword-weight, var(--opticm-default-syntax-keyword-weight));
 	}
 
 	.cm-syntax-type {
@@ -25,50 +25,37 @@
 		color: var(--opticm-syntax-variable-color, var(--opticm-default-syntax-variable-color));
 	}
 
-	.cm-syntax-literal {
-		color      : var(--opticm-syntax-literal-color, var(--opticm-default-syntax-literal-color));
-		font-weight: var(--opticm-syntax-literal-font-weight, var(--opticm-default-syntax-literal-font-weight));
-		text-shadow: var(--opticm-syntax-literal-text-shadow, var(--opticm-default-syntax-literal-text-shadow));
+	:is(.cm-syntax-local-variable, .cm-syntax-local-reference, .cm-syntax-local-reference .cm-syntax-variable) {
+		color: var(--opticm-syntax-local-variable-color, var(--opticm-default-syntax-local-variable-color));
 	}
 
-	.cm-activeLine .cm-syntax-literal {
-		text-shadow: var(--opticm-syntax-active-literal-text-shadow, var(--opticm-default-syntax-active-literal-text-shadow));
+	.cm-syntax-literal {
+		color      : var(--opticm-syntax-literal-color, var(--opticm-default-syntax-literal-color));
+		font-weight: var(--opticm-syntax-literal-weight, var(--opticm-default-syntax-literal-weight));
 	}
 
 	.cm-syntax-invalid {
 		text-decoration: var(--opticm-syntax-invalid-decoration, var(--opticm-default-syntax-invalid-decoration));
 	}
 
-	:is(.cm-syntax-local-variable, .cm-syntax-local-reference, .cm-syntax-local-reference .cm-syntax-variable) {
-		color: var(--opticm-syntax-local-variable-color, var(--opticm-default-syntax-local-variable-color));
-	}
-
 	:is(.cm-syntax-definition, .cm-syntax-definition *) {
 		color      : var(--opticm-syntax-definition-color, var(--opticm-default-syntax-definition-color));
-		font-weight: var(--opticm-syntax-definition-font-weight, var(--opticm-default-syntax-definition-font-weight));
+		font-weight: var(--opticm-syntax-definition-weight, var(--opticm-default-syntax-definition-weight));
 	}
 
-	:is(.cm-syntax-function-definition, .cm-syntax-function-definition *, .cm-syntax-class-definition, .cm-syntax-class-definition *) {
+	:is(.cm-syntax-function-definition, .cm-syntax-function-definition *) {
 		color      : var(--opticm-syntax-function-definition-color, var(--opticm-default-syntax-function-definition-color));
-		font-weight: var(--opticm-syntax-function-definition-font-weight, var(--opticm-default-syntax-function-definition-font-weight));
+		font-weight: var(--opticm-syntax-function-definition-weight, var(--opticm-default-syntax-function-definition-weight));
 	}
 
 	:is(.cm-syntax-field-definition, .cm-syntax-field-definition *, .cm-syntax-property-definition, .cm-syntax-property-definition *) {
-		color      : var(--opticm-syntax-definition-color, var(--opticm-default-syntax-definition-color));
-		font-weight: var(--opticm-syntax-definition-font-weight, var(--opticm-default-syntax-definition-font-weight));
+		color      : var(--opticm-syntax-field-definition-color, var(--opticm-default-syntax-field-definition-color));
+		font-weight: var(--opticm-syntax-field-definition-weight, var(--opticm-default-syntax-field-definition-weight));
 	}
 
-	&.cm-analysis-pending .cm-syntax-variable:not(:is(
-		.cm-syntax-definition, .cm-syntax-definition *,
-		.cm-syntax-class-definition, .cm-syntax-class-definition *,
-		.cm-syntax-function-definition, .cm-syntax-function-definition *,
-		.cm-syntax-field-definition, .cm-syntax-field-definition *,
-		.cm-syntax-property-definition, .cm-syntax-property-definition *,
-		.cm-syntax-function, .cm-syntax-function *,
-		.cm-syntax-property, .cm-syntax-property *
-	)):not(:has(.cm-syntax-definition, .cm-syntax-class-definition, .cm-syntax-function-definition,
-		.cm-syntax-field-definition, .cm-syntax-property-definition, .cm-syntax-function, .cm-syntax-property)) {
-		color: var(--opticm-syntax-local-variable-color, var(--opticm-default-syntax-local-variable-color));
+	:is(.cm-syntax-class-definition, .cm-syntax-class-definition *) {
+		color      : var(--opticm-syntax-class-definition-color, var(--opticm-default-syntax-class-definition-color));
+		font-weight: var(--opticm-syntax-class-definition-weight, var(--opticm-default-syntax-class-definition-weight));
 	}
 
 	.opticm & :where(.cm-syntax-invalid) {

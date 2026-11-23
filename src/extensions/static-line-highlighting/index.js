@@ -1,13 +1,17 @@
-import { StateEffect, StateField } from '@codemirror/state';
-import { Decoration, EditorView } from '@codemirror/view';
+import { RangeSet, StateEffect, StateField } from '@codemirror/state';
+import { Decoration, EditorView, GutterMarker, gutterLineClass } from '@codemirror/view';
 import { extensionStyles } from '../styles.js';
 import css from './style.css';
 
 export const setHighlightedLines = StateEffect.define();
 
 const lineHighlight = Decoration.line({ class: 'cm-opticm-highlighted-line' });
+const gutterHighlight = new class extends GutterMarker {
+	elementClass = 'cm-opticm-highlighted-line-number';
+}();
+
 const highlightedLines = StateField.define({
-	create: () => ({ lines: [], decorations: Decoration.none }),
+	create: () => ({ lines: [], decorations: Decoration.none, gutterMarkers: RangeSet.empty }),
 	update(value, transaction) {
 		let lines = value.lines;
 		for (const effect of transaction.effects) {
@@ -25,13 +29,19 @@ const highlightedLines = StateField.define({
 
 		const doc = transaction.newDoc;
 		const ranges = [];
+		const markers = [];
 		for (const line of lines) {
 			if (line >= doc.lines) break;
-			ranges.push(lineHighlight.range(doc.line(line + 1).from));
+			const from = doc.line(line + 1).from;
+			ranges.push(lineHighlight.range(from));
+			markers.push(gutterHighlight.range(from));
 		}
-		return { lines, decorations: Decoration.set(ranges) };
+		return { lines, decorations: Decoration.set(ranges), gutterMarkers: RangeSet.of(markers) };
 	},
-	provide: field => EditorView.decorations.from(field, value => value.decorations),
+	provide: field => [
+		EditorView.decorations.from(field, value => value.decorations),
+		gutterLineClass.from(field, value => value.gutterMarkers),
+	],
 });
 
 export const staticLineHighlighting = [highlightedLines, extensionStyles(css)];

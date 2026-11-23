@@ -1,5 +1,5 @@
-import { EditorSelection, StateEffect, StateField } from '@codemirror/state';
-import { EditorView, ViewPlugin } from '@codemirror/view';
+import { EditorSelection, RangeSet, StateEffect, StateField } from '@codemirror/state';
+import { EditorView, GutterMarker, ViewPlugin, gutterLineClass } from '@codemirror/view';
 import cursorRight from './cursor-right.svg';
 import cursorLine from './cursor-line.svg';
 import { extensionStyles } from '../styles.js';
@@ -7,6 +7,24 @@ import css from './style.css';
 
 export const setEasyLineSelectionMode = StateEffect.define();
 export const setLineSelectionMode     = setEasyLineSelectionMode;
+
+const setHoveredGutterLine = StateEffect.define();
+const gutterHoverMarker = new class extends GutterMarker {
+	elementClass = 'cm-opticm-gutter-line-hover';
+}();
+const hoveredGutterLine = StateField.define({
+	create: () => null,
+	update(line, transaction) {
+		for (const effect of transaction.effects) {
+			if (effect.is(setHoveredGutterLine)) return effect.value;
+		}
+		return transaction.docChanged ? null : line;
+	},
+	provide: field => gutterLineClass.compute([field, 'doc'], state => {
+		const line = state.field(field);
+		return line === null ? RangeSet.empty : RangeSet.of(gutterHoverMarker.range(state.doc.line(line).from));
+	}),
+});
 
 const lineSelectionMode = StateField.define({
 	create: () => false,
@@ -39,8 +57,15 @@ const gutterSelection = ViewPlugin.fromClass(class {
 		const listen = (target, type, listener) => target.addEventListener(type, listener, { signal: this.abort.signal });
 		listen(view.dom, 'mousedown', event => this.mouseDown(event));
 		listen(view.dom, 'mousemove', event => this.mouseMove(event));
+		listen(view.dom, 'mouseleave', () => this.setHoveredGutterLine(null));
 		listen(view.dom.ownerDocument.defaultView, 'mouseup', event => this.mouseUp(event));
 		listen(view.dom.ownerDocument.defaultView, 'blur', () => this.setMode(false));
+	}
+
+	setHoveredGutterLine(line) {
+		if (line !== this.view.state.field(hoveredGutterLine)) {
+			this.view.dispatch({ effects: setHoveredGutterLine.of(line) });
+		}
 	}
 
 	lineAt(event) {
@@ -85,7 +110,6 @@ const gutterSelection = ViewPlugin.fromClass(class {
 		if (event.button !== 0 || !view.state.facet(EditorView.editable) || !event.target.closest('.cm-gutters')) {
 			return;
 		}
-		if (event.target.closest('.cm-lint-marker')) return;
 		const line = this.lineAt(event);
 		if (line === null) return;
 		event.preventDefault();
@@ -102,8 +126,10 @@ const gutterSelection = ViewPlugin.fromClass(class {
 	}
 
 	mouseMove(event) {
+		const overGutter = event.target.closest('.cm-gutter-lint, .cm-lineNumbers, .cm-sectionNumbers');
+		const line = overGutter || (this.down !== null && event.buttons === 1) ? this.lineAt(event) : null;
+		this.setHoveredGutterLine(overGutter ? line : null);
 		if (this.down === null || event.buttons !== 1) return;
-		const line = this.lineAt(event);
 		if (line !== null) {
 			if (!this.dragged && line !== this.down) {
 				this.dragged = true;
@@ -135,6 +161,7 @@ const gutterSelection = ViewPlugin.fromClass(class {
 });
 
 export const standardGutterLineSelection = [
+	hoveredGutterLine,
 	gutterSelection,
 	EditorView.editorAttributes.of({ class: 'cm-gutter-line-selection' }),
 	extensionStyles(css

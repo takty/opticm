@@ -128,7 +128,7 @@
 
 	.cm-lineNumbers .cm-opticm-line-number { text-align: right; }
 	.cm-editor .cm-activeLineGutter {
-		background : var(--opticm-active-gutter-background, var(--opticm-default-active-gutter-background));
+		background : none;
 		color      : var(--opticm-color-text);
 		font-weight: bold;
 	}
@@ -142,7 +142,7 @@
 		.cm-lint-marker { vertical-align: middle; }
 
 		.cm-selectionMatch {
-			background   : var(--opticm-selection-match-background, var(--opticm-default-selection-match-background));
+			background   : none;
 			border-bottom: 2px dotted var(--opticm-selection-match-border-color, var(--opticm-default-selection-match-border-color));
 		}
 

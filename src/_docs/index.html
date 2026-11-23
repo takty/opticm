@@ -44,6 +44,15 @@
 			<label><input type="checkbox" name="easyLineSelection"> Easy line selection</label>
 			<label><input type="checkbox" name="rulers" checked> Indentation guides</label>
 		</fieldset>
+		<form id="static-line-highlighting">
+			<fieldset>
+				<legend>Static line highlighting</legend>
+				<label for="highlight-lines">Document line numbers (from 1)</label>
+				<input id="highlight-lines" type="text" placeholder="2, 3, 6" aria-describedby="highlight-lines-help">
+				<button type="submit" disabled>Apply</button>
+				<small id="highlight-lines-help">Separate numbers with commas. Apply an empty field to clear highlights.</small>
+			</fieldset>
+		</form>
 		<div id="editor" class="container"></div>
 		<button id="undo">Undo</button>
 		<button id="paste">Paste</button>

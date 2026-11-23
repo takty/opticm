@@ -173,11 +173,10 @@ const structurePlugin = ViewPlugin.fromClass(class {
 			referenceShadowOffsetY       : appearance.number('--opticm-structure-reference-shadow-offset-y'),
 			tokenHeightScale             : appearance.number('--opticm-structure-token-height-scale'),
 			tokenRadiusScale             : appearance.number('--opticm-structure-token-radius-scale'),
-			declarationInset             : appearance.number('--opticm-structure-declaration-inset'),
-			declarationWidthPadding      : appearance.number('--opticm-structure-declaration-width-padding'),
+			declarationInset             : appearance.number('--opticm-structure-declaration-padding-left'),
+			declarationWidthPadding      : appearance.number('--opticm-structure-declaration-padding-right'),
 			declarationBorderWidth       : appearance.number('--opticm-structure-declaration-border-width'),
-			declarationSideRuleWidthScale: appearance.number('--opticm-structure-declaration-side-rule-width-scale'),
-			declarationSideRuleOffset    : appearance.number('--opticm-structure-declaration-side-rule-offset'),
+			declarationSideRuleWidthScale: appearance.number('--opticm-structure-declaration-side-width-scale'),
 		};
 		const line = view.contentDOM.querySelector('.cm-line');
 		const lineStart = line
@@ -328,8 +327,8 @@ function commonDecorations(analysis, doc, options, appearance) {
 		for (const it of analysis.declarations) {
 			const colors = it.scope === 'function'
 				? [
-					appearance.color('--opticm-structure-declaration-function-fill'),
-					appearance.color('--opticm-structure-declaration-function-stroke'),
+					appearance.color('--opticm-structure-declaration-var-fill'),
+					appearance.color('--opticm-structure-declaration-var-stroke'),
 				]
 				: it.mutability === 'immutable'
 					? [
@@ -450,8 +449,8 @@ function drawStructure(canvas, { width, height, charWidth, lineHeight, drawStyle
 				ctx.stroke();
 				ctx.lineWidth = charWidth * drawStyle.declarationSideRuleWidthScale;
 				ctx.beginPath();
-				ctx.moveTo(x - ctx.lineWidth / 2, y - drawStyle.declarationSideRuleOffset);
-				ctx.lineTo(x - ctx.lineWidth / 2, y + h + drawStyle.declarationSideRuleOffset);
+				ctx.moveTo(x - ctx.lineWidth / 2, y - 0.5);
+				ctx.lineTo(x - ctx.lineWidth / 2, y + h + 0.5);
 				ctx.stroke();
 			}
 		}

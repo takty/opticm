@@ -5,7 +5,7 @@
 
 		background : var(--opticm-bracket-matching-background, var(--opticm-default-bracket-matching-background));
 		color      : var(--opticm-bracket-matching-color, var(--opticm-default-bracket-matching-color));
-		font-weight: var(--opticm-bracket-matching-font-weight, var(--opticm-default-bracket-matching-font-weight));
+		font-weight: var(--opticm-bracket-matching-weight, var(--opticm-default-bracket-matching-weight));
 	}
 
 	.cm-bracket-gutter-overlay {

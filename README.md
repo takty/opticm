@@ -550,12 +550,12 @@ Removing the highlighting extension removes the source's decorations. Local
 reference color can be customized with `--opticm-syntax-local-variable-color`.
 Variable-reference backgrounds are drawn by the structure view. Class, interface, enum, record, function and method declarations use the
 editor text color and bold weight; `--opticm-syntax-function-definition-color` and
-`--opticm-syntax-function-definition-font-weight` customize them. Comments, keywords/operators, definitions,
+`--opticm-syntax-function-definition-weight` customize them. Comments, keywords/operators, definitions,
 and literals are bold by default. Literals also have a text shadow, hidden on the
 active line. Font weights and literal shadows can be customized with
-`--opticm-syntax-comment-font-weight`, `--opticm-syntax-keyword-font-weight`,
-`--opticm-syntax-definition-font-weight`, `--opticm-syntax-literal-font-weight`, and
-`--opticm-syntax-literal-text-shadow`.
+`--opticm-syntax-comment-weight`, `--opticm-syntax-keyword-weight`,
+`--opticm-syntax-definition-weight`, `--opticm-syntax-literal-weight`, and
+`--opticm-syntax-literal-shadow`.
 
 The component's `syntaxHighlight` and `semanticHighlight` settings independently
 toggle token coloring and definition/reference decoration.
@@ -618,7 +618,7 @@ ancestor to change its appearance without affecting other editors:
 | Function highlighting | `--opticm-function-alternate-background` |
 | Function scroll markers | `--opticm-function-scroll-marker-radius`, `--opticm-function-scroll-marker-color` |
 | Gutter selection | `--opticm-gutter-cursor`, `--opticm-gutter-line-selection-cursor` (complete CSS `cursor` values) |
-| Syntax highlighting | `--opticm-syntax-comment-color`, `--opticm-syntax-comment-font-weight`, `--opticm-syntax-keyword-color`, `--opticm-syntax-keyword-font-weight`, `--opticm-syntax-type-color`, `--opticm-syntax-function-color`, `--opticm-syntax-definition-color`, `--opticm-syntax-definition-font-weight`, `--opticm-syntax-property-color`, `--opticm-syntax-variable-color`, `--opticm-syntax-local-variable-color`, `--opticm-syntax-literal-color`, `--opticm-syntax-literal-font-weight`, `--opticm-syntax-literal-text-shadow`, `--opticm-syntax-invalid-decoration` |
+| Syntax highlighting | `--opticm-syntax-comment-color`, `--opticm-syntax-comment-weight`, `--opticm-syntax-keyword-color`, `--opticm-syntax-keyword-weight`, `--opticm-syntax-type-color`, `--opticm-syntax-function-color`, `--opticm-syntax-definition-color`, `--opticm-syntax-definition-weight`, `--opticm-syntax-property-color`, `--opticm-syntax-variable-color`, `--opticm-syntax-local-variable-color`, `--opticm-syntax-literal-color`, `--opticm-syntax-literal-weight`, `--opticm-syntax-literal-shadow`, `--opticm-syntax-invalid-decoration` |
 | Indentation rulers | `--opticm-indent-ruler-width`, `--opticm-indent-ruler-style`, `--opticm-indent-ruler-color` |
 
 Extension style defaults are centralized in `src/styles/variables.css`; each

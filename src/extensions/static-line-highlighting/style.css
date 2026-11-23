@@ -1,3 +1,12 @@
 .cm-editor .cm-content .cm-line.cm-opticm-highlighted-line:not(.error-line) {
-	background-color: var(--opticm-color-highlighted-line, var(--opticm-default-color-highlighted-line));
+	background: var(--opticm-color-highlighted-line, linear-gradient(
+		to right,
+		var(--opticm-default-color-highlighted-line-start),
+		var(--opticm-default-color-highlighted-line-end)
+	));
+}
+
+.cm-editor .cm-gutter-lint .cm-gutterElement.cm-opticm-highlighted-line-number,
+.cm-editor :is(.cm-lineNumbers, .cm-sectionNumbers) .cm-gutterElement.cm-opticm-highlighted-line-number:not(:hover) {
+	background: var(--opticm-color-highlighted-line, var(--opticm-default-color-highlighted-line-end));
 }
