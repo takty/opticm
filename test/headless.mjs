@@ -8,10 +8,12 @@ function classPainted() {
 	const canvas = document.querySelector('.code-structure-view');
 	if (!canvas?.width || !canvas?.height) return false;
 	const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
-	const alpha = Math.round(0.08 * 255);
+	const reference = document.createElement('canvas').getContext('2d');
+	reference.fillStyle = 'oklch(0.75 0.25 12 / 0.10)';
+	reference.fillRect(0, 0, 1, 1);
+	const expected = reference.getImageData(0, 0, 1, 1).data;
 	for (let i = 0; i < pixels.length; i += 4) {
-		if (pixels[i] >= 220 && pixels[i + 1] < 45 && pixels[i + 2] >= 70 &&
-			pixels[i + 2] <= 100 && Math.abs(pixels[i + 3] - alpha) <= 1) return true;
+		if (expected.every((channel, offset) => Math.abs(pixels[i + offset] - channel) <= 1)) return true;
 	}
 	return false;
 }

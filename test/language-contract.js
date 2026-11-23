@@ -2,10 +2,11 @@ import { Editor } from '../.build/editor-view.js';
 import { javascriptLanguage } from '../.build/lang/js/index.js';
 import { plainLanguage } from '../.build/lang/plain/index.js';
 import { analyze } from '../.build/lang/js/analyzer.js';
-import { createCommonAnalysis, setCommonAnalysis as setEditorCommonAnalysis } from '../.build/analysis/common-analysis.js';
+import { commonAnalysisState as editorCommonAnalysisState, createCommonAnalysis, setCommonAnalysis as setEditorCommonAnalysis } from '../.build/analysis/common-analysis.js';
 import { commonAnalysisState, setCommonAnalysis } from 'opticm/analysis';
 import { createAnalyzer } from 'opticm/analyzer';
 import { createDisplayExtensions, setHighlightedLines } from 'opticm/display';
+import { lintGutter, setDiagnostics } from '@codemirror/lint';
 import { Compartment, EditorSelection, EditorState } from '@codemirror/state';
 import { EditorView, highlightActiveLine, lineNumbers } from '@codemirror/view';
 import { retainStructureOnEdit, setStructure, structureView } from '../dist/structure-view.js';
@@ -81,8 +82,8 @@ export async function runLanguageContractTests(assert) {
 			activeSpace && inactiveSpace && activeTab && inactiveTab &&
 				getComputedStyle(activeSpace).backgroundImage.includes('linear-gradient') &&
 				getComputedStyle(inactiveSpace).backgroundImage === 'none' &&
-				getComputedStyle(activeTab, '::before').color === 'rgb(246, 176, 197)' &&
-				getComputedStyle(inactiveTab, '::before').color === 'rgb(251, 221, 230)' &&
+				getComputedStyle(activeTab, '::before').color === 'oklch(0.75 0.25 12 / 0.35)' &&
+				getComputedStyle(inactiveTab, '::before').color === 'oklch(0.75 0.25 12 / 0.15)' &&
 				activeTabShadow === tabShadow && inactiveTabShadow === tabShadow,
 			'standalone whitespace extension styles active and inactive lines',
 		);
@@ -95,11 +96,10 @@ export async function runLanguageContractTests(assert) {
 		);
 		whitespaceHost.style.removeProperty('--opticm-whitespace-active-color');
 		whitespaceHost.style.removeProperty('--opticm-whitespace-tab-color');
-		whitespaceHost.style.setProperty('--opticm-l-red-35', '#234567');
-		whitespaceHost.style.setProperty('--opticm-l-red-15', '#345678');
+		whitespaceHost.style.setProperty('--opticm-l-red', 'oklch(0.65 0.12 35)');
 		assert(
-			getComputedStyle(activeTab, '::before').color === 'rgb(35, 69, 103)' &&
-				getComputedStyle(inactiveTab, '::before').color === 'rgb(52, 86, 120)',
+			getComputedStyle(activeTab, '::before').color === 'oklch(0.65 0.12 35 / 0.35)' &&
+				getComputedStyle(inactiveTab, '::before').color === 'oklch(0.65 0.12 35 / 0.15)',
 			'standalone whitespace defaults follow an inherited palette',
 		);
 		whitespaceView.dispatch({ effects: whitespaceCompartment.reconfigure([]) });
@@ -677,6 +677,7 @@ export async function runLanguageContractTests(assert) {
 			doc: 'one\ntwo\nthree\nlast',
 			extensions: [
 				gutterCompartment.of(lineNumbers()),
+				lintGutter(),
 				selectionCompartment.of(gutterLineSelection),
 				accessCompartment.of([]),
 				nonceCompartment.of(EditorView.cspNonce.of('first-nonce')),
@@ -686,24 +687,24 @@ export async function runLanguageContractTests(assert) {
 	});
 	const selectionText = () => selectionView.state.sliceDoc(selectionView.state.selection.main.from, selectionView.state.selection.main.to);
 	const mode = () => selectionView.dom.classList.contains('line-selection-mode');
-	const lineMouse = (type, index, options = {}) => {
+	const lineMouse = (type, index, options = {}, target) => {
 		const lines = selectionHost.querySelectorAll('.cm-content .cm-line');
 		const gutter = [...selectionHost.querySelectorAll(':is(.cm-lineNumbers, .cm-sectionNumbers) .cm-gutterElement')]
 			.filter(element => element.style.visibility !== 'hidden')[index];
 		const box = lines[index].getBoundingClientRect();
-		gutter.dispatchEvent(new MouseEvent(type, {
+		(target ?? gutter).dispatchEvent(new MouseEvent(type, {
 			bubbles   : true,
 			cancelable: true,
 			button    : 0,
 			buttons   : type === 'mouseup' ? 0 : 1,
-			clientX   : gutter.getBoundingClientRect().left + 2,
+			clientX   : (target ?? gutter).getBoundingClientRect().left + 2,
 			clientY   : box.top + box.height / 2,
 			...options,
 		}));
 	};
-	const lineClick = (index, options = {}) => {
-		lineMouse('mousedown', index, options);
-		lineMouse('mouseup', index, options);
+	const lineClick = (index, options = {}, target) => {
+		lineMouse('mousedown', index, options, target);
+		lineMouse('mouseup', index, options, target);
 	};
 	try {
 		await new Promise(resolve => setTimeout(resolve, 150));
@@ -750,13 +751,19 @@ export async function runLanguageContractTests(assert) {
 		lineClick(1);
 		assert(selectionText() === '' && !mode(), 'non-editable editor ignores gutter selection');
 		selectionView.dispatch({ effects: accessCompartment.reconfigure([]) });
-		const lint = document.createElement('span');
-		lint.className = 'cm-lint-marker';
-		const gutterElement = selectionHost.querySelector('.cm-lineNumbers .cm-gutterElement:not([style*="visibility: hidden"])');
-		gutterElement.append(lint);
-		lint.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, button: 0 }));
-		assert(selectionText() === '' && !mode(), 'gutter selection ignores lint markers');
-		lint.remove();
+		const diagnosticLine = selectionView.state.doc.line(2);
+		selectionView.dispatch(setDiagnostics(selectionView.state, [{
+			from: diagnosticLine.from,
+			to: diagnosticLine.to,
+			severity: 'warning',
+			message: 'Test warning',
+		}]));
+		const lint = selectionHost.querySelector('.cm-gutter-lint .cm-lint-marker-warning');
+		assert(lint, 'diagnostic marker appears in the lint gutter');
+		lineClick(1, {}, lint);
+		assert(selectionText() === 'two\n' && mode(), 'clicking a lint marker selects its line');
+		selectionView.dispatch({ selection: { anchor: 0 } });
+		selectionView.dispatch(setDiagnostics(selectionView.state, []));
 		lineClick(1);
 		window.dispatchEvent(new Event('blur'));
 		assert(!mode(), 'window blur exits line-selection mode');
@@ -809,11 +816,11 @@ export async function runLanguageContractTests(assert) {
 		assert(
 			keyword?.textContent === 'class' && type?.textContent === 'Example' &&
 				getComputedStyle(keyword).color === 'rgb(18, 52, 86)' &&
-				getComputedStyle(type).color === 'rgb(46, 68, 154)',
+				getComputedStyle(type).color === 'oklch(0.6 0.25 12)',
 			'standalone syntax extension renders supplied token ranges and custom colors',
 		);
-		syntaxHost.style.setProperty('--opticm-l-blue', '#234567');
-		assert(getComputedStyle(type).color === 'rgb(35, 69, 103)', 'standalone syntax defaults follow an inherited palette');
+		syntaxHost.style.setProperty('--opticm-l-red', 'oklch(0.65 0.12 35)');
+		assert(getComputedStyle(type).color === 'oklch(0.6 0.12 35)', 'standalone syntax defaults follow an inherited palette');
 		syntaxView.dispatch({ effects: syntaxCompartment.reconfigure([
 			syntaxHighlightingExtension,
 			syntaxHighlightingOptions({ syntax: true, semantic: false }),
@@ -1123,6 +1130,7 @@ export async function runLanguageContractTests(assert) {
 	};
 	const view = new Editor({ language, phrases: {}, onFontSizeChange() {} }, root);
 	const applyAnalysis = data => view.view.dispatch({ effects: setEditorCommonAnalysis.of(data) });
+	const currentAnalysis = () => view.view.state.field(editorCommonAnalysisState);
 	try {
 		const settings = {
 			analysis             : true,
@@ -1148,7 +1156,7 @@ export async function runLanguageContractTests(assert) {
 		const phrases = {};
 		view.setOptions(settings, phrases, diagnostics);
 		view.loadDocument('abc\ndef\nghi');
-		assert(view.view.dom.classList.contains('cm-analysis-pending'), 'loaded document starts with pending analysis');
+		assert(currentAnalysis() === null, 'loaded document starts without an analysis result');
 		view.view.focus();
 		const activeLines = () => [...root.querySelectorAll('.cm-content .cm-activeLine')];
 		const activeGutters = () => [...root.querySelectorAll('.cm-sectionNumbers .cm-activeLineGutter')];
@@ -1190,9 +1198,9 @@ export async function runLanguageContractTests(assert) {
 			references  : [],
 			sections    : [{ kind: 'function', from: 4 }],
 		}));
-		assert(!view.view.dom.classList.contains('cm-analysis-pending'), 'fresh analysis clears pending class');
+		assert(currentAnalysis()?.version === 1 && !currentAnalysis().stale, 'the first analysis result is current');
 		view.view.dispatch({ changes: { from: 0, to: 1, insert: 'a' } });
-		assert(view.view.dom.classList.contains('cm-analysis-pending'), 'editing marks analysis as pending');
+		assert(currentAnalysis()?.version === 1 && currentAnalysis().stale, 'editing marks the previous analysis result as stale');
 		applyAnalysis(createCommonAnalysis({
 			version     : 2,
 			sourceLength: 11,
@@ -1203,7 +1211,7 @@ export async function runLanguageContractTests(assert) {
 			references  : [],
 			sections    : [{ kind: 'function', from: 4 }],
 		}));
-		assert(!view.view.dom.classList.contains('cm-analysis-pending'), 'next analysis clears pending class');
+		assert(currentAnalysis()?.version === 2 && !currentAnalysis().stale, 'the next analysis replaces the stale result');
 		assert(view.getSectionLineNumber(0).join() === '0,1' && view.getSectionLineNumber(2).join() === '1,2', 'view numbers sections from language-neutral data');
 		assert(root.querySelector('.cm-function-number')?.textContent === '1', 'view renders section start markers');
 		view.setOptions({ ...settings, lineNumbers: false }, phrases, diagnostics);

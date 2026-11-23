@@ -119,8 +119,8 @@ var variables_default = `/**\r
 	--opticm-default-syntax-comment-weight: bold;\r
 	--opticm-default-syntax-keyword-weight: bold;\r
 \r
-	--opticm-default-syntax-variable-color      : oklch(from var(--opticm-l-green) 10% c h);\r
-	--opticm-default-syntax-function-color      : oklch(from var(--opticm-l-green) 10% c h);\r
+	--opticm-default-syntax-variable-color      : var(--opticm-color-text);\r
+	--opticm-default-syntax-function-color      : var(--opticm-color-text);  /* Since Acorn cannot distinguish, it must be the same as the above.*/\r
 	--opticm-default-syntax-type-color          : oklch(from var(--opticm-l-red) 60% c h);\r
 	--opticm-default-syntax-property-color      : oklch(from var(--opticm-l-turquoise) 60% c h);\r
 	--opticm-default-syntax-local-variable-color: oklch(from var(--opticm-l-yellowgreen) 60% c h);\r
@@ -223,8 +223,8 @@ var variables_default = `/**\r
 	--opticm-default-syntax-comment-color: oklch(from var(--opticm-color-text) l c h / 0.5);\r
 	--opticm-default-syntax-keyword-color: oklch(from var(--opticm-l-brown) 80% c h);\r
 \r
-	--opticm-default-syntax-variable-color      : oklch(from var(--opticm-l-green) 90% 0.01 h);\r
-	--opticm-default-syntax-function-color      : oklch(from var(--opticm-l-green) 90% 0.01 h);\r
+	--opticm-default-syntax-variable-color      : var(--opticm-color-text);\r
+	--opticm-default-syntax-function-color      : var(--opticm-color-text);  /* Since Acorn cannot distinguish, it must be the same as the above.*/\r
 	--opticm-default-syntax-type-color          : oklch(from var(--opticm-l-red) 80% c h);\r
 	--opticm-default-syntax-property-color      : oklch(from var(--opticm-l-turquoise) 80% c h);\r
 	--opticm-default-syntax-local-variable-color: oklch(from var(--opticm-l-yellowgreen) 80% c h);\r
