@@ -469,6 +469,8 @@ export class Editor {
 					const first = view.state.doc.lineAt(start).number;
 					const last  = view.state.doc.lineAt(end).number;
 					for (let line = first; line < last; line++) {
+						// Enter between paired braces leaves the caret on an indented inner line.
+						if (line === head && !view.state.doc.line(line).text.trim()) continue;
 						lines.add(line);
 					}
 					if (head === last) {

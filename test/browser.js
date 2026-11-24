@@ -447,6 +447,12 @@ try {
 	const replaceField = editorA.querySelector('.cm-search input[name="replace"]');
 	assert(replaceField && document.activeElement === replaceField, 'legacy replace shortcut focuses the replacement field');
 	editorA.querySelector('.cm-search button[name="close"]').click();
+	a.setSettings({ autoFormat: true });
+	a.loadDocument('class Hoge {}');
+	a.moveTo({ line: 0, ch: 'class Hoge {'.length });
+	press(editorA, 'Enter');
+	assert(a.getValue() === 'class Hoge {\n\t\n}', 'Enter between class braces keeps indentation with auto-format enabled');
+	a.setSettings({ autoFormat: false });
 	a.loadDocument('function one() { return 1; }');
 	b.focus();
 	const focusEvents = [];
