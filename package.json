@@ -1,7 +1,7 @@
 {
 	"name": "opticm",
 	"version": "0.1.0",
-	"description": "Standalone CodeMirror 6 editor component",
+	"description": "Code editor component for programming learners",
 	"license": "MIT",
 	"private": true,
 	"type": "module",
@@ -61,5 +61,5 @@
 		"klales": "github:takty/klales",
 		"vite": "^8.3.8"
 	},
-	"packageManager": "yarn@4.18.0"
+	"packageManager": "yarn@4.19.0"
 }

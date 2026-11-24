@@ -159,7 +159,7 @@ var variables_default = `/**\r
 	--opticm-default-structure-declaration-immutable-fill  : oklch(from var(--opticm-l-blue)     99% 0.015 h);\r
 	--opticm-default-structure-declaration-immutable-stroke: oklch(from var(--opticm-l-blue)     80% 0.25 h);\r
 	--opticm-default-structure-declaration-padding-left    : 2;\r
-	--opticm-default-structure-declaration-padding-right   : 1;\r
+	--opticm-default-structure-declaration-padding-right   : 2;\r
 	--opticm-default-structure-declaration-border-width    : 0.5;\r
 	--opticm-default-structure-declaration-side-width-scale: 0.25;\r
 }\r

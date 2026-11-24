@@ -145,7 +145,7 @@
 	--opticm-default-structure-declaration-immutable-fill  : oklch(from var(--opticm-l-blue)     99% 0.015 h);
 	--opticm-default-structure-declaration-immutable-stroke: oklch(from var(--opticm-l-blue)     80% 0.25 h);
 	--opticm-default-structure-declaration-padding-left    : 2;
-	--opticm-default-structure-declaration-padding-right   : 1;
+	--opticm-default-structure-declaration-padding-right   : 2;
 	--opticm-default-structure-declaration-border-width    : 0.5;
 	--opticm-default-structure-declaration-side-width-scale: 0.25;
 }

@@ -17,7 +17,7 @@ var variables_default = `/**\r
  * CSS custom properties\r
  *\r
  * @author Takuto Yanagida\r
- * @version 2026-11-23\r
+ * @version 2026-11-24\r
  */\r
 \r
 /* Standalone extensions inherit palette defaults and any overrides from their host page. */\r
@@ -62,8 +62,8 @@ var variables_default = `/**\r
 	--opticm-default-gutter-color                  : oklch(from var(--opticm-color-text) l c h / 0.65);\r
 	--opticm-default-gutter-number-hover-background: oklch(from var(--opticm-l-cyan) l c h / 0.1);\r
 \r
-	--opticm-default-selection-match-border-color  : var(--opticm-l-cyan);\r
-	--opticm-default-popup-shadow                  : 0 0 2px oklch(from var(--opticm-color-text) l c h / 0.15), 0 2px 4px oklch(from var(--opticm-color-text) l c h / 0.25);\r
+	--opticm-default-selection-match-border-color: var(--opticm-l-cyan);\r
+	--opticm-default-popup-shadow                : 0 0 2px oklch(from var(--opticm-color-text) l c h / 0.15), 0 2px 4px oklch(from var(--opticm-color-text) l c h / 0.25);\r
 \r
 	--opticm-default-bracket-matching-background: transparent;\r
 	--opticm-default-bracket-matching-color     : inherit;\r
@@ -124,8 +124,8 @@ var variables_default = `/**\r
 	--opticm-default-syntax-property-color      : oklch(from var(--opticm-l-turquoise) 60% c h);\r
 	--opticm-default-syntax-local-variable-color: oklch(from var(--opticm-l-yellowgreen) 60% c h);\r
 \r
-	--opticm-default-syntax-literal-color     : oklch(from var(--opticm-l-orange) 65% c h / 0.8);\r
-	--opticm-default-syntax-literal-weight    : bold;\r
+	--opticm-default-syntax-literal-color : oklch(from var(--opticm-l-orange) 65% c h / 0.8);\r
+	--opticm-default-syntax-literal-weight: bold;\r
 \r
 	--opticm-default-syntax-definition-color          : oklch(from var(--opticm-color-text) l c h / 0.75);\r
 	--opticm-default-syntax-function-definition-color : oklch(from var(--opticm-color-text) l c h / 0.75);\r
@@ -160,7 +160,7 @@ var variables_default = `/**\r
 	--opticm-default-structure-declaration-immutable-fill  : oklch(from var(--opticm-l-blue)     99% 0.015 h);\r
 	--opticm-default-structure-declaration-immutable-stroke: oklch(from var(--opticm-l-blue)     80% 0.25 h);\r
 	--opticm-default-structure-declaration-padding-left    : 2;\r
-	--opticm-default-structure-declaration-padding-right   : 1;\r
+	--opticm-default-structure-declaration-padding-right   : 2;\r
 	--opticm-default-structure-declaration-border-width    : 0.5;\r
 	--opticm-default-structure-declaration-side-width-scale: 0.25;\r
 }\r
