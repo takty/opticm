@@ -143,17 +143,17 @@ var variables_default = `/**\r
 	--opticm-default-structure-token-height-scale: 1.9;\r
 	--opticm-default-structure-token-radius-scale: 0.2;\r
 \r
-	--opticm-default-structure-reference-fill           : var(--opticm-color-editor);\r
+	--opticm-default-structure-reference-fill           : oklch(from var(--opticm-color-editor) l c h / 0.95);\r
 	--opticm-default-structure-reference-stroke         : oklch(from var(--opticm-color-text) l c h / 0.2);\r
 	--opticm-default-structure-reference-shadow-blur    : 4;\r
 	--opticm-default-structure-reference-shadow-offset-y: 1;\r
 \r
-	--opticm-default-structure-declaration-var-fill        : oklch(from var(--opticm-color-text) l c h / 0.05);\r
-	--opticm-default-structure-declaration-var-stroke      : oklch(from var(--opticm-color-text) l c h / 0.15);\r
-	--opticm-default-structure-declaration-mutable-fill    : oklch(from var(--opticm-l-cyan) 90% c h / 0.15);\r
-	--opticm-default-structure-declaration-mutable-stroke  : oklch(from var(--opticm-l-cyan) 60% c h / 0.5);\r
-	--opticm-default-structure-declaration-immutable-fill  : oklch(from var(--opticm-l-blue) 90% c h / 0.15);\r
-	--opticm-default-structure-declaration-immutable-stroke: oklch(from var(--opticm-l-blue) 60% c h / 0.5);\r
+	--opticm-default-structure-declaration-var-fill        : oklch(from var(--opticm-color-text) 98% c h);\r
+	--opticm-default-structure-declaration-var-stroke      : oklch(from var(--opticm-color-text) 80% c h);\r
+	--opticm-default-structure-declaration-mutable-fill    : oklch(from var(--opticm-l-cyan)     98% 0.025 h);\r
+	--opticm-default-structure-declaration-mutable-stroke  : oklch(from var(--opticm-l-cyan)     80% 0.25 h);\r
+	--opticm-default-structure-declaration-immutable-fill  : oklch(from var(--opticm-l-blue)     98% 0.025 h);\r
+	--opticm-default-structure-declaration-immutable-stroke: oklch(from var(--opticm-l-blue)     80% 0.25 h);\r
 	--opticm-default-structure-declaration-padding-left    : 1;\r
 	--opticm-default-structure-declaration-padding-right   : 1;\r
 	--opticm-default-structure-declaration-border-width    : 0.5;\r
@@ -235,15 +235,16 @@ var variables_default = `/**\r
 	--opticm-default-structure-loop-fill       : oklch(from var(--opticm-l-cyan) l c h / 0.25);\r
 	--opticm-default-structure-loop2-fill      : oklch(from var(--opticm-l-purple) l c h / 0.25);\r
 \r
-	--opticm-default-structure-reference-fill  : var(--opticm-color-editor);\r
-	--opticm-default-structure-reference-stroke: oklch(from var(--opticm-color-text) l c h / 0.5);\r
+	--opticm-default-structure-reference-fill           : oklch(from var(--opticm-color-editor) l c h / 0.95);\r
+	--opticm-default-structure-reference-stroke         : oklch(from var(--opticm-color-text) l c h / 0.5);\r
+	--opticm-default-structure-reference-shadow-offset-y: 0;\r
 \r
-	--opticm-default-structure-declaration-var-fill        : oklch(from var(--opticm-color-text) l c h / 0.15);\r
-	--opticm-default-structure-declaration-var-stroke      : oklch(from var(--opticm-color-text) l c h / 0.25);\r
-	--opticm-default-structure-declaration-mutable-fill    : oklch(from var(--opticm-l-cyan) 90% c h / 0.25);\r
-	--opticm-default-structure-declaration-mutable-stroke  : oklch(from var(--opticm-l-cyan) 60% c h / 0.6);\r
-	--opticm-default-structure-declaration-immutable-fill  : oklch(from var(--opticm-l-blue) 90% c h / 0.25);\r
-	--opticm-default-structure-declaration-immutable-stroke: oklch(from var(--opticm-l-blue) 60% c h / 0.6);\r
+	--opticm-default-structure-declaration-var-fill        : oklch(from var(--opticm-color-text) 45% c h);\r
+	--opticm-default-structure-declaration-var-stroke      : oklch(from var(--opticm-color-text) 60% c h);\r
+	--opticm-default-structure-declaration-mutable-fill    : oklch(from var(--opticm-l-cyan) 40% 0.025 h);\r
+	--opticm-default-structure-declaration-mutable-stroke  : oklch(from var(--opticm-l-cyan) 60% 0.25 h);\r
+	--opticm-default-structure-declaration-immutable-fill  : oklch(from var(--opticm-l-blue) 40% 0.025 h);\r
+	--opticm-default-structure-declaration-immutable-stroke: oklch(from var(--opticm-l-blue) 60% 0.25 h);\r
 }\r
 `;
 
