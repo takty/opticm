@@ -62,10 +62,10 @@
 	--opticm-default-bracket-active-background  : oklch(from var(--opticm-l-yellow) 90% c h / 0.65);
 
 	--opticm-default-function-gutter-edge-width      : 0.5ch;
-	--opticm-default-function-gutter-edge-color      : oklch(from var(--opticm-l-purple) 60% c h / 0.15);
-	--opticm-default-function-gutter-edge-hover-color: oklch(from var(--opticm-l-purple) 60% c h / 0.25);
+	--opticm-default-function-gutter-edge-color      : oklch(from var(--opticm-l-purple) 80% 0.1 h / 0.8);
+	--opticm-default-function-gutter-edge-hover-color: oklch(from var(--opticm-l-purple) 80% 0.1 h / 0.95);
 	--opticm-default-function-stripe-width           : 0.5ch;
-	--opticm-default-function-stripe-color           : oklch(from var(--opticm-l-purple) 60% c h / 0.15);
+	--opticm-default-function-stripe-color           : oklch(from var(--opticm-l-purple) 99% 0.1 h / 0.5);
 	--opticm-default-function-gutter-edge-pattern    : repeating-linear-gradient(
 		135deg, transparent, transparent var(--opticm-function-stripe-width, var(--opticm-default-function-stripe-width)),
 		var(--opticm-function-stripe-color, var(--opticm-default-function-stripe-color)) var(--opticm-function-stripe-width, var(--opticm-default-function-stripe-width)),
@@ -76,7 +76,7 @@
 	--opticm-default-function-number-font-variant : tabular-nums;
 	--opticm-default-function-number-color        : oklch(from var(--opticm-l-orange) 60% c h);
 	--opticm-default-function-active-number-color : oklch(from var(--opticm-l-orange) 60% c h);
-	--opticm-default-function-background          : oklch(from var(--opticm-color-text) l c h / 0.025);
+	--opticm-default-function-background          : oklch(from var(--opticm-color-editor) 98% c h);
 	--opticm-default-function-alternate-background: oklch(from var(--opticm-color-text) l c h / 0.05);
 
 	--opticm-default-function-scroll-marker-radius: 50%;
@@ -100,7 +100,7 @@
 															0px 1px 1px var(--opticm-color-editor), 1px -1px 1px var(--opticm-color-editor),  0px -1px 1px var(--opticm-color-editor), -1px  1px 1px var(--opticm-color-editor);
 
 	--opticm-default-syntax-comment-color : oklch(from var(--opticm-color-text) l c h / 0.5);
-	--opticm-default-syntax-keyword-color : oklch(from var(--opticm-l-brown) 60% c h);
+	--opticm-default-syntax-keyword-color : oklch(from var(--opticm-l-brown) 55% c h);
 	--opticm-default-syntax-comment-weight: bold;
 	--opticm-default-syntax-keyword-weight: bold;
 
@@ -110,7 +110,7 @@
 	--opticm-default-syntax-property-color      : oklch(from var(--opticm-l-turquoise) 60% c h);
 	--opticm-default-syntax-local-variable-color: oklch(from var(--opticm-l-yellowgreen) 60% c h);
 
-	--opticm-default-syntax-literal-color     : oklch(from var(--opticm-l-orange) l c h / 0.8);
+	--opticm-default-syntax-literal-color     : oklch(from var(--opticm-l-orange) 65% c h / 0.8);
 	--opticm-default-syntax-literal-weight    : bold;
 	--opticm-default-syntax-invalid-decoration: underline wavy var(--opticm-l-red);
 
@@ -142,14 +142,14 @@
 
 	--opticm-default-structure-declaration-var-fill        : oklch(from var(--opticm-color-text) 98% c h);
 	--opticm-default-structure-declaration-var-stroke      : oklch(from var(--opticm-color-text) 80% c h);
-	--opticm-default-structure-declaration-mutable-fill    : oklch(from var(--opticm-l-cyan)     98% 0.025 h);
+	--opticm-default-structure-declaration-mutable-fill    : oklch(from var(--opticm-l-cyan)     99% 0.015 h);
 	--opticm-default-structure-declaration-mutable-stroke  : oklch(from var(--opticm-l-cyan)     80% 0.25 h);
-	--opticm-default-structure-declaration-immutable-fill  : oklch(from var(--opticm-l-blue)     98% 0.025 h);
+	--opticm-default-structure-declaration-immutable-fill  : oklch(from var(--opticm-l-blue)     99% 0.015 h);
 	--opticm-default-structure-declaration-immutable-stroke: oklch(from var(--opticm-l-blue)     80% 0.25 h);
-	--opticm-default-structure-declaration-padding-left    : 1;
+	--opticm-default-structure-declaration-padding-left    : 2;
 	--opticm-default-structure-declaration-padding-right   : 1;
 	--opticm-default-structure-declaration-border-width    : 0.5;
-	--opticm-default-structure-declaration-side-width-scale: 0.35;
+	--opticm-default-structure-declaration-side-width-scale: 0.25;
 }
 
 :where(.opticm[data-opticm-color-scheme="light"]) {
@@ -192,7 +192,7 @@
 
 	--opticm-default-function-number-color        : oklch(from var(--opticm-l-orange) 95% c h);
 	--opticm-default-function-active-number-color : oklch(from var(--opticm-l-orange) 95% c h);
-	--opticm-default-function-background          : oklch(from var(--opticm-color-text) l c h / 0.075);
+	--opticm-default-function-background          : oklch(from var(--opticm-color-editor) 15% c h);
 	--opticm-default-function-alternate-background: oklch(from var(--opticm-color-text) l c h / 0.15);
 
 	--opticm-default-color-highlighted-line-start: oklch(from var(--opticm-l-yellow) l c h / 0.07);
