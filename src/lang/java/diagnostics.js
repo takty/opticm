@@ -1,8 +1,24 @@
+const MESSAGES = {
+	en: {
+		unclosedString  : 'Expected a closing quote for this string.',
+		missingToken    : token => `Expected "${token}".`,
+		unexpectedSyntax: 'Unexpected syntax.',
+		wrapInBraces    : 'Wrap the statement in braces.',
+	},
+	ja: {
+		unclosedString  : '文字列を閉じる「"」が必要です。',
+		missingToken    : token => `「${token}」が必要です。`,
+		unexpectedSyntax: 'この部分の構文を確認してください。',
+		wrapInBraces    : '文を波括弧 { } で囲んでください。',
+	},
+};
+
 const LOOP_STATEMENTS = new Set(['for_statement', 'enhanced_for_statement', 'while_statement', 'do_statement']);
 
 export function diagnoseJava(root, locale, parser, source) {
+	const messages = locale === 'ja' ? MESSAGES.ja : MESSAGES.en;
 	const opening = parser && root.hasError ? findUnclosedString(root) : null;
-	if (!opening) return collectDiagnostics(root, locale);
+	if (!opening) return collectDiagnostics(root, messages);
 
 	const start = opening.startIndex;
 	const line = opening.startPosition.row;
@@ -19,11 +35,11 @@ export function diagnoseJava(root, locale, parser, source) {
 			ch: position.line === line && position.ch > insertionColumn ? position.ch - 1 : position.ch,
 		});
 		return [{
-			message: locale === 'ja' ? '文字列を閉じる「"」が必要です。' : 'Expected a closing quote for this string.',
+			message: messages.unclosedString,
 			severity: 'error',
 			from: { line, ch: column },
 			to: { line, ch: column + 1 },
-		}, ...collectDiagnostics(repaired.rootNode, locale).map(item => ({
+		}, ...collectDiagnostics(repaired.rootNode, messages).map(item => ({
 			...item,
 			from: originalPosition(item.from),
 			to: originalPosition(item.to),
@@ -56,8 +72,7 @@ function findUnclosedString(root) {
 	}
 }
 
-function collectDiagnostics(root, locale) {
-	const japanese = locale === 'ja';
+function collectDiagnostics(root, messages) {
 	const diagnostics = [];
 	const position = ({ row, column }) => ({ line: row, ch: column });
 	const add = (node, severity, message) => diagnostics.push({
@@ -68,7 +83,7 @@ function collectDiagnostics(root, locale) {
 	});
 	const checkBody = node => {
 		if (!node || node.type === 'block' || node.hasError) return;
-		add(node, 'warning', japanese ? '文を波括弧 { } で囲んでください。' : 'Wrap the statement in braces.');
+		add(node, 'warning', messages.wrapInBraces);
 	};
 
 	const cursor = root.walk();
@@ -76,9 +91,9 @@ function collectDiagnostics(root, locale) {
 		for (;;) {
 			const node = cursor.currentNode;
 			if (node.isMissing) {
-				add(node, 'error', japanese ? `「${node.type}」が必要です。` : `Expected "${node.type}".`);
+				add(node, 'error', messages.missingToken(node.type));
 			} else if (node.isError) {
-				add(node, 'error', japanese ? 'この部分の構文を確認してください。' : 'Unexpected syntax.');
+				add(node, 'error', messages.unexpectedSyntax);
 			} else if (node.type === 'if_statement') {
 				checkBody(node.childForFieldName('consequence'));
 				const alternative = node.childForFieldName('alternative');
