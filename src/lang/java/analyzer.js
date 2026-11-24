@@ -210,11 +210,7 @@ export function analyzeJava(source, rootNode) {
 	}
 
 	function visit(node) {
-		if (node.isError) {
-			add(node, 'invalid');
-			return;
-		}
-		if (node.isMissing) return;
+		if (node.isError || node.isMissing) return;
 		locals.enter(node);
 		if (node.type === 'dimensions') {
 			let owner = node.parent;

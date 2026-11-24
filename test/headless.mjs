@@ -491,6 +491,30 @@ try {
 					structureIsPainted() && classPainted() && count &&
 					javaAnalysis.complete && !Object.hasOwn(javaAnalysis, 'decorations'),
 					'Built docs Java renders syntax, structure, per-method line numbers, and reference highlighting');
+				const prefixLine = [...document.querySelectorAll('.cm-line')]
+					.find(node => node.textContent.includes('String prefix = "Hello"'));
+				const content = prefixLine.closest('.cm-content');
+				content.focus();
+				const walker = document.createTreeWalker(prefixLine, NodeFilter.SHOW_TEXT);
+				let offset = prefixLine.textContent.indexOf('"Hello"') + '"Hello'.length;
+				let text = walker.nextNode();
+				while (text && offset >= text.length) {
+					offset -= text.length;
+					text = walker.nextNode();
+				}
+				assert(text?.data[offset] === '"', 'The Java sample has a closing quote to delete');
+				window.getSelection().setBaseAndExtent(text, offset, text, offset + 1);
+				document.execCommand('delete');
+				const editor = content.closest('.cm-editor');
+				for (let i = 0; i < 100 && !editor.querySelector('.cm-lintRange-error'); i++)
+					await new Promise(resolve => setTimeout(resolve, 20));
+				const errors = [...editor.querySelectorAll('.cm-lintRange-error')];
+				assert(errors.length === 1 && errors[0].textContent === '"' &&
+					errors[0].closest('.cm-line').textContent.includes('String prefix = "Hello;') &&
+					getComputedStyle(errors[0]).backgroundImage.includes('svg'),
+					'The unclosed Java string has one lint wave on its opening quote');
+				assert(!editor.querySelector('.cm-syntax-invalid'),
+					'Parser recovery ranges do not appear in the Java editor DOM');
 				document.querySelector('#code-language input[value="javascript"]').click();
 				for (let i = 0; i < 100 && !document.querySelector('#status').textContent.includes('Switched to javascript'); i++)
 					await new Promise(resolve => setTimeout(resolve, 20));

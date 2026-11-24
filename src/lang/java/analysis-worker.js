@@ -17,7 +17,7 @@ self.onmessage = async ({ data: { type, treeSitterWasmURL, javaWasmURL } }) => {
 				tree = parser.parse(text);
 				const result = diagnosticLocale === undefined
 					? { version, text, ...analyzeJava(text, tree.rootNode) }
-					: diagnoseJava(tree.rootNode, diagnosticLocale);
+					: diagnoseJava(tree.rootNode, diagnosticLocale, parser, text);
 				self.postMessage({ id, result });
 			} catch (error) {
 				self.postMessage({ id, error: String(error.message || error) });

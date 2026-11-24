@@ -10,7 +10,6 @@ const style = HighlightStyle.define([
 	{ tag: tags.function(tags.variableName), class: 'function' },
 	{ tag: tags.variableName, class: 'variable' },
 	{ tag: tags.typeName, class: 'type' },
-	{ tag: tags.invalid, class: 'invalid' },
 ]);
 
 const typeDeclarations = new Set([

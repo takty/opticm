@@ -15,7 +15,6 @@ const syntaxKinds = new Set([
 	'function-definition',
 	'variable',
 	'literal',
-	'invalid',
 	'property',
 ]);
 const semanticKinds = new Set([
@@ -36,7 +35,6 @@ const allKinds = new Set([
 	'function-definition',
 	'variable',
 	'literal',
-	'invalid',
 	'definition',
 	'field-definition',
 	'property-definition',

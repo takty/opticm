@@ -9,7 +9,6 @@ const style = HighlightStyle.define([
 	{ tag: tags.variableName, class: 'variable' },
 	{ tag: tags.local(tags.variableName), class: 'local-variable' },
 	{ tag: tags.propertyName, class: 'property' },
-	{ tag: tags.invalid, class: 'invalid' },
 ]);
 
 const FUNCTION_SCOPES = new Set(['FunctionDeclaration', 'FunctionExpression', 'ArrowFunction', 'MethodDeclaration']);

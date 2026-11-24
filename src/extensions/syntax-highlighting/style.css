@@ -34,10 +34,6 @@
 		font-weight: var(--opticm-syntax-literal-weight, var(--opticm-default-syntax-literal-weight));
 	}
 
-	.cm-syntax-invalid {
-		text-decoration: var(--opticm-syntax-invalid-decoration, var(--opticm-default-syntax-invalid-decoration));
-	}
-
 	:is(.cm-syntax-definition, .cm-syntax-definition *) {
 		color      : var(--opticm-syntax-definition-color, var(--opticm-default-syntax-definition-color));
 		font-weight: var(--opticm-syntax-definition-weight, var(--opticm-default-syntax-definition-weight));
@@ -56,20 +52,5 @@
 	:is(.cm-syntax-class-definition, .cm-syntax-class-definition *) {
 		color      : var(--opticm-syntax-class-definition-color, var(--opticm-default-syntax-class-definition-color));
 		font-weight: var(--opticm-syntax-class-definition-weight, var(--opticm-default-syntax-class-definition-weight));
-	}
-
-	.opticm & :where(.cm-syntax-invalid) {
-		text-decoration: var(--opticm-syntax-invalid-decoration, none);
-		border-bottom  : 0.15em solid var(--opticm-syntax-invalid-border-color, var(--opticm-default-syntax-invalid-border-color));
-	}
-
-	/* Let an overlapping lint error provide the underline. */
-	:is(
-		.cm-syntax-invalid.cm-lintRange-error,
-		.cm-lintRange-error .cm-syntax-invalid,
-		.cm-syntax-invalid:has(.cm-lintRange-error)
-	) {
-		text-decoration: none;
-		border-bottom  : 0;
 	}
 }

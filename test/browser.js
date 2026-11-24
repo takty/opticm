@@ -527,7 +527,7 @@ try {
 	colorProbe.innerHTML = '<div class="cm-selectionBackground"></div><div class="cm-activeLine"></div>' +
 		'<div class="cm-line error-line"></div><div class="cm-cursor"></div><div class="cm-gutters"></div>' +
 		'<div class="cm-selectionMatch"></div><div class="cm-tooltip"></div><div class="cm-panels"></div>' +
-		'<span class="cm-syntax-keyword"></span><span class="cm-syntax-invalid"></span>';
+		'<span class="cm-syntax-keyword"></span>';
 	themeRoot.append(colorProbe);
 	try {
 		const probeStyle = (selector, pseudo) => getComputedStyle(colorProbe.querySelector(selector), pseudo);
@@ -560,7 +560,6 @@ try {
 		for (const name of [
 			'selection-background', 'focused-line-background', 'error-line-background', 'cursor-color',
 			'ime-cursor-background', 'function-background', 'gutter-color', 'selection-match-border-color',
-			'syntax-invalid-border-color',
 		]) colorProbe.style.setProperty('--opticm-' + name, '#234567');
 		assert(
 			probeStyle('.cm-selectionBackground').backgroundColor === 'rgb(35, 69, 103)' &&
@@ -570,8 +569,7 @@ try {
 				probeStyle('.cm-cursor').backgroundColor === 'rgb(35, 69, 103)' &&
 				probeStyle('.cm-gutters').backgroundColor === 'rgb(35, 69, 103)' &&
 				probeStyle('.cm-gutters').color === 'rgb(35, 69, 103)' &&
-				probeStyle('.cm-selectionMatch').borderBottomColor === 'rgb(35, 69, 103)' &&
-				probeStyle('.cm-syntax-invalid').borderBottomColor === 'rgb(35, 69, 103)',
+				probeStyle('.cm-selectionMatch').borderBottomColor === 'rgb(35, 69, 103)',
 			'component colors can be overridden independently through theme properties',
 		);
 		colorProbe.style.removeProperty('--opticm-cursor-color');
@@ -1535,17 +1533,15 @@ try {
 		javaEditor.loadDocument('class Broken {\n  int value = ;\n}');
 		const broken = await javaEditor.analyzeNow();
 		assert(
-			broken && !broken.complete && javaRoot.querySelector('.cm-syntax-invalid') &&
+			broken && !broken.complete && !javaRoot.querySelector('.cm-syntax-invalid') &&
 				!javaRoot.querySelector('.cm-function-number'),
-			'Java retains parser error ranges and clears stale method structure',
+			'Java analysis clears stale method structure without marking parser errors in the DOM',
 		);
 		await waitFor(() => javaRoot.querySelector('.cm-lintRange-error') &&
 			javaRoot.querySelector('.cm-lint-marker-error'), 'Java syntax errors use the diagnostic underline and gutter');
-		assert(
-			[...javaRoot.querySelectorAll('.cm-syntax-invalid')].every(node =>
-				getComputedStyle(node).textDecorationLine === 'none' && getComputedStyle(node).borderBottomStyle === 'none'),
-			'Java syntax highlighting does not draw a second underline',
-		);
+		javaEditor.setSettings({ diagnostics: false });
+		assert(!javaRoot.querySelector('.cm-syntax-invalid, .cm-lintRange-error, .cm-lint-marker-error'),
+			'Java shows no error marks when diagnostics are disabled');
 	} finally {
 		javaEditor?.destroy();
 	}

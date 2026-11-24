@@ -612,13 +612,13 @@ ancestor to change its appearance without affecting other editors:
 | Editor interaction | `--opticm-editor-post-edit-cursor` |
 | Editor colors | `--opticm-selection-background`, `--opticm-active-line-background`, `--opticm-focused-line-background`, `--opticm-focused-line-shadow`, `--opticm-error-line-background` |
 | Cursor and gutter colors | `--opticm-cursor-color`, `--opticm-cursor-bottom-color`, `--opticm-ime-cursor-background`, `--opticm-function-background`, `--opticm-gutter-color`, `--opticm-active-gutter-background` |
-| Search, syntax and popup colors | `--opticm-selection-match-background`, `--opticm-selection-match-border-color`, `--opticm-syntax-invalid-border-color`, `--opticm-popup-shadow` |
+| Search, syntax and popup colors | `--opticm-selection-match-background`, `--opticm-selection-match-border-color`, `--opticm-popup-shadow` |
 | Function numbers | `--opticm-function-number-color`, `--opticm-function-active-number-color`, `--opticm-function-line-color`, `--opticm-function-number-font-variant`, `--opticm-function-line-align` |
 | Function gutter edge | `--opticm-function-gutter-edge-width`, `--opticm-function-gutter-edge-color`, `--opticm-function-gutter-edge-hover-color`, `--opticm-function-gutter-edge-pattern`, `--opticm-function-stripe-width`, `--opticm-function-stripe-color` |
 | Function highlighting | `--opticm-function-alternate-background` |
 | Function scroll markers | `--opticm-function-scroll-marker-radius`, `--opticm-function-scroll-marker-color` |
 | Gutter selection | `--opticm-gutter-cursor`, `--opticm-gutter-line-selection-cursor` (complete CSS `cursor` values) |
-| Syntax highlighting | `--opticm-syntax-comment-color`, `--opticm-syntax-comment-weight`, `--opticm-syntax-keyword-color`, `--opticm-syntax-keyword-weight`, `--opticm-syntax-type-color`, `--opticm-syntax-function-color`, `--opticm-syntax-definition-color`, `--opticm-syntax-definition-weight`, `--opticm-syntax-property-color`, `--opticm-syntax-variable-color`, `--opticm-syntax-local-variable-color`, `--opticm-syntax-literal-color`, `--opticm-syntax-literal-weight`, `--opticm-syntax-literal-shadow`, `--opticm-syntax-invalid-decoration` |
+| Syntax highlighting | `--opticm-syntax-comment-color`, `--opticm-syntax-comment-weight`, `--opticm-syntax-keyword-color`, `--opticm-syntax-keyword-weight`, `--opticm-syntax-type-color`, `--opticm-syntax-function-color`, `--opticm-syntax-definition-color`, `--opticm-syntax-definition-weight`, `--opticm-syntax-property-color`, `--opticm-syntax-variable-color`, `--opticm-syntax-local-variable-color`, `--opticm-syntax-literal-color`, `--opticm-syntax-literal-weight`, `--opticm-syntax-literal-shadow` |
 | Indentation rulers | `--opticm-indent-ruler-width`, `--opticm-indent-ruler-style`, `--opticm-indent-ruler-color` |
 
 Extension style defaults are centralized in `src/styles/variables.css`; each

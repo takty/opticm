@@ -326,7 +326,6 @@ var variables_default = `/**\r
 	--opticm-default-gutter-color                  : oklch(from var(--opticm-color-text) l c h / 0.65);\r
 	--opticm-default-gutter-number-hover-background: oklch(from var(--opticm-l-cyan) l c h / 0.1);\r
 \r
-	--opticm-default-syntax-invalid-border-color   : var(--opticm-l-red);\r
 	--opticm-default-selection-match-border-color  : var(--opticm-l-cyan);\r
 	--opticm-default-popup-shadow                  : 0 0 2px oklch(from var(--opticm-color-text) l c h / 0.15), 0 2px 4px oklch(from var(--opticm-color-text) l c h / 0.25);\r
 \r
@@ -341,10 +340,10 @@ var variables_default = `/**\r
 	--opticm-default-bracket-active-background  : oklch(from var(--opticm-l-yellow) 90% c h / 0.65);\r
 \r
 	--opticm-default-function-gutter-edge-width      : 0.5ch;\r
-	--opticm-default-function-gutter-edge-color      : oklch(from var(--opticm-l-purple) 60% c h / 0.15);\r
-	--opticm-default-function-gutter-edge-hover-color: oklch(from var(--opticm-l-purple) 60% c h / 0.25);\r
+	--opticm-default-function-gutter-edge-color      : oklch(from var(--opticm-l-purple) 80% 0.1 h / 0.8);\r
+	--opticm-default-function-gutter-edge-hover-color: oklch(from var(--opticm-l-purple) 80% 0.1 h / 0.95);\r
 	--opticm-default-function-stripe-width           : 0.5ch;\r
-	--opticm-default-function-stripe-color           : oklch(from var(--opticm-l-purple) 60% c h / 0.15);\r
+	--opticm-default-function-stripe-color           : oklch(from var(--opticm-l-purple) 99% 0.1 h / 0.5);\r
 	--opticm-default-function-gutter-edge-pattern    : repeating-linear-gradient(\r
 		135deg, transparent, transparent var(--opticm-function-stripe-width, var(--opticm-default-function-stripe-width)),\r
 		var(--opticm-function-stripe-color, var(--opticm-default-function-stripe-color)) var(--opticm-function-stripe-width, var(--opticm-default-function-stripe-width)),\r
@@ -355,7 +354,7 @@ var variables_default = `/**\r
 	--opticm-default-function-number-font-variant : tabular-nums;\r
 	--opticm-default-function-number-color        : oklch(from var(--opticm-l-orange) 60% c h);\r
 	--opticm-default-function-active-number-color : oklch(from var(--opticm-l-orange) 60% c h);\r
-	--opticm-default-function-background          : oklch(from var(--opticm-color-text) l c h / 0.025);\r
+	--opticm-default-function-background          : oklch(from var(--opticm-color-editor) 98% c h);\r
 	--opticm-default-function-alternate-background: oklch(from var(--opticm-color-text) l c h / 0.05);\r
 \r
 	--opticm-default-function-scroll-marker-radius: 50%;\r
@@ -379,7 +378,7 @@ var variables_default = `/**\r
 															0px 1px 1px var(--opticm-color-editor), 1px -1px 1px var(--opticm-color-editor),  0px -1px 1px var(--opticm-color-editor), -1px  1px 1px var(--opticm-color-editor);\r
 \r
 	--opticm-default-syntax-comment-color : oklch(from var(--opticm-color-text) l c h / 0.5);\r
-	--opticm-default-syntax-keyword-color : oklch(from var(--opticm-l-brown) 60% c h);\r
+	--opticm-default-syntax-keyword-color : oklch(from var(--opticm-l-brown) 55% c h);\r
 	--opticm-default-syntax-comment-weight: bold;\r
 	--opticm-default-syntax-keyword-weight: bold;\r
 \r
@@ -389,9 +388,8 @@ var variables_default = `/**\r
 	--opticm-default-syntax-property-color      : oklch(from var(--opticm-l-turquoise) 60% c h);\r
 	--opticm-default-syntax-local-variable-color: oklch(from var(--opticm-l-yellowgreen) 60% c h);\r
 \r
-	--opticm-default-syntax-literal-color     : oklch(from var(--opticm-l-orange) l c h / 0.8);\r
+	--opticm-default-syntax-literal-color     : oklch(from var(--opticm-l-orange) 65% c h / 0.8);\r
 	--opticm-default-syntax-literal-weight    : bold;\r
-	--opticm-default-syntax-invalid-decoration: underline wavy var(--opticm-l-red);\r
 \r
 	--opticm-default-syntax-definition-color          : oklch(from var(--opticm-color-text) l c h / 0.75);\r
 	--opticm-default-syntax-function-definition-color : oklch(from var(--opticm-color-text) l c h / 0.75);\r
@@ -421,14 +419,14 @@ var variables_default = `/**\r
 \r
 	--opticm-default-structure-declaration-var-fill        : oklch(from var(--opticm-color-text) 98% c h);\r
 	--opticm-default-structure-declaration-var-stroke      : oklch(from var(--opticm-color-text) 80% c h);\r
-	--opticm-default-structure-declaration-mutable-fill    : oklch(from var(--opticm-l-cyan)     98% 0.025 h);\r
+	--opticm-default-structure-declaration-mutable-fill    : oklch(from var(--opticm-l-cyan)     99% 0.015 h);\r
 	--opticm-default-structure-declaration-mutable-stroke  : oklch(from var(--opticm-l-cyan)     80% 0.25 h);\r
-	--opticm-default-structure-declaration-immutable-fill  : oklch(from var(--opticm-l-blue)     98% 0.025 h);\r
+	--opticm-default-structure-declaration-immutable-fill  : oklch(from var(--opticm-l-blue)     99% 0.015 h);\r
 	--opticm-default-structure-declaration-immutable-stroke: oklch(from var(--opticm-l-blue)     80% 0.25 h);\r
-	--opticm-default-structure-declaration-padding-left    : 1;\r
+	--opticm-default-structure-declaration-padding-left    : 2;\r
 	--opticm-default-structure-declaration-padding-right   : 1;\r
 	--opticm-default-structure-declaration-border-width    : 0.5;\r
-	--opticm-default-structure-declaration-side-width-scale: 0.35;\r
+	--opticm-default-structure-declaration-side-width-scale: 0.25;\r
 }\r
 \r
 :where(.opticm[data-opticm-color-scheme="light"]) {\r
@@ -471,7 +469,7 @@ var variables_default = `/**\r
 \r
 	--opticm-default-function-number-color        : oklch(from var(--opticm-l-orange) 95% c h);\r
 	--opticm-default-function-active-number-color : oklch(from var(--opticm-l-orange) 95% c h);\r
-	--opticm-default-function-background          : oklch(from var(--opticm-color-text) l c h / 0.075);\r
+	--opticm-default-function-background          : oklch(from var(--opticm-color-editor) 15% c h);\r
 	--opticm-default-function-alternate-background: oklch(from var(--opticm-color-text) l c h / 0.15);\r
 \r
 	--opticm-default-color-highlighted-line-start: oklch(from var(--opticm-l-yellow) l c h / 0.07);\r
@@ -485,7 +483,7 @@ var variables_default = `/**\r
 	--opticm-default-whitespace-tab-shadow             : none;\r
 \r
 	--opticm-default-syntax-comment-color: oklch(from var(--opticm-color-text) l c h / 0.5);\r
-	--opticm-default-syntax-keyword-color: oklch(from var(--opticm-l-brown) 80% c h);\r
+	--opticm-default-syntax-keyword-color: oklch(from var(--opticm-l-brown) 70% c h);\r
 \r
 	--opticm-default-syntax-variable-color      : var(--opticm-color-text);\r
 	--opticm-default-syntax-function-color      : var(--opticm-color-text);  /* Since Acorn cannot distinguish, it must be the same as the above.*/\r
@@ -569,7 +567,7 @@ function extensionStyles(css) {
 }
 
 // .build/extensions/syntax-highlighting/style.css
-var style_default = ".cm-editor.cm-syntax-highlighting {\n	.cm-syntax-comment {\n		color      : var(--opticm-syntax-comment-color, var(--opticm-default-syntax-comment-color));\n		font-weight: var(--opticm-syntax-comment-weight, var(--opticm-default-syntax-comment-weight));\n	}\n\n	:is(.cm-syntax-keyword, .cm-syntax-operator) {\n		color      : var(--opticm-syntax-keyword-color, var(--opticm-default-syntax-keyword-color));\n		font-weight: var(--opticm-syntax-keyword-weight, var(--opticm-default-syntax-keyword-weight));\n	}\n\n	.cm-syntax-type {\n		color: var(--opticm-syntax-type-color, var(--opticm-default-syntax-type-color));\n	}\n\n	.cm-syntax-function {\n		color: var(--opticm-syntax-function-color, var(--opticm-default-syntax-function-color));\n	}\n\n	.cm-syntax-property {\n		color: var(--opticm-syntax-property-color, var(--opticm-default-syntax-property-color));\n	}\n\n	.cm-syntax-variable {\n		color: var(--opticm-syntax-variable-color, var(--opticm-default-syntax-variable-color));\n	}\n\n	:is(.cm-syntax-local-variable, .cm-syntax-local-reference, .cm-syntax-local-reference .cm-syntax-variable) {\n		color: var(--opticm-syntax-local-variable-color, var(--opticm-default-syntax-local-variable-color));\n	}\n\n	.cm-syntax-literal {\n		color      : var(--opticm-syntax-literal-color, var(--opticm-default-syntax-literal-color));\n		font-weight: var(--opticm-syntax-literal-weight, var(--opticm-default-syntax-literal-weight));\n	}\n\n	.cm-syntax-invalid {\n		text-decoration: var(--opticm-syntax-invalid-decoration, var(--opticm-default-syntax-invalid-decoration));\n	}\n\n	:is(.cm-syntax-definition, .cm-syntax-definition *) {\n		color      : var(--opticm-syntax-definition-color, var(--opticm-default-syntax-definition-color));\n		font-weight: var(--opticm-syntax-definition-weight, var(--opticm-default-syntax-definition-weight));\n	}\n\n	:is(.cm-syntax-function-definition, .cm-syntax-function-definition *) {\n		color      : var(--opticm-syntax-function-definition-color, var(--opticm-default-syntax-function-definition-color));\n		font-weight: var(--opticm-syntax-function-definition-weight, var(--opticm-default-syntax-function-definition-weight));\n	}\n\n	:is(.cm-syntax-field-definition, .cm-syntax-field-definition *, .cm-syntax-property-definition, .cm-syntax-property-definition *) {\n		color      : var(--opticm-syntax-field-definition-color, var(--opticm-default-syntax-field-definition-color));\n		font-weight: var(--opticm-syntax-field-definition-weight, var(--opticm-default-syntax-field-definition-weight));\n	}\n\n	:is(.cm-syntax-class-definition, .cm-syntax-class-definition *) {\n		color      : var(--opticm-syntax-class-definition-color, var(--opticm-default-syntax-class-definition-color));\n		font-weight: var(--opticm-syntax-class-definition-weight, var(--opticm-default-syntax-class-definition-weight));\n	}\n\n	.opticm & :where(.cm-syntax-invalid) {\n		text-decoration: var(--opticm-syntax-invalid-decoration, none);\n		border-bottom  : 0.15em solid var(--opticm-syntax-invalid-border-color, var(--opticm-default-syntax-invalid-border-color));\n	}\n\n	/* Let an overlapping lint error provide the underline. */\n	:is(\n		.cm-syntax-invalid.cm-lintRange-error,\n		.cm-lintRange-error .cm-syntax-invalid,\n		.cm-syntax-invalid:has(.cm-lintRange-error)\n	) {\n		text-decoration: none;\n		border-bottom  : 0;\n	}\n}\n";
+var style_default = ".cm-editor.cm-syntax-highlighting {\n	.cm-syntax-comment {\n		color      : var(--opticm-syntax-comment-color, var(--opticm-default-syntax-comment-color));\n		font-weight: var(--opticm-syntax-comment-weight, var(--opticm-default-syntax-comment-weight));\n	}\n\n	:is(.cm-syntax-keyword, .cm-syntax-operator) {\n		color      : var(--opticm-syntax-keyword-color, var(--opticm-default-syntax-keyword-color));\n		font-weight: var(--opticm-syntax-keyword-weight, var(--opticm-default-syntax-keyword-weight));\n	}\n\n	.cm-syntax-type {\n		color: var(--opticm-syntax-type-color, var(--opticm-default-syntax-type-color));\n	}\n\n	.cm-syntax-function {\n		color: var(--opticm-syntax-function-color, var(--opticm-default-syntax-function-color));\n	}\n\n	.cm-syntax-property {\n		color: var(--opticm-syntax-property-color, var(--opticm-default-syntax-property-color));\n	}\n\n	.cm-syntax-variable {\n		color: var(--opticm-syntax-variable-color, var(--opticm-default-syntax-variable-color));\n	}\n\n	:is(.cm-syntax-local-variable, .cm-syntax-local-reference, .cm-syntax-local-reference .cm-syntax-variable) {\n		color: var(--opticm-syntax-local-variable-color, var(--opticm-default-syntax-local-variable-color));\n	}\n\n	.cm-syntax-literal {\n		color      : var(--opticm-syntax-literal-color, var(--opticm-default-syntax-literal-color));\n		font-weight: var(--opticm-syntax-literal-weight, var(--opticm-default-syntax-literal-weight));\n	}\n\n	:is(.cm-syntax-definition, .cm-syntax-definition *) {\n		color      : var(--opticm-syntax-definition-color, var(--opticm-default-syntax-definition-color));\n		font-weight: var(--opticm-syntax-definition-weight, var(--opticm-default-syntax-definition-weight));\n	}\n\n	:is(.cm-syntax-function-definition, .cm-syntax-function-definition *) {\n		color      : var(--opticm-syntax-function-definition-color, var(--opticm-default-syntax-function-definition-color));\n		font-weight: var(--opticm-syntax-function-definition-weight, var(--opticm-default-syntax-function-definition-weight));\n	}\n\n	:is(.cm-syntax-field-definition, .cm-syntax-field-definition *, .cm-syntax-property-definition, .cm-syntax-property-definition *) {\n		color      : var(--opticm-syntax-field-definition-color, var(--opticm-default-syntax-field-definition-color));\n		font-weight: var(--opticm-syntax-field-definition-weight, var(--opticm-default-syntax-field-definition-weight));\n	}\n\n	:is(.cm-syntax-class-definition, .cm-syntax-class-definition *) {\n		color      : var(--opticm-syntax-class-definition-color, var(--opticm-default-syntax-class-definition-color));\n		font-weight: var(--opticm-syntax-class-definition-weight, var(--opticm-default-syntax-class-definition-weight));\n	}\n}\n";
 
 // .build/extensions/syntax-highlighting/index.js
 var syntaxKinds2 = /* @__PURE__ */ new Set([
@@ -582,7 +580,6 @@ var syntaxKinds2 = /* @__PURE__ */ new Set([
   "function-definition",
   "variable",
   "literal",
-  "invalid",
   "property"
 ]);
 var semanticKinds = /* @__PURE__ */ new Set([
@@ -603,7 +600,6 @@ var allKinds = /* @__PURE__ */ new Set([
   "function-definition",
   "variable",
   "literal",
-  "invalid",
   "definition",
   "field-definition",
   "property-definition",
