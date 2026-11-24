@@ -213,7 +213,7 @@ var variables_default = `/**\r
 	--opticm-default-whitespace-tab-shadow             : none;\r
 \r
 	--opticm-default-syntax-comment-color: oklch(from var(--opticm-color-text) l c h / 0.5);\r
-	--opticm-default-syntax-keyword-color: oklch(from var(--opticm-l-brown) 80% c h);\r
+	--opticm-default-syntax-keyword-color: oklch(from var(--opticm-l-brown) 70% c h);\r
 \r
 	--opticm-default-syntax-variable-color      : var(--opticm-color-text);\r
 	--opticm-default-syntax-function-color      : var(--opticm-color-text);  /* Since Acorn cannot distinguish, it must be the same as the above.*/\r
