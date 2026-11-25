@@ -23,6 +23,99 @@ const waitFor = async (predicate, message) => {
 	throw new Error(message);
 };
 
+async function checkWheelAdjustments() {
+	const host = document.createElement('div');
+	host.className = 'host';
+	document.body.append(host);
+	let editor;
+	try {
+		editor = await createEditor(host, { codeLanguage: null, value: 'sample' });
+		const line = host.querySelector('.cm-line');
+		const wheel = options => {
+			const event = new WheelEvent('wheel', { bubbles: true, cancelable: true, ...options });
+			return !line.dispatchEvent(event);
+		};
+		const lineHeight = () => line.getBoundingClientRect().height;
+		const originalHeight = lineHeight();
+		const up = { ctrlKey: true, shiftKey: true, deltaY: -100 };
+		const down = { ...up, deltaY: 100 };
+		assert(!wheel(up) && editor.getSettings().lineHeight === 165, 'line-height shortcut requires editor focus');
+		editor.focus();
+		assert(wheel(up) && editor.getSettings().lineHeight === 170 && editor.getSettings().fontSize === 16,
+			'Ctrl+Shift+wheel up increases only the line height');
+		assert(lineHeight() > originalHeight, 'line-height shortcut increases the rendered line height');
+		assert(wheel(down) && editor.getSettings().lineHeight === 165 && lineHeight() === originalHeight,
+			'Ctrl+Shift+wheel down decreases the line height');
+		assert(wheel({ ctrlKey: true, deltaY: -100 }) && editor.getSettings().fontSize === 18 && editor.getSettings().lineHeight === 165,
+			'Ctrl+wheel still increases only the font size');
+		assert(!wheel({ deltaY: 100 }), 'unmodified wheel input is left to normal scrolling');
+		editor.setSettings({ lineHeight: 192 });
+		assert(wheel(up) && editor.getSettings().lineHeight === 195, 'line-height shortcut stops at 195%');
+		editor.setSettings({ lineHeight: 138 });
+		assert(wheel(down) && editor.getSettings().lineHeight === 135, 'line-height shortcut stops at 135%');
+	} finally {
+		editor?.destroy();
+		host.remove();
+	}
+}
+
+async function checkDeclarationScrollAlignment() {
+	const nextFrame = () => new Promise(resolve => requestAnimationFrame(resolve));
+	for (const lineWrapping of [false, true]) {
+		const host = document.createElement('div');
+		host.className = 'host';
+		host.style.cssText = `position: fixed; top: 10px; left: 10px; width: ${lineWrapping ? 250 : 550}px`;
+		document.body.append(host);
+		let editor;
+		try {
+			const value = Array.from({ length: 150 }, (_, i) => {
+				const comment = lineWrapping && i % 4 === 0 ? ` // ${'wrapped content '.repeat(4)}` : '';
+				return `const declaration${String(i).padStart(3, '0')} = ${i};${comment}`;
+			}).join('\n');
+			editor = await createEditor(host, {
+				value, fontSize: 18, lineWrapping, structureHighlight: false, referenceHighlight: false, diagnostics: false,
+			});
+			const content = host.querySelector('.cm-content');
+			const scroller = host.querySelector('.cm-scroller');
+			const canvas = host.querySelector('.code-structure-view');
+			const context = canvas.getContext('2d');
+			const clearRect = context.clearRect.bind(context);
+			const roundRect = context.roundRect.bind(context);
+			const centers = [];
+			context.clearRect = (...args) => {
+				centers.length = 0;
+				return clearRect(...args);
+			};
+			context.roundRect = (x, y, width, height, radii) => {
+				centers.push(y + height / 2);
+				return roundRect(x, y, width, height, radii);
+			};
+
+			editor.focus();
+			const scrollDistance = scroller.scrollHeight - scroller.clientHeight;
+			scroller.scrollTop = lineWrapping ? scrollDistance / 2 : scrollDistance;
+			for (let i = 0; i < 4; i++) await nextFrame();
+			for (const deltaY of [-100, -100, 100, 100]) {
+				content.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, ctrlKey: true, shiftKey: true, deltaY }));
+				await nextFrame();
+				const frameTop = canvas.getBoundingClientRect().top;
+				const halfLineHeight = parseFloat(getComputedStyle(content).lineHeight) / 2;
+				const visibleCenters = Array.from(content.querySelectorAll('.cm-syntax-definition'), identifier => {
+					const { top, bottom } = identifier.getBoundingClientRect();
+					return (top + bottom) / 2 - frameTop;
+				}).filter(y => y > halfLineHeight && y < scroller.clientHeight - halfLineHeight);
+				const maxOffset = Math.max(...visibleCenters.map(y => Math.min(...centers.map(center => Math.abs(center - y)))));
+				assert(visibleCenters.length > 0 && maxOffset < 1,
+					`declarations align on the first frame after changing line height (${lineWrapping ? 'wrapped middle' : 'document end'})`,
+					` (offset ${maxOffset}px, wheel delta ${deltaY})`);
+			}
+		} finally {
+			editor?.destroy();
+			host.remove();
+		}
+	}
+}
+
 async function checkColorSchemes() {
 	const nativeMatchMedia = window.matchMedia;
 	const preference = new EventTarget();
@@ -177,6 +270,8 @@ const press = (host, key, modifiers = {}) => host.querySelector('.cm-content').d
 );
 let a, b;
 try {
+	await checkWheelAdjustments();
+	await checkDeclarationScrollAlignment();
 	await checkColorSchemes();
 	a = await createEditor(document.querySelector('#a'), { value: 'function one() { return 1; }', language: 'ja', autoFormat: false });
 	b = await createEditor(document.querySelector('#b'), { value: 'function two() { return 2; }', language: 'en', autoFormat: false });

@@ -206,6 +206,8 @@ Commands: `undo`, `redo`, `cut`, `copy`, `paste`, `selectAll`, `toggleComment`, 
 Clipboard commands focus the target editor and call `document.execCommand`, retaining the original editor's behavior. Availability depends on the browser or Electron environment. Read-only editors allow `copy` but block `cut` and `paste`; disabled editors block all three.
 `format` formats the current line or selected lines; it is not a dedicated whole-document formatting command.
 
+In a focused editor, `Ctrl` + mouse wheel changes the font size. `Ctrl` + `Shift` + mouse wheel adjusts the line height from 135% to 195% in five-percentage-point steps. Scroll up to increase it or down to decrease it.
+
 Position APIs use **zero-based lines and UTF-16 columns** as `{line, ch}`. Replacement ranges exclude their end position.
 `highlightLine` also uses zero-based line numbers. Document changes clear highlights automatically.
 Host document APIs remain available when the editor is read-only or disabled; these settings restrict user interaction.

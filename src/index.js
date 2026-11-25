@@ -179,6 +179,9 @@ export async function createEditor(container, { value = '', definitions = [], ja
 			onFontSizeChange(delta) {
 				api.setSettings({ fontSize: Math.min(64, Math.max(10, settings.fontSize + delta)) });
 			},
+			onLineHeightChange(delta) {
+				api.setSettings({ lineHeight: Math.min(195, Math.max(135, settings.lineHeight + delta)) });
+			},
 		}, root);
 		const cm = view.view;
 		colorScheme.set(cm, settings.colorScheme);

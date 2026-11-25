@@ -89,7 +89,7 @@ export function positionAt(doc, offset) {
 }
 
 export class Editor {
-	constructor({ language, colorScheme = [], phrases, onFontSizeChange, onUpdate, allowChanges = () => true }, parent) {
+	constructor({ language, colorScheme = [], phrases, onFontSizeChange, onLineHeightChange, onUpdate, allowChanges = () => true }, parent) {
 		this.language            = language;
 		this.enabled             = true;
 		this.readOnly            = false;
@@ -210,7 +210,12 @@ export class Editor {
 		this.listen(this.view.dom, 'wheel', event => {
 			if (!this.enabled || !this.view.hasFocus || !event.ctrlKey || event.deltaY === 0) return;
 			event.preventDefault();
-			onFontSizeChange(event.deltaY > 0 ? -2 : 2);
+			const direction = event.deltaY > 0 ? -1 : 1;
+			if (event.shiftKey) {
+				onLineHeightChange?.(direction * 5);
+			} else {
+				onFontSizeChange(direction * 2);
+			}
 		}, { passive: false });
 		this.listen(this.view.contentDOM, 'keypress', event => this.scheduleCompletion(event));
 		this.listen(this.view.contentDOM, 'mousemove', () => { this.view.contentDOM.style.cursor = ''; });

@@ -1,6 +1,6 @@
 // .build/extensions/structure-view/index.js
 import { Facet, StateEffect, StateField, countColumn } from "@codemirror/state";
-import { EditorView as EditorView2, ViewPlugin as ViewPlugin2 } from "@codemirror/view";
+import { EditorView as EditorView2, ViewPlugin as ViewPlugin2, logException } from "@codemirror/view";
 import { commonAnalysisState } from "opticm/analysis";
 
 // .build/extensions/styles.js
@@ -390,10 +390,11 @@ var structurePlugin = ViewPlugin2.fromClass(class {
     this.canvas.className = "code-structure-view";
     this.overlay.append(this.canvas);
     view.dom.append(this.overlay);
+    this.pendingDraw = null;
     this.measure = {
       key: this,
       read: (view2) => this.read(view2),
-      write: (data) => this.write(data)
+      write: (data) => this.queueDraw(data)
     };
     this.onScroll = () => this.refresh();
     view.scrollDOM.addEventListener("scroll", this.onScroll, { passive: true });
@@ -417,6 +418,8 @@ var structurePlugin = ViewPlugin2.fromClass(class {
     const content = view.contentDOM.getBoundingClientRect();
     const window = view.dom.ownerDocument.defaultView;
     const styles = window.getComputedStyle(view.dom);
+    const { scrollTop, scrollLeft } = scroller;
+    const { viewport } = view;
     const resolveColor = (value) => {
       const match = /^var\(\s*(--[\w-]+)\s*,\s*(.+)\)$/.exec(value);
       return match ? styles.getPropertyValue(match[1]).trim() || match[2] : value;
@@ -500,9 +503,31 @@ var structurePlugin = ViewPlugin2.fromClass(class {
       height,
       charWidth: view.defaultCharacterWidth,
       lineHeight: view.defaultLineHeight,
+      scrollTop,
+      scrollLeft,
+      viewport,
       drawStyle,
       decorations
     };
+  }
+  queueDraw(data) {
+    const alreadyQueued = this.pendingDraw !== null;
+    this.pendingDraw = data;
+    if (alreadyQueued) return;
+    queueMicrotask(() => {
+      const pending = this.pendingDraw;
+      this.pendingDraw = null;
+      if (pending === null) return;
+      const { view } = this;
+      const { scrollTop, scrollLeft } = view.scrollDOM;
+      const { viewport } = view;
+      const moved = pending.scrollTop !== scrollTop || pending.scrollLeft !== scrollLeft || pending.viewport.from !== viewport.from || pending.viewport.to !== viewport.to;
+      try {
+        this.write(moved ? this.read(view) : pending);
+      } catch (error) {
+        logException(view.state, error);
+      }
+    });
   }
   write(data) {
     Object.assign(
@@ -547,6 +572,7 @@ var structurePlugin = ViewPlugin2.fromClass(class {
     this.lastDrawing = drawing;
   }
   destroy() {
+    this.pendingDraw = null;
     this.view.scrollDOM.removeEventListener("scroll", this.onScroll);
     this.overlay.remove();
   }
