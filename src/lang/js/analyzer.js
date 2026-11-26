@@ -53,6 +53,7 @@ function createVisitor() {
 	const fnLocs      = [];
 	const classLocs   = [];
 	const ifLocs      = [];
+	const switchLocs  = [];
 	const forLocs     = [];
 	const whileLocs   = [];
 	const fnNames     = [];
@@ -172,6 +173,9 @@ function createVisitor() {
 			}
 			ifLocs.push(p);
 		},
+		SwitchStatement: node => {
+			switchLocs.push([node, node]);
+		},
 		ForStatement: (node, state, c) => {
 			forLocs.push([node, node]);
 		},
@@ -194,6 +198,7 @@ function createVisitor() {
 				fnLocs,
 				classLocs,
 				ifLocs,
+				switchLocs,
 				forLocs,
 				whileLocs,
 				varLocs,

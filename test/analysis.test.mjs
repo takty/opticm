@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { analyze } from '../.build/lang/js/analyzer.js';
 import { AnalysisClient } from '../src/analysis-client.js';
+import { createCommonAnalysis } from '../src/analysis/common-analysis.js';
 
 test('strict and tolerant results retain the existing coordinate contract', () => {
 	const valid = analyze('function outer() {\n const f = () => 1;\n if (f()) { for (let i=0;i<2;i++) {} }\n}');
@@ -15,6 +16,19 @@ test('strict and tolerant results retain the existing coordinate contract', () =
 	assert.equal(invalid.success, false);
 	assert.ok(Array.isArray(invalid.fnLocs));
 	assert.equal('ast' in valid, false);
+});
+
+test('JavaScript if and switch statements use distinct structures', () => {
+	const conditional = 'if (ready) { step(); }';
+	const branch = 'switch (value) { case 1: step(); break; default: stop(); }';
+	const source = `${conditional}\n${branch}`;
+	const result = analyze(source);
+	assert.equal(result.success, true);
+	const { structures } = createCommonAnalysis({ ...result.commonAnalysis, version: 1 });
+	assert.deepEqual(structures.map(item => [item.kind, source.slice(item.from, item.to)]), [
+		['conditional', conditional],
+		['branch', branch],
+	]);
 });
 
 test('JavaScript while and do-while statements use loop2 structures', () => {

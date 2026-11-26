@@ -138,7 +138,7 @@ const FUNCTION_NODES = new Set([
 	'compact_constructor_declaration',
 	'lambda_expression',
 ]);
-const CONDITIONAL_NODES = new Set(['if_statement', 'switch_statement', 'switch_expression']);
+const SWITCH_NODES = new Set(['switch_statement', 'switch_expression']);
 const LOOP_NODES = new Set(['enhanced_for_statement', 'for_statement']);
 const LOOP2_NODES = new Set(['do_statement', 'while_statement']);
 
@@ -241,11 +241,13 @@ export function analyzeJava(source, rootNode) {
 				sectionStarts.add(lineAt(start));
 				addRange(node, 'function');
 			}
-		} else if (CONDITIONAL_NODES.has(node.type)) {
+		} else if (node.type === 'if_statement') {
 			const alternative = node.childForFieldName('alternative');
 			const branchOffset = alternative ? toOffset(alternative.startIndex) : undefined;
 			const branches = branchOffset === undefined ? [] : [branchOffset];
 			addRange(node, 'conditional', branches);
+		} else if (SWITCH_NODES.has(node.type)) {
+			addRange(node, 'branch');
 		} else if (LOOP_NODES.has(node.type)) {
 			addRange(node, 'loop');
 		} else if (LOOP2_NODES.has(node.type)) {

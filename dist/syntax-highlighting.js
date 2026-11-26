@@ -9,7 +9,7 @@ import { highlightTree } from "@lezer/highlight";
 
 // .build/analysis/common-analysis.js
 import { StateEffect, StateField } from "@codemirror/state";
-var structureKinds = /* @__PURE__ */ new Set(["function", "class", "conditional", "loop", "loop2"]);
+var structureKinds = /* @__PURE__ */ new Set(["function", "class", "conditional", "branch", "loop", "loop2"]);
 var declarationMutabilities = /* @__PURE__ */ new Set(["mutable", "immutable", "unknown"]);
 var declarationScopes = /* @__PURE__ */ new Set(["function", "lexical", "member", "parameter", "unknown"]);
 var syntaxKinds = /* @__PURE__ */ new Set([
@@ -402,9 +402,10 @@ var variables_default = `/**\r
 \r
 	--opticm-default-structure-class-fill      : oklch(from var(--opticm-l-red) l c h / 0.10);\r
 	--opticm-default-structure-function-fill   : oklch(from var(--opticm-l-orange) l c h / 0.15);\r
-	--opticm-default-structure-conditional-fill: oklch(from var(--opticm-l-green) l c h / 0.15);\r
+	--opticm-default-structure-conditional-fill: oklch(from var(--opticm-l-yellowgreen) l c h / 0.15);\r
+	--opticm-default-structure-branch-fill     : oklch(from var(--opticm-l-green) l c h / 0.15);\r
 	--opticm-default-structure-loop-fill       : oklch(from var(--opticm-l-cyan) l c h / 0.15);\r
-	--opticm-default-structure-loop2-fill      : oklch(from var(--opticm-l-purple) l c h / 0.15);\r
+	--opticm-default-structure-loop2-fill      : oklch(from var(--opticm-l-blue) l c h / 0.15);\r
 	--opticm-default-structure-range-padding   : 3;\r
 	--opticm-default-structure-spine-inset     : 4;\r
 	--opticm-default-structure-fade-length     : 16;\r
@@ -500,9 +501,10 @@ var variables_default = `/**\r
 \r
 	--opticm-default-structure-class-fill      : oklch(from var(--opticm-l-red) l c h / 0.20);\r
 	--opticm-default-structure-function-fill   : oklch(from var(--opticm-l-orange) l c h / 0.25);\r
-	--opticm-default-structure-conditional-fill: oklch(from var(--opticm-l-green) l c h / 0.25);\r
+	--opticm-default-structure-conditional-fill: oklch(from var(--opticm-l-yellowgreen) l c h / 0.25);\r
+	--opticm-default-structure-branch-fill     : oklch(from var(--opticm-l-green) l c h / 0.25);\r
 	--opticm-default-structure-loop-fill       : oklch(from var(--opticm-l-cyan) l c h / 0.25);\r
-	--opticm-default-structure-loop2-fill      : oklch(from var(--opticm-l-purple) l c h / 0.25);\r
+	--opticm-default-structure-loop2-fill      : oklch(from var(--opticm-l-blue) l c h / 0.25);\r
 \r
 	--opticm-default-structure-reference-fill           : oklch(from var(--opticm-color-editor) l c h / 0.95);\r
 	--opticm-default-structure-reference-stroke         : oklch(from var(--opticm-color-text) l c h / 0.5);\r

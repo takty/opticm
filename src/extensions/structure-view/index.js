@@ -333,6 +333,7 @@ function commonDecorations(analysis, doc, options, appearance) {
 		class      : appearance.color('--opticm-structure-class-fill'),
 		function   : appearance.color('--opticm-structure-function-fill'),
 		conditional: appearance.color('--opticm-structure-conditional-fill'),
+		branch     : appearance.color('--opticm-structure-branch-fill'),
 		loop       : appearance.color('--opticm-structure-loop-fill'),
 		loop2      : appearance.color('--opticm-structure-loop2-fill'),
 	};

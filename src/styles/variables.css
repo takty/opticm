@@ -123,9 +123,10 @@
 
 	--opticm-default-structure-class-fill      : oklch(from var(--opticm-l-red) l c h / 0.10);
 	--opticm-default-structure-function-fill   : oklch(from var(--opticm-l-orange) l c h / 0.15);
-	--opticm-default-structure-conditional-fill: oklch(from var(--opticm-l-green) l c h / 0.15);
+	--opticm-default-structure-conditional-fill: oklch(from var(--opticm-l-yellowgreen) l c h / 0.15);
+	--opticm-default-structure-branch-fill     : oklch(from var(--opticm-l-green) l c h / 0.15);
 	--opticm-default-structure-loop-fill       : oklch(from var(--opticm-l-cyan) l c h / 0.15);
-	--opticm-default-structure-loop2-fill      : oklch(from var(--opticm-l-purple) l c h / 0.15);
+	--opticm-default-structure-loop2-fill      : oklch(from var(--opticm-l-blue) l c h / 0.15);
 	--opticm-default-structure-range-padding   : 3;
 	--opticm-default-structure-spine-inset     : 4;
 	--opticm-default-structure-fade-length     : 16;
@@ -221,9 +222,10 @@
 
 	--opticm-default-structure-class-fill      : oklch(from var(--opticm-l-red) l c h / 0.20);
 	--opticm-default-structure-function-fill   : oklch(from var(--opticm-l-orange) l c h / 0.25);
-	--opticm-default-structure-conditional-fill: oklch(from var(--opticm-l-green) l c h / 0.25);
+	--opticm-default-structure-conditional-fill: oklch(from var(--opticm-l-yellowgreen) l c h / 0.25);
+	--opticm-default-structure-branch-fill     : oklch(from var(--opticm-l-green) l c h / 0.25);
 	--opticm-default-structure-loop-fill       : oklch(from var(--opticm-l-cyan) l c h / 0.25);
-	--opticm-default-structure-loop2-fill      : oklch(from var(--opticm-l-purple) l c h / 0.25);
+	--opticm-default-structure-loop2-fill      : oklch(from var(--opticm-l-blue) l c h / 0.25);
 
 	--opticm-default-structure-reference-fill           : oklch(from var(--opticm-color-editor) l c h / 0.95);
 	--opticm-default-structure-reference-stroke         : oklch(from var(--opticm-color-text) l c h / 0.5);

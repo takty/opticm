@@ -94,6 +94,27 @@ test('Java array type brackets follow their element type before and after worker
 	}
 });
 
+test('Java if statements and both forms of switch use distinct structures', () => {
+	const conditional = 'if (ready) { tick(); }';
+	const statement = 'switch (value) { case 1: tick(); break; default: stop(); }';
+	const expression = 'switch (value) { case 1 -> 2; default -> 0; }';
+	const source = `class Example { void run() { ${conditional} ${statement} int result = ${expression}; } }`;
+	const tree = parser.parse(source);
+	try {
+		const result = analyzeJava(source, tree.rootNode);
+		assert.equal(result.success, true);
+		const structures = createCommonAnalysis({ ...result.commonAnalysis, version: 1 }).structures
+			.filter(item => item.kind === 'conditional' || item.kind === 'branch');
+		assert.deepEqual(structures.map(item => [item.kind, source.slice(item.from, item.to)]), [
+			['conditional', conditional],
+			['branch', statement],
+			['branch', expression],
+		]);
+	} finally {
+		tree.delete();
+	}
+});
+
 test('Java while and do-while statements use loop2 structures', () => {
 	const source = 'class Example { void run() { for (;;) {} while (ready) { tick(); } do { tick(); } while (ready); } }';
 	const tree = parser.parse(source);
