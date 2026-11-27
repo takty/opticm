@@ -44,7 +44,7 @@
 		"@codemirror/lint": "6.9.8",
 		"@codemirror/search": "6.7.3",
 		"@codemirror/state": "6.7.6",
-		"@codemirror/view": "6.44.0",
+		"@codemirror/view": "6.44.2",
 		"@lezer/highlight": "1.2.5",
 		"acorn": "8.19.0",
 		"acorn-loose": "8.5.2",
@@ -59,7 +59,7 @@
 	"devDependencies": {
 		"esbuild": "^0.28.2",
 		"klales": "github:takty/klales",
-		"vite": "^8.3.8"
+		"vite": "^8.4.0"
 	},
 	"packageManager": "yarn@4.19.0"
 }
