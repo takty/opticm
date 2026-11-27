@@ -17,8 +17,16 @@ const DECLARATIONS    = new Set(['VariableDeclaration', 'ForInSpec', 'ForOfSpec'
 
 export const lezerSyntax = {
 	style,
-	classify(_tree, kind, from, to, add) {
+	classify(tree, kind, from, to, add) {
 		add(from, to, kind);
+		if (kind === 'definition') {
+			const node = tree.resolveInner(from, 1);
+			if (node.name === 'VariableDefinition' && node.parent?.name === 'PatternProperty' &&
+				node.parent.firstChild?.from === from) {
+				add(from, to, 'property');
+				add(from, to, 'destructuring-shorthand');
+			}
+		}
 		if (kind === 'variable' || kind === 'local-variable') add(from, to, 'variable-reference');
 	},
 	collectInterimReferences,

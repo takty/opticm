@@ -25,24 +25,7 @@ const semanticKinds = new Set([
 	'local-reference',
 	'variable-reference',
 ]);
-const allKinds = new Set([
-	'comment',
-	'keyword',
-	'operator',
-	'type',
-	'class-definition',
-	'function',
-	'function-definition',
-	'variable',
-	'literal',
-	'definition',
-	'field-definition',
-	'property-definition',
-	'property',
-	'local-variable',
-	'local-reference',
-	'variable-reference',
-]);
+const allKinds = new Set([...syntaxKinds, ...semanticKinds]);
 
 export const setSyntaxHighlights = StateEffect.define();
 const sourceFacet = Facet.define({ combine: sources => sources.at(-1) ?? null });

@@ -11,7 +11,7 @@ var variables_default = `/**\r
  * CSS custom properties\r
  *\r
  * @author Takuto Yanagida\r
- * @version 2026-11-24\r
+ * @version 2026-11-27\r
  */\r
 \r
 /* Standalone extensions inherit palette defaults and any overrides from their host page. */\r
@@ -424,82 +424,19 @@ var structurePlugin = ViewPlugin2.fromClass(class {
     const styles = window.getComputedStyle(view.dom);
     const { scrollTop, scrollLeft } = scroller;
     const { viewport } = view;
-    const resolveColor = (value) => {
-      const match = /^var\(\s*(--[\w-]+)\s*,\s*(.+)\)$/.exec(value);
-      return match ? styles.getPropertyValue(match[1]).trim() || match[2] : value;
-    };
-    const readValue = (name) => styles.getPropertyValue(name).trim() || styles.getPropertyValue(name.replace("--opticm-", "--opticm-default-")).trim();
-    const readNumber = (name) => {
-      const value = readValue(name);
-      const number = Number(value);
-      if (!value || !Number.isFinite(number)) {
-        throw new TypeError(`CSS custom property ${name} must be a finite number`);
-      }
-      return number;
-    };
-    const appearance = {
-      color: (name) => resolveColor(readValue(name)),
-      number: readNumber
-    };
-    const drawStyle = {
-      rangePadding: appearance.number("--opticm-structure-range-padding"),
-      spineInset: appearance.number("--opticm-structure-spine-inset"),
-      fadeLength: appearance.number("--opticm-structure-fade-length"),
-      referenceShadowBlur: appearance.number("--opticm-structure-reference-shadow-blur"),
-      referenceShadowOffsetY: appearance.number("--opticm-structure-reference-shadow-offset-y"),
-      tokenHeightScale: appearance.number("--opticm-structure-token-height-scale"),
-      tokenRadiusScale: appearance.number("--opticm-structure-token-radius-scale"),
-      declarationInset: appearance.number("--opticm-structure-declaration-padding-left"),
-      declarationWidthPadding: appearance.number("--opticm-structure-declaration-padding-right"),
-      declarationBorderWidth: appearance.number("--opticm-structure-declaration-border-width"),
-      declarationSideRuleWidthScale: appearance.number("--opticm-structure-declaration-side-width-scale")
-    };
+    const appearance = createAppearanceReader(styles);
+    const drawStyle = readDrawStyle(appearance);
     const line = view.contentDOM.querySelector(".cm-line");
     const lineStart = line ? line.getBoundingClientRect().left + parseFloat(window.getComputedStyle(line).paddingLeft) : content.left;
     const left = Math.max(frame.left, content.left);
     const width = Math.max(0, frame.left + scroller.clientWidth - left);
     const height = scroller.clientHeight;
-    const { doc, tabSize } = view.state;
-    const coords = (pos, side = 1) => {
-      const line2 = doc.line(Math.max(1, Math.min(doc.lines, pos.line + 1)));
-      const offset = line2.from + Math.max(0, Math.min(line2.length, pos.ch ?? 0));
-      const measured = view.coordsAtPos(offset, side);
-      const block = view.lineBlockAt(offset);
-      const lineTop = view.documentTop + block.top - frame.top;
-      if (measured) {
-        const glyphTop = (measured.top + measured.bottom - view.defaultLineHeight) / 2 - frame.top;
-        const row = Math.max(0, Math.round((glyphTop - lineTop) / view.defaultLineHeight));
-        return {
-          x: measured.left - left,
-          y: lineTop + row * view.defaultLineHeight
-        };
-      }
-      const columns = countColumn(doc.sliceString(block.from, offset), tabSize);
-      return {
-        x: lineStart - left + columns * view.defaultCharacterWidth,
-        y: lineTop
-      };
-    };
+    const { doc } = view.state;
+    const coords = createCoordinateMapper(view, { frame, left, lineStart });
     const analysis = view.state.field(commonAnalysisState, false);
     const options = view.state.facet(displayOptions);
     const source = analysis ? commonDecorations(analysis, doc, options, appearance) : view.state.field(structureField);
-    const decorations = source.map((item) => {
-      const start = coords(item.from);
-      const end = coords(item.to, -1);
-      const fill2 = resolveColor(item.fill);
-      if (item.kind === "token") {
-        return { ...item, fill: fill2, stroke: resolveColor(item.stroke), start, end };
-      }
-      return {
-        ...item,
-        fill: fill2,
-        start,
-        end,
-        spine: coords({ ...item.from, ch: item.from.ch + item.spineChars + 1 }, -1).x - start.x - item.spineChars,
-        branchWidth: coords({ ...item.from, ch: item.from.ch + item.branchChars + 1 }, -1).x - start.x - item.branchChars,
-        branchRows: item.branches.map((branch) => coords(branch).y)
-      };
-    });
+    const decorations = measureDecorations(source, coords, appearance.resolveColor);
     return {
       left: left - root.left,
       top: frame.top - root.top,
@@ -587,6 +524,83 @@ var structureView = [
   EditorView2.editorAttributes.of({ class: "cm-structure-view" }),
   extensionStyles(style_default)
 ];
+function createAppearanceReader(styles) {
+  const resolveColor = (value) => {
+    const match = /^var\(\s*(--[\w-]+)\s*,\s*(.+)\)$/.exec(value);
+    return match ? styles.getPropertyValue(match[1]).trim() || match[2] : value;
+  };
+  const readValue = (name) => styles.getPropertyValue(name).trim() || styles.getPropertyValue(name.replace("--opticm-", "--opticm-default-")).trim();
+  const readNumber = (name) => {
+    const value = readValue(name);
+    const number = Number(value);
+    if (!value || !Number.isFinite(number)) {
+      throw new TypeError(`CSS custom property ${name} must be a finite number`);
+    }
+    return number;
+  };
+  return {
+    color: (name) => resolveColor(readValue(name)),
+    number: readNumber,
+    resolveColor
+  };
+}
+function readDrawStyle(appearance) {
+  return {
+    rangePadding: appearance.number("--opticm-structure-range-padding"),
+    spineInset: appearance.number("--opticm-structure-spine-inset"),
+    fadeLength: appearance.number("--opticm-structure-fade-length"),
+    referenceShadowBlur: appearance.number("--opticm-structure-reference-shadow-blur"),
+    referenceShadowOffsetY: appearance.number("--opticm-structure-reference-shadow-offset-y"),
+    tokenHeightScale: appearance.number("--opticm-structure-token-height-scale"),
+    tokenRadiusScale: appearance.number("--opticm-structure-token-radius-scale"),
+    declarationInset: appearance.number("--opticm-structure-declaration-padding-left"),
+    declarationWidthPadding: appearance.number("--opticm-structure-declaration-padding-right"),
+    declarationBorderWidth: appearance.number("--opticm-structure-declaration-border-width"),
+    declarationSideWidthScale: appearance.number("--opticm-structure-declaration-side-width-scale")
+  };
+}
+function createCoordinateMapper(view, { frame, left, lineStart }) {
+  const { doc, tabSize } = view.state;
+  return (pos, side = 1) => {
+    const line = doc.line(Math.max(1, Math.min(doc.lines, pos.line + 1)));
+    const offset = line.from + Math.max(0, Math.min(line.length, pos.ch ?? 0));
+    const measured = view.coordsAtPos(offset, side);
+    const block = view.lineBlockAt(offset);
+    const lineTop = view.documentTop + block.top - frame.top;
+    if (measured) {
+      const glyphTop = (measured.top + measured.bottom - view.defaultLineHeight) / 2 - frame.top;
+      const row = Math.max(0, Math.round((glyphTop - lineTop) / view.defaultLineHeight));
+      return {
+        x: measured.left - left,
+        y: lineTop + row * view.defaultLineHeight
+      };
+    }
+    const columns = countColumn(doc.sliceString(block.from, offset), tabSize);
+    return {
+      x: lineStart - left + columns * view.defaultCharacterWidth,
+      y: lineTop
+    };
+  };
+}
+function measureDecorations(source, coords, resolveColor) {
+  return source.map((item) => {
+    const start = coords(item.from);
+    const end = coords(item.to, -1);
+    const fill2 = resolveColor(item.fill);
+    if (item.kind === "token") {
+      return { ...item, fill: fill2, stroke: resolveColor(item.stroke), start, end };
+    }
+    return {
+      ...item,
+      fill: fill2,
+      start,
+      end,
+      spine: coords({ ...item.from, ch: item.from.ch + item.spineChars + 1 }, -1).x - start.x - item.spineChars,
+      branchWidth: coords({ ...item.from, ch: item.from.ch + item.branchChars + 1 }, -1).x - start.x - item.branchChars,
+      branchRows: item.branches.map((branch) => coords(branch).y)
+    };
+  });
+}
 function commonDecorations(analysis, doc, options, appearance) {
   const colors = {
     class: appearance.color("--opticm-structure-class-fill"),
@@ -665,8 +679,21 @@ function drawStructure(canvas, { width, height, charWidth, lineHeight, drawStyle
   if (!width || !height) return;
   const padding = Math.min(drawStyle.rangePadding, lineHeight / 4);
   const band = lineHeight - padding * 2;
+  const transparentColor = createTransparentColorReader(canvas);
+  for (const it of decorations) {
+    ctx.fillStyle = it.fill;
+    if (it.kind === "range") {
+      drawRange(ctx, it, charWidth, drawStyle, padding, band, transparentColor);
+    } else if (it.appearance === "reference") {
+      drawReference(ctx, it, charWidth, lineHeight, drawStyle);
+    } else if (it.appearance === "declaration") {
+      drawDeclaration(ctx, it, charWidth, lineHeight, drawStyle);
+    }
+  }
+}
+function createTransparentColorReader(canvas) {
   let colorContext;
-  const transparentColor = (color) => {
+  return (color) => {
     if (!colorContext) {
       const colorCanvas = canvas.ownerDocument.createElement("canvas");
       colorCanvas.width = colorCanvas.height = 1;
@@ -678,64 +705,65 @@ function drawStructure(canvas, { width, height, charWidth, lineHeight, drawStyle
     const [red, green, blue] = colorContext.getImageData(0, 0, 1, 1).data;
     return `rgba(${red}, ${green}, ${blue}, 0)`;
   };
-  for (const it of decorations) {
-    const { start, end } = it;
+}
+function drawRange(ctx, it, charWidth, drawStyle, padding, band, transparentColor) {
+  const { start, end } = it;
+  const left = start.x + drawStyle.spineInset;
+  const spine = Math.max(1, it.spine - drawStyle.spineInset);
+  const top = start.y + padding;
+  const bottom = end.y + padding;
+  fill(ctx, left, top, spine, bottom - top + band, [band / 2, 0, 0, band / 2]);
+  const capWidth = Math.max(0, charWidth * drawStyle.fadeLength - spine);
+  const fadeColor = transparentColor(it.fill);
+  const fillHorizontal = (x, y, width, radii) => {
+    if (width <= 0) return;
+    const gradient = ctx.createLinearGradient(x, y, x + width, y);
+    gradient.addColorStop(0, it.fill);
+    gradient.addColorStop(1, fadeColor);
+    ctx.fillStyle = gradient;
+    fill(ctx, x, y, width, band, radii);
     ctx.fillStyle = it.fill;
-    if (it.kind === "range") {
-      const left = start.x + drawStyle.spineInset;
-      const spine = Math.max(1, it.spine - drawStyle.spineInset);
-      const top = start.y + padding;
-      const bottom = end.y + padding;
-      fill(ctx, left, top, spine, bottom - top + band, [band / 2, 0, 0, band / 2]);
-      const capWidth = Math.max(0, charWidth * drawStyle.fadeLength - spine);
-      const fadeColor = transparentColor(it.fill);
-      const fillHorizontal = (x, y, width2, radii) => {
-        if (width2 <= 0) return;
-        const gradient = ctx.createLinearGradient(x, y, x + width2, y);
-        gradient.addColorStop(0, it.fill);
-        gradient.addColorStop(1, fadeColor);
-        ctx.fillStyle = gradient;
-        fill(ctx, x, y, width2, band, radii);
-        ctx.fillStyle = it.fill;
-      };
-      fillHorizontal(left + spine, top, capWidth, [0, 0, 0, 0]);
-      if (it.from.line !== it.to.line) {
-        fillHorizontal(left + spine, bottom, capWidth, [0, 0, 0, 0]);
-      }
-      for (const row of it.branchRows) {
-        fillHorizontal(
-          left + spine,
-          row + padding,
-          Math.max(1, it.branchWidth - drawStyle.spineInset),
-          [0, band / 2, band / 2, 0]
-        );
-      }
-    } else if (it.appearance === "reference") {
-      const x = start.x, h = charWidth * drawStyle.tokenHeightScale;
-      const y = start.y + (lineHeight - h) / 2;
-      ctx.save();
-      ctx.shadowColor = it.stroke;
-      ctx.shadowBlur = drawStyle.referenceShadowBlur;
-      ctx.shadowOffsetY = drawStyle.referenceShadowOffsetY;
-      fill(ctx, x, y, end.x - x, h, [0, lineHeight * drawStyle.tokenRadiusScale, lineHeight * drawStyle.tokenRadiusScale, 0]);
-      ctx.restore();
-    } else if (it.appearance === "declaration") {
-      const x = start.x - drawStyle.declarationInset;
-      const tokenHeight = charWidth * drawStyle.tokenHeightScale;
-      const y = start.y + (lineHeight - tokenHeight) / 2;
-      const h = end.y - start.y + tokenHeight;
-      const radius = lineHeight * drawStyle.tokenRadiusScale;
-      if (fill(ctx, x, y, end.x - x + drawStyle.declarationWidthPadding, h, [0, radius, radius, 0])) {
-        ctx.strokeStyle = it.stroke;
-        ctx.lineWidth = drawStyle.declarationBorderWidth;
-        ctx.stroke();
-        ctx.lineWidth = charWidth * drawStyle.declarationSideRuleWidthScale;
-        ctx.beginPath();
-        ctx.moveTo(x - ctx.lineWidth / 2, y - 0.5);
-        ctx.lineTo(x - ctx.lineWidth / 2, y + h + 0.5);
-        ctx.stroke();
-      }
-    }
+  };
+  fillHorizontal(left + spine, top, capWidth, [0, 0, 0, 0]);
+  if (it.from.line !== it.to.line) {
+    fillHorizontal(left + spine, bottom, capWidth, [0, 0, 0, 0]);
+  }
+  for (const row of it.branchRows) {
+    fillHorizontal(
+      left + spine,
+      row + padding,
+      Math.max(1, it.branchWidth - drawStyle.spineInset),
+      [0, band / 2, band / 2, 0]
+    );
+  }
+}
+function drawReference(ctx, it, charWidth, lineHeight, drawStyle) {
+  const { start, end } = it;
+  const x = start.x, h = charWidth * drawStyle.tokenHeightScale;
+  const y = start.y + (lineHeight - h) / 2;
+  ctx.save();
+  ctx.shadowColor = it.stroke;
+  ctx.shadowBlur = drawStyle.referenceShadowBlur;
+  ctx.shadowOffsetY = drawStyle.referenceShadowOffsetY;
+  fill(ctx, x, y, end.x - x, h, [0, lineHeight * drawStyle.tokenRadiusScale, lineHeight * drawStyle.tokenRadiusScale, 0]);
+  ctx.restore();
+}
+function drawDeclaration(ctx, it, charWidth, lineHeight, drawStyle) {
+  const { start, end } = it;
+  const x = start.x - drawStyle.declarationInset;
+  const tokenHeight = charWidth * drawStyle.tokenHeightScale;
+  const y = start.y + (lineHeight - tokenHeight) / 2;
+  const h = end.y - start.y + tokenHeight;
+  const radius = lineHeight * drawStyle.tokenRadiusScale;
+  if (fill(ctx, x, y, end.x - x + drawStyle.declarationWidthPadding, h, [0, radius, radius, 0])) {
+    ctx.strokeStyle = it.stroke;
+    ctx.lineWidth = drawStyle.declarationBorderWidth;
+    ctx.stroke();
+    ctx.lineWidth = charWidth * drawStyle.declarationSideWidthScale;
+    ctx.beginPath();
+    ctx.moveTo(x - ctx.lineWidth / 2, y - 0.5);
+    ctx.lineTo(x - ctx.lineWidth / 2, y + h + 0.5);
+    ctx.stroke();
   }
 }
 function fill(ctx, x, y, width, height, radii) {

@@ -297,27 +297,7 @@ export class Editor {
 			]));
 		}
 		if (diagnosticsChanged) {
-			let latestRequest = 0;
-			const extension = diagnosticSource ? linter(async stateView => {
-				const { state } = stateView;
-				const { doc }   = state;
-				const phrases   = state.facet(EditorState.phrases);
-				const request   = ++latestRequest;
-				const items     = await diagnosticSource(doc.toString());
-				const current   = stateView.state;
-				// CodeMirror also rejects results for an older document.
-				if (request !== latestRequest || current.facet(EditorState.phrases) !== phrases ||
-					this.options.diagnostics.get(current) !== extension) {
-					const displayed = [];
-					forEachDiagnostic(current, (item, from, to) => displayed.push({ ...item, from, to }));
-					return displayed;
-				}
-				return items.filter(item => item.from.line < doc.lines).map(item => {
-					const from = offsetAt(doc, item.from);
-					return { from, to: Math.max(from, offsetAt(doc, item.to)), severity: item.severity, message: item.message };
-				});
-			}, { delay: 500, needsRefresh: update => update.startState.facet(EditorState.phrases) !== update.state.facet(EditorState.phrases) }) : [];
-			effects.push(this.options.diagnostics.reconfigure(extension));
+			effects.push(this.options.diagnostics.reconfigure(this.#createDiagnosticExtension(diagnosticSource)));
 		}
 		if (effects.length) view.dispatch({ effects });
 		if (diagnosticsChanged) {
@@ -327,7 +307,39 @@ export class Editor {
 				view.dispatch(setDiagnostics(view.state, []));
 			}
 		}
-		this.optionState = {
+		this.optionState = this.#createOptionState(settings, {
+			phrases, numberMode, lineNumberStart, bracketsEnabled, diagnosticSource,
+		});
+		if (reopenSearch && this.enabled) openSearchPanel(view);
+		this.refresh();
+	}
+
+	#createDiagnosticExtension(diagnosticSource) {
+		let latestRequest = 0;
+		const extension = diagnosticSource ? linter(async stateView => {
+			const { state } = stateView;
+			const { doc }   = state;
+			const phrases   = state.facet(EditorState.phrases);
+			const request   = ++latestRequest;
+			const items     = await diagnosticSource(doc.toString());
+			const current   = stateView.state;
+			// CodeMirror also rejects results for an older document.
+			if (request !== latestRequest || current.facet(EditorState.phrases) !== phrases ||
+				this.options.diagnostics.get(current) !== extension) {
+				const displayed = [];
+				forEachDiagnostic(current, (item, from, to) => displayed.push({ ...item, from, to }));
+				return displayed;
+			}
+			return items.filter(item => item.from.line < doc.lines).map(item => {
+				const from = offsetAt(doc, item.from);
+				return { from, to: Math.max(from, offsetAt(doc, item.to)), severity: item.severity, message: item.message };
+			});
+		}, { delay: 500, needsRefresh: update => update.startState.facet(EditorState.phrases) !== update.state.facet(EditorState.phrases) }) : [];
+		return extension;
+	}
+
+	#createOptionState(settings, { phrases, numberMode, lineNumberStart, bracketsEnabled, diagnosticSource }) {
+		return {
 			phrases,
 			fontFamily          : settings.fontFamily,
 			fontSize            : settings.fontSize,
@@ -351,8 +363,6 @@ export class Editor {
 			enabled             : this.enabled,
 			diagnosticSource,
 		};
-		if (reopenSearch && this.enabled) openSearchPanel(view);
-		this.refresh();
 	}
 
 	canUseCompletion() {

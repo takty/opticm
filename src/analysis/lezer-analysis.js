@@ -32,7 +32,7 @@ function reconcile(interim, parsedTo, analysis) {
 	if (!analysis) return interim;
 	if (!analysis.stale) {
 		return {
-			syntax    : analysis.syntaxComplete === false ? [...interim.syntax, ...analysis.syntax] :
+			syntax    : analysis.syntaxComplete === false ? mergeSyntax(interim.syntax, analysis.syntax) :
 				analysis.syntax.length ? analysis.syntax : interim.syntax,
 			references: analysis.references
 		};
@@ -63,6 +63,15 @@ function reconcile(interim, parsedTo, analysis) {
 			...analysis.references.filter(reference => reference.from >= parsedTo),
 		],
 	};
+}
+
+function mergeSyntax(interim, analyzed) {
+	const ranges = new Map();
+	for (const range of [...interim, ...analyzed]) {
+		const key = `${range.from}:${range.to}:${range.kind}`;
+		if (!ranges.has(key)) ranges.set(key, range);
+	}
+	return [...ranges.values()];
 }
 
 function referenceKey({ from, to, role }) {

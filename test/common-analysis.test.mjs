@@ -109,6 +109,21 @@ test('worker reports shorthand properties without discarding their variable defi
 	);
 });
 
+test('destructuring defaults and nested shorthand remain properties while aliases and rest remain definitions', () => {
+	const doc = 'const { enabled = true, nested: { name }, key: alias, ...rest } = options;';
+	let state = EditorState.create({ doc, extensions: [javascript(), lezerAnalysis(javascriptSyntax), commonAnalysisState] });
+	const assertClassification = () => {
+		const data = state.field(syntaxAnalysisState).data;
+		const names = (ranges, predicate) => ranges.filter(predicate).map(item => doc.slice(item.from, item.to));
+		assert.deepEqual(names(data.syntax, item => item.kind === 'property'), ['enabled', 'nested', 'name', 'key']);
+		assert.deepEqual(names(data.syntax, item => item.kind === 'destructuring-shorthand'), ['enabled', 'name']);
+		assert.deepEqual(names(data.references, item => item.role === 'definition'), ['enabled', 'name', 'alias', 'rest']);
+	};
+	assertClassification();
+	state = state.update({ effects: setCommonAnalysis.of({ ...analyze(doc).commonAnalysis, version: 1 }) }).state;
+	assertClassification();
+});
+
 test('JavaScript conditional branches use common UTF-16 offsets', () => {
 	const source = 'if (ready) { start(); } else { stop(); }';
 	const result = createCommonAnalysis({ ...analyze(source).commonAnalysis, version: 11 });

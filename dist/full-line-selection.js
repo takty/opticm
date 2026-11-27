@@ -9,7 +9,7 @@ var variables_default = `/**\r
  * CSS custom properties\r
  *\r
  * @author Takuto Yanagida\r
- * @version 2026-11-24\r
+ * @version 2026-11-27\r
  */\r
 \r
 /* Standalone extensions inherit palette defaults and any overrides from their host page. */\r

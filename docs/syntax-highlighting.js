@@ -215,7 +215,7 @@ function reconcile(interim, parsedTo, analysis) {
   if (!analysis) return interim;
   if (!analysis.stale) {
     return {
-      syntax: analysis.syntaxComplete === false ? [...interim.syntax, ...analysis.syntax] : analysis.syntax.length ? analysis.syntax : interim.syntax,
+      syntax: analysis.syntaxComplete === false ? mergeSyntax(interim.syntax, analysis.syntax) : analysis.syntax.length ? analysis.syntax : interim.syntax,
       references: analysis.references
     };
   }
@@ -244,6 +244,14 @@ function reconcile(interim, parsedTo, analysis) {
       ...analysis.references.filter((reference) => reference.from >= parsedTo)
     ]
   };
+}
+function mergeSyntax(interim, analyzed) {
+  const ranges = /* @__PURE__ */ new Map();
+  for (const range of [...interim, ...analyzed]) {
+    const key = `${range.from}:${range.to}:${range.kind}`;
+    if (!ranges.has(key)) ranges.set(key, range);
+  }
+  return [...ranges.values()];
 }
 function referenceKey({ from, to, role }) {
   return `${from}:${to}:${role}`;
@@ -281,7 +289,7 @@ var variables_default = `/**\r
  * CSS custom properties\r
  *\r
  * @author Takuto Yanagida\r
- * @version 2026-11-24\r
+ * @version 2026-11-27\r
  */\r
 \r
 /* Standalone extensions inherit palette defaults and any overrides from their host page. */\r
@@ -400,16 +408,16 @@ var variables_default = `/**\r
 	--opticm-default-syntax-field-definition-weight   : bold;\r
 	--opticm-default-syntax-class-definition-weight   : bold;\r
 \r
-	--opticm-default-structure-class-fill   : oklch(from var(--opticm-l-red) l c h / 0.10);\r
-	--opticm-default-structure-function-fill: oklch(from var(--opticm-l-orange) l c h / 0.15);\r
-	--opticm-default-structure-branch-fill  : oklch(from var(--opticm-l-yellowgreen) l c h / 0.15);\r
-	--opticm-default-structure-branch2-fill : oklch(from var(--opticm-l-green) l c h / 0.15);\r
-	--opticm-default-structure-loop-fill    : oklch(from var(--opticm-l-cyan) l c h / 0.15);\r
-	--opticm-default-structure-loop2-fill   : oklch(from var(--opticm-l-blue) l c h / 0.15);\r
-	--opticm-default-structure-exception-fill: oklch(from var(--opticm-l-purple) l c h / 0.15);\r
-	--opticm-default-structure-range-padding: 3;\r
-	--opticm-default-structure-spine-inset  : 4;\r
-	--opticm-default-structure-fade-length  : 16;\r
+	--opticm-default-structure-class-fill    : oklch(from var(--opticm-l-red) l c h / 0.10);\r
+	--opticm-default-structure-function-fill : oklch(from var(--opticm-l-orange) l c h / 0.15);\r
+	--opticm-default-structure-branch-fill   : oklch(from var(--opticm-l-yellowgreen) l c h / 0.15);\r
+	--opticm-default-structure-branch2-fill  : oklch(from var(--opticm-l-green) l c h / 0.15);\r
+	--opticm-default-structure-loop-fill     : oklch(from var(--opticm-l-cyan) l c h / 0.15);\r
+	--opticm-default-structure-loop2-fill    : oklch(from var(--opticm-l-blue) l c h / 0.15);\r
+	--opticm-default-structure-exception-fill: oklch(from var(--opticm-color-text) 75% c h / 0.15);\r
+	--opticm-default-structure-range-padding : 3;\r
+	--opticm-default-structure-spine-inset   : 4;\r
+	--opticm-default-structure-fade-length   : 16;\r
 \r
 	--opticm-default-structure-token-height-scale: 1.9;\r
 	--opticm-default-structure-token-radius-scale: 0.2;\r
@@ -500,13 +508,13 @@ var variables_default = `/**\r
 	--opticm-default-syntax-field-definition-color    : oklch(from var(--opticm-color-text) l c h / 0.85);\r
 	--opticm-default-syntax-class-definition-color    : oklch(from var(--opticm-color-text) l c h / 0.85);\r
 \r
-	--opticm-default-structure-class-fill   : oklch(from var(--opticm-l-red) l c h / 0.20);\r
-	--opticm-default-structure-function-fill: oklch(from var(--opticm-l-orange) l c h / 0.25);\r
-	--opticm-default-structure-branch-fill  : oklch(from var(--opticm-l-yellowgreen) l c h / 0.25);\r
-	--opticm-default-structure-branch2-fill : oklch(from var(--opticm-l-green) l c h / 0.25);\r
-	--opticm-default-structure-loop-fill    : oklch(from var(--opticm-l-cyan) l c h / 0.25);\r
-	--opticm-default-structure-loop2-fill   : oklch(from var(--opticm-l-blue) l c h / 0.25);\r
-	--opticm-default-structure-exception-fill: oklch(from var(--opticm-l-purple) l c h / 0.25);\r
+	--opticm-default-structure-class-fill    : oklch(from var(--opticm-l-red) l c h / 0.20);\r
+	--opticm-default-structure-function-fill : oklch(from var(--opticm-l-orange) l c h / 0.25);\r
+	--opticm-default-structure-branch-fill   : oklch(from var(--opticm-l-yellowgreen) l c h / 0.25);\r
+	--opticm-default-structure-branch2-fill  : oklch(from var(--opticm-l-green) l c h / 0.25);\r
+	--opticm-default-structure-loop-fill     : oklch(from var(--opticm-l-cyan) l c h / 0.25);\r
+	--opticm-default-structure-loop2-fill    : oklch(from var(--opticm-l-blue) l c h / 0.25);\r
+	--opticm-default-structure-exception-fill: oklch(from var(--opticm-color-text) 75% c h / 0.15);\r
 \r
 	--opticm-default-structure-reference-fill           : oklch(from var(--opticm-color-editor) l c h / 0.95);\r
 	--opticm-default-structure-reference-stroke         : oklch(from var(--opticm-color-text) l c h / 0.5);\r
@@ -594,24 +602,7 @@ var semanticKinds = /* @__PURE__ */ new Set([
   "local-reference",
   "variable-reference"
 ]);
-var allKinds = /* @__PURE__ */ new Set([
-  "comment",
-  "keyword",
-  "operator",
-  "type",
-  "class-definition",
-  "function",
-  "function-definition",
-  "variable",
-  "literal",
-  "definition",
-  "field-definition",
-  "property-definition",
-  "property",
-  "local-variable",
-  "local-reference",
-  "variable-reference"
-]);
+var allKinds = /* @__PURE__ */ new Set([...syntaxKinds2, ...semanticKinds]);
 var setSyntaxHighlights = StateEffect2.define();
 var sourceFacet = Facet2.define({ combine: (sources) => sources.at(-1) ?? null });
 var displayOptions = Facet2.define({ combine: (values) => values.at(-1) ?? { syntax: true, semantic: true } });
