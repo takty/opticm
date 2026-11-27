@@ -1,3 +1,10 @@
+/**
+ * Gutter hover feedback and line selection cursors
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 .cm-editor.cm-gutter-line-selection {
 	:is(.cm-lineNumbers, .cm-sectionNumbers, .cm-gutter-lint),
 	.cm-gutters::after {

@@ -1,3 +1,10 @@
+/**
+ * Reconcile immediate Lezer classifications with asynchronous analysis snapshots.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { Facet, StateField } from '@codemirror/state';
 import { syntaxTree } from '@codemirror/language';
 import { highlightTree } from '@lezer/highlight';

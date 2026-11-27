@@ -1,3 +1,10 @@
+/**
+ * Verify Java parsing, classifications, diagnostics, and shared analysis output.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';

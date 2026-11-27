@@ -1,3 +1,10 @@
+/**
+ * Build and serve isolated fixtures for browser and Electron integration tests.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { cp, mkdir, mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';

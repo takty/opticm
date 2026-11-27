@@ -1,3 +1,10 @@
+/**
+ * Verify function, method, class, and field definition classifications.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { EditorState } from '@codemirror/state';

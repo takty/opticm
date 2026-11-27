@@ -1,3 +1,10 @@
+/**
+ * Build distributable editor modules, workers, styles, and bundled dependency licenses.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { readFile, readdir, rm } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';

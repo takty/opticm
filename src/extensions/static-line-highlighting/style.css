@@ -1,3 +1,10 @@
+/**
+ * Static line highlights and matching gutter backgrounds
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 .cm-editor .cm-content .cm-line.cm-opticm-highlighted-line:not(.error-line) {
 	background: var(--opticm-color-highlighted-line, linear-gradient(
 		to right,

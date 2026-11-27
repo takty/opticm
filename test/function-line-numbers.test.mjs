@@ -1,3 +1,10 @@
+/**
+ * Verify function-relative line numbering and section state updates.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import { EditorState } from '@codemirror/state';

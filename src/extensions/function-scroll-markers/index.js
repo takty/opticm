@@ -1,3 +1,10 @@
+/**
+ * Display function section markers alongside the editor scrollbar.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { EditorView, ViewPlugin } from '@codemirror/view';
 import { commonAnalysisState } from '../../analysis/common-analysis.js';
 import { extensionStyles } from '../styles.js';

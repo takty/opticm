@@ -1,3 +1,10 @@
+/**
+ * Provide an inert language implementation for plain text editing.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 // A complete, inert implementation of the language interface. This exercises
 // the same coordinator/view paths as a language with syntax-aware services.
 export const plainLanguage = {

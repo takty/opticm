@@ -1,3 +1,10 @@
+/**
+ * Convert Java parser nodes into syntax, structure, declaration, and reference ranges.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { buildCommonAnalysis } from './common-analysis.js';
 import { createLocalVariables, isVariableReference } from './scope-analysis.js';
 

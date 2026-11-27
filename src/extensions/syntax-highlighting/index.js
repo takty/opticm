@@ -1,3 +1,10 @@
+/**
+ * Render configurable syntax and semantic highlights from shared or supplied ranges.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { Facet, RangeSet, StateEffect, StateField } from '@codemirror/state';
 import { Decoration, EditorView, ViewPlugin } from '@codemirror/view';
 import { syntaxAnalysisState } from '../../analysis/lezer-analysis.js';

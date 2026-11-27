@@ -1,3 +1,10 @@
+/**
+ * Manage the CodeMirror view, editing commands, settings, and language services.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { Compartment, EditorState, Prec, StateEffect, StateField, Text, Transaction } from '@codemirror/state';
 import { Decoration, EditorView, highlightActiveLine, highlightActiveLineGutter, keymap, showTooltip } from '@codemirror/view';
 import {

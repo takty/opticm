@@ -1,3 +1,10 @@
+/**
+ * Validate shared analysis snapshots and maintain their state across document edits.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { StateEffect, StateField } from '@codemirror/state';
 
 const structureKinds = new Set(['function', 'class', 'branch', 'branch2', 'loop', 'loop2', 'exception']);

@@ -1,3 +1,10 @@
+/**
+ * Verify that documentation samples parse and cover the supported display classifications.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';

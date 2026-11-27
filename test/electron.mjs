@@ -1,3 +1,10 @@
+/**
+ * Launch and monitor the Electron integration test process.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { execFile } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';

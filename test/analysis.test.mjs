@@ -1,3 +1,10 @@
+/**
+ * Verify JavaScript analysis output and analysis worker client behavior.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { analyze } from '../.build/lang/js/analyzer.js';

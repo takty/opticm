@@ -1,3 +1,10 @@
+/**
+ * Create language analysis workers and expose standalone analysis sessions.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { AnalysisClient } from './analysis-client.js';
 import { createCommonAnalysis } from './analysis/common-analysis.js';
 

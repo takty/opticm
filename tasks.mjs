@@ -1,3 +1,10 @@
+/**
+ * Provide file, package, build, and watch utilities for development tasks.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { existsSync, watch as nodeWatch } from 'node:fs';
 import { copyFile, cp, mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';

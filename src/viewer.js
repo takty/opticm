@@ -1,3 +1,10 @@
+/**
+ * Expose a read-only code viewer with configurable display and language analysis.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { selectAll } from '@codemirror/commands';
 import { Compartment, EditorState } from '@codemirror/state';
 import { EditorView, keymap } from '@codemirror/view';

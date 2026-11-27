@@ -1,3 +1,10 @@
+/**
+ * Exercise editor and viewer behavior, appearance, and resource cleanup in a browser.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { createEditor, createViewer } from '../dist/opticm.min.js';
 import { createViewer as createStandaloneViewer } from '../dist/viewer.min.js';
 const results = [];

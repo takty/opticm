@@ -1,3 +1,10 @@
+/**
+ * Manage analysis worker requests, initialization, failures, and disposal.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 export class AnalysisClient {
 
 	constructor(worker) {

@@ -1,3 +1,10 @@
+/**
+ * Track Java local bindings and distinguish variable references from member names.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 const SCOPES = new Set([
 	'method_declaration',
 	'constructor_declaration',

@@ -1,3 +1,10 @@
+/**
+ * Assemble language-independent display extensions from shared analysis data.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { commonAnalysisState } from './analysis/common-analysis.js';
 import { createLineNumberExtensions } from './extensions/function-line-numbers/index.js';
 import { indentRulers } from './extensions/indent-rulers/index.js';

@@ -1,3 +1,10 @@
+/**
+ * Verify display extension configuration and static line highlighting.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import { Compartment, EditorState } from '@codemirror/state';

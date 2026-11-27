@@ -1,8 +1,8 @@
 /**
- * Code Analyzer
+ * Analyze JavaScript with strict or tolerant parsing and collect display ranges.
  *
  * @author Takuto Yanagida
- * @version 2026-11-17
+ * @version 2026-11-28
  */
 
 import { acorn } from '../../lib/parser.js';

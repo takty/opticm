@@ -1,3 +1,10 @@
+/**
+ * Install extension styles and manage shared CSS variable defaults.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { EditorView, ViewPlugin } from '@codemirror/view';
 import variables from '../styles/variables.css';
 

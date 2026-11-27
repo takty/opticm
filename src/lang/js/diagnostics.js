@@ -1,3 +1,10 @@
+/**
+ * Adapt localized JavaScript lint results to the shared diagnostic format.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { lintEn, lintJa } from '../../lib/vendor.js';
 import defaults from '../../res/defaults.json';
 

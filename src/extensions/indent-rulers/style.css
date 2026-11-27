@@ -1,3 +1,10 @@
+/**
+ * Indentation ruler layout and appearance
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 .cm-editor.cm-indent-rulers {
 	.cm-scroller {
 		z-index: auto;

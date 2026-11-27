@@ -1,3 +1,10 @@
+/**
+ * Expose the editor API and coordinate its lifecycle, settings, events, and analysis.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { EditorSelection } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { createCommonAnalysis, setCommonAnalysis } from './analysis/common-analysis.js';

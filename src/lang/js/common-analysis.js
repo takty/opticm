@@ -1,3 +1,10 @@
+/**
+ * Convert JavaScript analysis results and binding ranges into shared snapshots.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 export function buildCommonAnalysis(analysis, source, nodes, references) {
 	const lineStarts = [0];
 	for (let index = 0; index < source.length; index++) {

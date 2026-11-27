@@ -1,3 +1,10 @@
+/**
+ * Display indentation rulers aligned with the editor text.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { EditorView, ViewPlugin } from '@codemirror/view';
 import { extensionStyles } from '../styles.js';
 import css from './style.css';

@@ -1,3 +1,10 @@
+/**
+ * Handle JavaScript analysis requests in a dedicated worker.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { analyze } from './analyzer.js';
 
 self.onmessage = ({ data: { id, version, text } }) => {

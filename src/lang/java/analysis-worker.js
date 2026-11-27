@@ -1,3 +1,10 @@
+/**
+ * Initialize the Java parser and handle worker analysis and diagnostic requests.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { Language, Parser } from 'web-tree-sitter';
 import { analyzeJava } from './analyzer.js';
 import { diagnoseJava } from './diagnostics.js';

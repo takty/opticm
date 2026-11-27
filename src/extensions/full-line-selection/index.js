@@ -1,3 +1,10 @@
+/**
+ * Render selection backgrounds that fill complete visual line heights.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { EditorView, RectangleMarker, drawSelection, layer } from '@codemirror/view';
 import { extensionStyles } from '../styles.js';
 import css from './style.css';

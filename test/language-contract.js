@@ -1,3 +1,10 @@
+/**
+ * Exercise language service boundaries and standalone display extension contracts.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { Editor } from '../.build/editor-view.js';
 import { javascriptLanguage } from '../.build/lang/js/index.js';
 import { plainLanguage } from '../.build/lang/plain/index.js';

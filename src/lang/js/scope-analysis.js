@@ -1,3 +1,10 @@
+/**
+ * Resolve JavaScript binding scopes and classify definitions and variable references.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 const BLOCKS    = new Set(['BlockStatement', 'ForStatement', 'CatchClause']);
 const FUNCTIONS = new Set(['FunctionDeclaration', 'FunctionExpression', 'ArrowFunctionExpression']);
 

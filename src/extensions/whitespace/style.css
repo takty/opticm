@@ -1,3 +1,10 @@
+/**
+ * Tab, ordinary space, and ideographic space decorations
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 .cm-editor.cm-opticm-whitespace {
 	.cm-highlightSpace {
 		background-image: none;

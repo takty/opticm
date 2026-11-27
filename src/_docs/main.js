@@ -1,3 +1,10 @@
+/**
+ * Initialize the documentation demo, sample programs, and editor controls.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import 'klales/klales.min.css';
 
 // Load the distributed modules unchanged, including the analysis worker.

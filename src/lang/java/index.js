@@ -1,3 +1,10 @@
+/**
+ * Connect Java syntax, analysis, diagnostics, and optional editing services.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { javaLanguage as javaSyntax } from '@codemirror/lang-java';
 import { createAnalysisClient } from '../../analyzer.js';
 import { closeBracketsFor } from '../close-brackets.js';

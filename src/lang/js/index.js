@@ -1,3 +1,10 @@
+/**
+ * Connect JavaScript syntax, analysis, diagnostics, completion, and formatting services.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { javascriptLanguage as javascriptSyntax } from '@codemirror/lang-javascript';
 import { createAnalysisClient } from '../../analyzer.js';
 import { closeBracketsFor } from '../close-brackets.js';

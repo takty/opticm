@@ -1,3 +1,10 @@
+/**
+ * Display matching brackets and their indicators over the line-number gutter.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { bracketMatching } from '@codemirror/language';
 import { EditorView, ViewPlugin } from '@codemirror/view';
 import { extensionStyles } from '../styles.js';

@@ -1,3 +1,10 @@
+/**
+ * Verify shared analysis validation, reconciliation, edit mapping, and language integration.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { EditorState } from '@codemirror/state';

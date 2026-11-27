@@ -1,3 +1,10 @@
+/**
+ * Measure and draw structure, declaration, and reference highlights on a canvas.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { Facet, StateEffect, StateField, countColumn } from '@codemirror/state';
 import { EditorView, ViewPlugin, logException } from '@codemirror/view';
 import { commonAnalysisState } from '../../analysis/common-analysis.js';

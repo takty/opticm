@@ -1,3 +1,10 @@
+/**
+ * Apply editor color schemes and track system appearance preferences.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { Compartment } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { refreshStructure } from './extensions/structure-view/index.js';

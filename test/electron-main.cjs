@@ -1,3 +1,10 @@
+/**
+ * Run browser contract tests in Electron and record progress and results.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 const { writeFileSync } = require('node:fs');
 const { join } = require('node:path');
 const { app, BrowserWindow } = require('electron');

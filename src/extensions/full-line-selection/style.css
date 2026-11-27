@@ -1,3 +1,10 @@
+/**
+ * Full visual-line selection backgrounds
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 .cm-editor.cm-full-line-selection > .cm-scroller {
 	& > .cm-selectionLayer .cm-selectionBackground {
 		display: none;

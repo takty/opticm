@@ -1,3 +1,10 @@
+/**
+ * Coordinate gutter hover feedback, line selection, and easy line selection mode.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { EditorSelection, RangeSet, StateEffect, StateField } from '@codemirror/state';
 import { EditorView, GutterMarker, ViewPlugin, gutterLineClass } from '@codemirror/view';
 import cursorRight from './cursor-right.svg';

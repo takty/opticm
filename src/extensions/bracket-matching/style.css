@@ -1,3 +1,10 @@
+/**
+ * Matching bracket highlights and gutter indicators
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 .cm-editor.cm-bracket-matching {
 	:is(.cm-matchingBracket, .cm-bracket-gutter-mark) {
 		position : relative;

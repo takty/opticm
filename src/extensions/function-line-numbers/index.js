@@ -1,3 +1,10 @@
+/**
+ * Display absolute or function-relative line numbers with configurable starting values.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { StateEffect, StateField } from '@codemirror/state';
 import { EditorView, GutterMarker, gutter } from '@codemirror/view';
 import { commonAnalysisState } from '../../analysis/common-analysis.js';

@@ -1,3 +1,10 @@
+/**
+ * Syntax and semantic token colors and weights
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 .cm-editor.cm-syntax-highlighting {
 	.cm-syntax-comment {
 		color      : var(--opticm-syntax-comment-color, var(--opticm-default-syntax-comment-color));

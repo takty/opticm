@@ -1,3 +1,10 @@
+/**
+ * Display tabs, ordinary spaces, and ideographic spaces with distinct decorations.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { Decoration, EditorView, highlightWhitespace, MatchDecorator, ViewPlugin } from '@codemirror/view';
 import { extensionStyles } from '../styles.js';
 import css from './style.css';

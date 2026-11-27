@@ -1,3 +1,10 @@
+/**
+ * Highlight specified document lines and their gutter entries.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { RangeSet, StateEffect, StateField } from '@codemirror/state';
 import { Decoration, EditorView, GutterMarker, gutterLineClass } from '@codemirror/view';
 import { extensionStyles } from '../styles.js';

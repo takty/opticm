@@ -1,3 +1,10 @@
+/**
+ * Run browser contract tests and documentation checks through the DevTools protocol.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { spawn } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';

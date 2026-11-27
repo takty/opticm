@@ -1,3 +1,10 @@
+/**
+ * Format JavaScript lines while preserving configured indentation and comment spacing.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { beautify } from '../../lib/vendor.js';
 import defaults from '../../res/defaults.json';
 

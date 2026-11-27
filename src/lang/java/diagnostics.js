@@ -1,3 +1,10 @@
+/**
+ * Generate localized Java syntax diagnostics and control-body warnings.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 const MESSAGES = {
 	en: {
 		unclosedString  : 'Expected a closing quote for this string.',

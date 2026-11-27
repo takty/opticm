@@ -1,3 +1,10 @@
+/**
+ * Provide JavaScript completion and argument hints through per-editor Tern sessions.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { syntaxTree } from '@codemirror/language';
 import { tern, defaultDefinitions } from '../../lib/vendor.js';
 

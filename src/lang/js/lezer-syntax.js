@@ -1,3 +1,10 @@
+/**
+ * Classify JavaScript Lezer nodes and resolve interim local references.
+ *
+ * @author Takuto Yanagida
+ * @version 2026-11-28
+ */
+
 import { HighlightStyle } from '@codemirror/language';
 import { tags } from '@lezer/highlight';
 
