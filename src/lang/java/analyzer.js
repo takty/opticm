@@ -245,13 +245,18 @@ export function analyzeJava(source, rootNode) {
 			const alternative = node.childForFieldName('alternative');
 			const branchOffset = alternative ? toOffset(alternative.startIndex) : undefined;
 			const branches = branchOffset === undefined ? [] : [branchOffset];
-			addRange(node, 'conditional', branches);
+			addRange(node, 'branch', branches);
 		} else if (SWITCH_NODES.has(node.type)) {
-			addRange(node, 'branch');
+			addRange(node, 'branch2');
 		} else if (LOOP_NODES.has(node.type)) {
 			addRange(node, 'loop');
 		} else if (LOOP2_NODES.has(node.type)) {
 			addRange(node, 'loop2');
+		} else if (node.type === 'try_statement' || node.type === 'try_with_resources_statement') {
+			const branches = node.namedChildren
+				.filter(child => child.type === 'catch_clause' || child.type === 'finally_clause')
+				.map(child => toOffset(child.startIndex));
+			addRange(node, 'exception', branches);
 		}
 		if (node.type.includes('comment')) {
 			add(node, 'comment');

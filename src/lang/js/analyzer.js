@@ -54,6 +54,7 @@ function createVisitor() {
 	const classLocs   = [];
 	const ifLocs      = [];
 	const switchLocs  = [];
+	const tryNodes    = [];
 	const forLocs     = [];
 	const whileLocs   = [];
 	const fnNames     = [];
@@ -176,6 +177,9 @@ function createVisitor() {
 		SwitchStatement: node => {
 			switchLocs.push([node, node]);
 		},
+		TryStatement: node => {
+			tryNodes.push(node);
+		},
 		ForStatement: (node, state, c) => {
 			forLocs.push([node, node]);
 		},
@@ -211,6 +215,18 @@ function createVisitor() {
 			]));
 			const legacy = mapRanges(node => node.loc.start, node => node.loc.end);
 			const offsets = mapRanges(node => node.start, node => node.end);
+			offsets.tryLocs = tryNodes.map(node => {
+				const range = [node.start, node.end];
+				if (node.handler) range.push(node.handler.start);
+				if (node.finalizer) {
+					// Acorn gives the finalizer block's opening brace, not the keyword.
+					const start = (node.handler ?? node.block).end;
+					const gap = source.slice(start, node.finalizer.start);
+					const clause = /^(?:\s|\/\/[^\r\n\u2028\u2029]*|\/\*[\s\S]*?\*\/)*finally\b/.exec(gap);
+					if (clause) range.push(start + clause[0].lastIndexOf('finally'));
+				}
+				return range;
+			});
 			offsets.propertyDefinitions = propertyDefinitions;
 			offsets.shorthandProperties = shorthandProperties;
 			for (const kind of ['var', 'let', 'const']) {

@@ -83,9 +83,11 @@ exclusive ends. `complete` indicates whether the source parse was complete.
 An unavailable or incomplete category is represented with the best valid
 partial data available, not parser-specific node names.
 
-- Structures use the shared kinds `function`, `class`, `conditional` (if-style
-  constructs), `branch` (switch-style constructs), `loop` (for-style loops),
-  and `loop2` (while-style loops), with optional branch offsets.
+- Structures use the shared kinds `function`, `class`, `branch` (if-style
+  constructs), `branch2` (switch-style constructs), `loop` (for-style loops),
+  `loop2` (while-style loops), and `exception` (exception-handling constructs).
+  Exception ranges cover the whole construct, with branch offsets at handler
+  and cleanup clauses when present.
 - Declarations use `kind: 'variable'`, normalized mutability (`mutable`,
   `immutable`, or `unknown`), and scope (`function`, `lexical`, `member`,
   `parameter`, or `unknown`).

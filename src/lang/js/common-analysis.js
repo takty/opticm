@@ -13,10 +13,11 @@ export function buildCommonAnalysis(analysis, source, nodes, references) {
 	};
 	addStructures(nodes.fnLocs, 'function');
 	addStructures(nodes.classLocs, 'class');
-	addStructures(nodes.ifLocs, 'conditional');
-	addStructures(nodes.switchLocs, 'branch');
+	addStructures(nodes.ifLocs, 'branch');
+	addStructures(nodes.switchLocs, 'branch2');
 	addStructures(nodes.forLocs, 'loop');
 	addStructures(nodes.whileLocs, 'loop2');
+	addStructures(nodes.tryLocs, 'exception');
 
 	const declarations = [];
 	for (const [sourceKind, ranges] of [
