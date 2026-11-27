@@ -20,14 +20,14 @@ test('strict and tolerant results retain the existing coordinate contract', () =
 
 test('JavaScript if and switch statements use distinct structures', () => {
 	const conditional = 'if (ready) { step(); }';
-	const branch = 'switch (value) { case 1: step(); break; default: stop(); }';
-	const source = `${conditional}\n${branch}`;
+	const switchStatement = 'switch (value) { case 1: step(); break; default: stop(); }';
+	const source = `${conditional}\n${switchStatement}`;
 	const result = analyze(source);
 	assert.equal(result.success, true);
 	const { structures } = createCommonAnalysis({ ...result.commonAnalysis, version: 1 });
 	assert.deepEqual(structures.map(item => [item.kind, source.slice(item.from, item.to)]), [
-		['conditional', conditional],
-		['branch', branch],
+		['branch', conditional],
+		['branch2', switchStatement],
 	]);
 });
 
@@ -40,6 +40,25 @@ test('JavaScript while and do-while statements use loop2 structures', () => {
 		['loop2', 'while (ready) { step(); }'],
 		['loop2', 'do { step(); } while (ready);'],
 	]);
+});
+
+test('JavaScript exception structures span try statements and mark their clauses', () => {
+	const caught = 'try { read(); } catch { recover(); }';
+	const cleaned = 'try { read(); } /* finally in a comment */ finally\n{ close(); }';
+	const both = 'try { read(); } catch (error) { report(error); } finally { close(); }';
+	const source = ['// 😀', caught, cleaned, both].join('\n');
+	const result = analyze(source);
+	assert.equal(result.success, true);
+	const ranges = createCommonAnalysis({ ...result.commonAnalysis, version: 1 }).structures
+		.filter(item => item.kind === 'exception');
+	assert.deepEqual(ranges.map(item => [source.slice(item.from, item.to), item.branches]), [
+		[caught, [source.indexOf('catch')]],
+		[cleaned, [source.indexOf('finally\n')]],
+		[both, [source.lastIndexOf('catch'), source.lastIndexOf('finally')]],
+	]);
+	const incomplete = analyze('try { read(); } finally {\n');
+	assert.equal(incomplete.success, false);
+	assert.doesNotThrow(() => createCommonAnalysis({ ...incomplete.commonAnalysis, version: 1 }));
 });
 
 test('JavaScript analysis reports class declarations and expressions', () => {

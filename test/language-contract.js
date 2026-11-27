@@ -133,7 +133,7 @@ export async function runLanguageContractTests(assert) {
 	const data = createCommonAnalysis({ ...raw.commonAnalysis, version: 1 });
 	assert(JSON.stringify(raw) === snapshot, 'common analysis conversion preserves public analysis');
 	assert(data.complete && data.sections[0].from === 0, 'analysis supplies language-neutral function sections');
-	const branch = data.structures.find(item => item.kind === 'conditional' && item.branches.length);
+	const branch = data.structures.find(item => item.kind === 'branch' && item.branches.length);
 	assert(
 		branch.from === source.indexOf('if') && branch.branches[0] > branch.from && branch.branches[0] < branch.to,
 		'conditional structures and branches use common UTF-16 offsets',

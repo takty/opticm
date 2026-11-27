@@ -13,7 +13,7 @@ const extensionSettings = () => Object.fromEntries(
 	Array.from(extensionControls.querySelectorAll('input[type="checkbox"]'), input => [input.name, input.checked]),
 );
 const samples = {
-	javascript: `// Functions, parameters and literals
+	javascript: `// A greeter with two moods and a fallback for invalid input.
 function showMessage(message) {
 	console.log(message);
 }
@@ -22,31 +22,69 @@ class Greeter {
 	prefix = "Hello";
 	static count = 0;
 
-	greet(name) {
-		const message = this.prefix + ", " + name;
-		let remaining = 2;
-		while (remaining > 0) {
-			if (name !== null && name !== "") {
-				showMessage(message);
-			} else {
-				showMessage("Hello, guest");
+	greet(name, mood) {
+		try {
+			if (name === null || name === "") {
+				name = "guest";
+			} else if (!isName(name)) {
+				throw new Error("Names must start with a capital letter.");
 			}
-			remaining--;
+			const message = makeGreeting(this.prefix, name, mood);
+			let remaining = 2;
+			while (remaining > 0) {
+				showMessage(message);
+				remaining--;
+			}
+		} catch (error) {
+			showMessage(error.message);
+		} finally {
+			Greeter.count++;
 		}
 	}
 }
 
+const makeGreeting = function (prefix, name, mood) {
+	switch (mood) {
+		case "happy":
+			return prefix + ", " + name + "!";
+		default:
+			return prefix + ", " + name;
+	}
+};
+
 const options = { enabled: true, name: "Opticm" };
 const { enabled, name } = options;
 const { name: displayName } = options;
-showMessage(displayName);
 const isName = value => /^[A-Z]/.test(value);
-for (let index = 0; index < 2; index++) {
-	if (enabled && isName(name)) new Greeter().greet(name);
-}`,
-	java: `// Types, fields, methods and parameters
+
+function runDemo() {
+	// The attempt counter uses function-scoped var for comparison with let and const.
+	var attempts = 0;
+	const greeter = new Greeter();
+	const names = [name, "invalid", null];
+	if (enabled) {
+		showMessage("Testing " + displayName);
+		for (let index = 0; index < names.length; index++) {
+			greeter.greet(names[index], index === 0 ? "happy" : "quiet");
+			attempts++;
+		}
+	} else {
+		showMessage("Greetings are disabled.");
+	}
+	do {
+		showMessage("Countdown: " + attempts);
+		attempts--;
+	} while (attempts > 0);
+}
+
+runDemo();`,
+	java: `import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
+
+// A greeter with two moods and a fallback for invalid input.
 interface Greeting {
-	void greet(String name);
+	void greet(String name, Mood mood);
 }
 
 enum Mood { HAPPY, QUIET }
@@ -56,9 +94,14 @@ class Greeter implements Greeting {
 	private final String prefix = "Hello";
 	private static int count = 0;
 
-	public void greet(String name) {
+	@Override
+	public void greet(String name, Mood mood) {
 		count++;
-		String message = prefix + ", " + name;
+		char punctuation = switch (mood) {
+			case HAPPY -> '!';
+			case QUIET -> '.';
+		};
+		String message = prefix + ", " + name + punctuation;
 		int remaining = 2;
 		while (remaining > 0) {
 			if (name != null && !name.isEmpty()) {
@@ -74,14 +117,37 @@ class Greeter implements Greeting {
 		System.out.println(message);
 	}
 
+	static String readName(String input) throws IOException {
+		try (BufferedReader reader = new BufferedReader(new StringReader(input))) {
+			String name;
+			do {
+				name = reader.readLine();
+			} while (name != null && name.isBlank());
+			return name;
+		}
+	}
+
 	public static void main(String[] args) {
-		Person person = new Person("Opticm", 20);
-		Mood mood = Mood.HAPPY;
-		boolean enabled = true;
-		for (int index = 0; index < 2; index++) {
-			if (enabled && mood == Mood.HAPPY) {
-				new Greeter().greet(person.name());
+		try {
+			final Person person = new Person(readName("Opticm"), 20);
+			final Greeting greeter = new Greeter();
+			Mood[] moods = Mood.values();
+			for (Mood mood : moods) {
+				greeter.greet(person.name(), mood);
 			}
+			for (int index = 0; index < args.length; index++) {
+				switch (args[index]) {
+					case "--quiet":
+						greeter.greet(person.name(), Mood.QUIET);
+						break;
+					default:
+						greeter.greet(args[index], Mood.HAPPY);
+				}
+			}
+		} catch (IOException error) {
+			showMessage(error.getMessage());
+		} finally {
+			showMessage("Greetings sent: " + count);
 		}
 	}
 }`,

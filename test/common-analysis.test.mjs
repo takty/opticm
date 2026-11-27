@@ -112,7 +112,7 @@ test('worker reports shorthand properties without discarding their variable defi
 test('JavaScript conditional branches use common UTF-16 offsets', () => {
 	const source = 'if (ready) { start(); } else { stop(); }';
 	const result = createCommonAnalysis({ ...analyze(source).commonAnalysis, version: 11 });
-	const conditional = result.structures.find(item => item.kind === 'conditional');
+	const conditional = result.structures.find(item => item.kind === 'branch');
 	assert.equal(conditional.branches.length, 1);
 	assert.ok(conditional.branches[0] > conditional.from && conditional.branches[0] < conditional.to);
 });

@@ -104,11 +104,11 @@ test('Java if statements and both forms of switch use distinct structures', () =
 		const result = analyzeJava(source, tree.rootNode);
 		assert.equal(result.success, true);
 		const structures = createCommonAnalysis({ ...result.commonAnalysis, version: 1 }).structures
-			.filter(item => item.kind === 'conditional' || item.kind === 'branch');
+			.filter(item => item.kind === 'branch' || item.kind === 'branch2');
 		assert.deepEqual(structures.map(item => [item.kind, source.slice(item.from, item.to)]), [
-			['conditional', conditional],
-			['branch', statement],
-			['branch', expression],
+			['branch', conditional],
+			['branch2', statement],
+			['branch2', expression],
 		]);
 	} finally {
 		tree.delete();
@@ -126,6 +126,28 @@ test('Java while and do-while statements use loop2 structures', () => {
 			['loop', 'for (;;) {}'],
 			['loop2', 'while (ready) { tick(); }'],
 			['loop2', 'do { tick(); } while (ready);'],
+		]);
+	} finally {
+		tree.delete();
+	}
+});
+
+test('Java exception structures mark each direct clause and include resource-only try statements', () => {
+	const resources = 'try (var in = open()) { read(in); }';
+	const nested = 'try { read(); } finally { close(); }';
+	const outer = 'try { ' + nested + ' } catch (IOException error) { recover(); } ' +
+		'catch (RuntimeException error) { report(error); } finally { finish(); }';
+	const source = '// 😀\nclass Example { void run() { ' + resources + ' ' + outer + ' } }';
+	const tree = parser.parse(source);
+	try {
+		const result = analyzeJava(source, tree.rootNode);
+		assert.equal(result.success, true);
+		const ranges = createCommonAnalysis({ ...result.commonAnalysis, version: 1 }).structures
+			.filter(item => item.kind === 'exception');
+		assert.deepEqual(ranges.map(item => [source.slice(item.from, item.to), item.branches]), [
+			[resources, []],
+			[outer, [source.indexOf('catch'), source.lastIndexOf('catch'), source.lastIndexOf('finally')]],
+			[nested, [source.indexOf('finally')]],
 		]);
 	} finally {
 		tree.delete();
