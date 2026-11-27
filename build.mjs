@@ -109,6 +109,7 @@ async function buildJavaScript() {
 				};
 				build.onResolve({ filter: /^\.\/extensions\/[^/]+\/index\.js$/ }, args => {
 					if (args.importer !== join(stageRoot, 'display-extensions.js')) return;
+
 					const entry = displayImports[args.path.split('/')[2]];
 					if (entry) return { path: 'opticm/' + entry, external: true };
 				});

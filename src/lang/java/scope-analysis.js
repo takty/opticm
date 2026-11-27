@@ -72,8 +72,10 @@ export function createLocalVariables(textOf) {
 	function enter(node) {
 		if (SCOPES.has(node.type)) scopes.push(new Map());
 		if (node.type !== 'identifier' || !scopes.length) return;
+
 		const parent = node.parent;
 		if (!parent) return;
+
 		let visibleFrom;
 		let visibleTo = Infinity;
 		if (parent.type === 'variable_declarator' &&
@@ -89,7 +91,7 @@ export function createLocalVariables(textOf) {
 			const body = parent.parent?.parent?.childForFieldName('body');
 			if (body) {
 				visibleFrom = node.endIndex;
-				visibleTo = body.endIndex;
+				visibleTo   = body.endIndex;
 			}
 		} else if ((parent.type === 'lambda_expression' && isField(node, parent, 'parameters')) ||
 			parent.type === 'inferred_parameters') {

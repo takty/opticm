@@ -180,6 +180,7 @@ try {
 	highlightForm.onsubmit = event => {
 		event.preventDefault();
 		if (!editor) return;
+
 		const value = highlightInput.value.trim();
 		const entries = value ? value.split(',').map(entry => entry.trim()) : [];
 		const lines = entries.map(Number);
@@ -198,6 +199,7 @@ try {
 	document.querySelector('#code-language').onchange = async () => {
 		const nextLanguage = selectedCodeLanguage();
 		if (nextLanguage === activeCodeLanguage) return;
+
 		if (editor) {
 			samples[activeCodeLanguage] = editor.getValue();
 			editor.destroy();

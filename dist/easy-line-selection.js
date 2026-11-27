@@ -306,7 +306,7 @@ function extensionStyles(css) {
 }
 
 // .build/extensions/gutter-line-selection/style.css
-var style_default = '.cm-editor.cm-gutter-line-selection {\r\n	:is(.cm-lineNumbers, .cm-sectionNumbers, .cm-gutter-lint),\r\n	.cm-gutters::after {\r\n		cursor: var(--opticm-gutter-cursor, url("./cursor-right.svg") 22 8, pointer);\r\n	}\r\n\r\n	&.line-selection-mode :is(.cm-lineNumbers, .cm-sectionNumbers, .cm-gutter-lint),\r\n	&.line-selection-mode .cm-gutters::after {\r\n		cursor: var(--opticm-gutter-line-selection-cursor, url("./cursor-line.svg") 22 8, pointer);\r\n	}\r\n\r\n	.cm-gutters :is(.cm-lineNumbers, .cm-sectionNumbers, .cm-gutter-lint) .cm-gutterElement.cm-opticm-gutter-line-hover {\r\n		background: var(--opticm-gutter-number-hover-background, var(--opticm-default-gutter-number-hover-background));\r\n	}\r\n}\r\n';
+var style_default = '/**\r\n * Gutter hover feedback and line selection cursors\r\n *\r\n * @author Takuto Yanagida\r\n * @version 2026-11-28\r\n */\r\n\r\n.cm-editor.cm-gutter-line-selection {\r\n	:is(.cm-lineNumbers, .cm-sectionNumbers, .cm-gutter-lint),\r\n	.cm-gutters::after {\r\n		cursor: var(--opticm-gutter-cursor, url("./cursor-right.svg") 22 8, pointer);\r\n	}\r\n\r\n	&.line-selection-mode :is(.cm-lineNumbers, .cm-sectionNumbers, .cm-gutter-lint),\r\n	&.line-selection-mode .cm-gutters::after {\r\n		cursor: var(--opticm-gutter-line-selection-cursor, url("./cursor-line.svg") 22 8, pointer);\r\n	}\r\n\r\n	.cm-gutters :is(.cm-lineNumbers, .cm-sectionNumbers, .cm-gutter-lint) .cm-gutterElement.cm-opticm-gutter-line-hover {\r\n		background: var(--opticm-gutter-number-hover-background, var(--opticm-default-gutter-number-hover-background));\r\n	}\r\n}\r\n';
 
 // .build/extensions/gutter-line-selection/index.js
 var setEasyLineSelectionMode = StateEffect.define();
@@ -421,7 +421,9 @@ var gutterSelection = ViewPlugin2.fromClass(class {
     if (line !== null) {
       if (!this.dragged && line !== this.down) {
         this.dragged = true;
-        if (!event.shiftKey) this.anchor = this.down;
+        if (!event.shiftKey) {
+          this.anchor = this.down;
+        }
         this.setMode(false);
       }
       this.select(line);

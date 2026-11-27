@@ -80,6 +80,7 @@ export async function createViewer(container, { value = '', codeLanguage = 'java
 
 	async function analyze() {
 		if (!analyzer) return;
+
 		const current = ++revision;
 		try {
 			const snapshot = await analyzer.analyze(view.state.doc.toString());
@@ -93,6 +94,7 @@ export async function createViewer(container, { value = '', codeLanguage = 'java
 
 	function destroy() {
 		if (destroyed) return;
+
 		destroyed = true;
 		colorScheme.destroy();
 		analyzer?.destroy();

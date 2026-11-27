@@ -105,389 +105,476 @@ function normalizeSettings({ gutterLineSelection, ...options }) {
 
 /** Creates an editor in an empty, sized container. See README.md for the API contract. */
 export async function createEditor(container, { value = '', definitions = [], javaAnalysis, ...options } = {}) {
+	validateContainer(container);
+	validate(options);
+	const initialDefinitions = structuredClone(definitions);
+	if (!Array.isArray(initialDefinitions)) {
+		throw new TypeError('definitions must be an array');
+	}
+	const context = createEditorContext(container, options);
+	try {
+		await initializeEditor(context, initialDefinitions, javaAnalysis, value);
+		return context.api;
+	} catch (error) {
+		disposeEditor(context);
+		throw error;
+	}
+}
+
+function validateContainer(container) {
 	if (!container || container.nodeType !== 1 || container.ownerDocument !== document) {
 		throw new TypeError('A container in the current document is required');
 	}
 	if (mounted.has(container) || container.childNodes.length) {
 		throw new Error('Container must be empty and unoccupied');
 	}
-	validate(options);
-	const initialDefinitions = structuredClone(definitions);
-	if (!Array.isArray(initialDefinitions)) {
-		throw new TypeError('definitions must be an array');
-	}
+}
+
+// Editor initialization -------------------------------------------------------
+
+function createEditorContext(container, options) {
 	mounted.add(container);
 	const root = document.createElement('div');
 	root.className = 'opticm';
 	container.append(root);
 	const language = options.codeLanguage === null ? plainLanguage : options.codeLanguage === 'java' ? javaLanguage : javascriptLanguage;
-	let view, client, observer, timer, destroyed = false;
-	let settings = { ...DEFAULT_SETTINGS, ...normalizeSettings(options) };
-	const colorScheme = createColorScheme(root);
-	const diagnosticSource = text => language.diagnostics(text, settings.language, undefined, client);
-	let version      = 0;
-	let analysis     = null;
-	let loading      = false;
-	let programmatic = false;
-	let composing    = false;
-	const listeners = new Map();
-	const abort = new AbortController();
-	let markerId = 0;
+	const context = {
+		container,
+		root,
+		language,
+		settings    : { ...DEFAULT_SETTINGS, ...normalizeSettings(options) },
+		colorScheme : createColorScheme(root),
+		destroyed   : false,
+		version     : 0,
+		analysis    : null,
+		loading     : false,
+		programmatic: false,
+		composing   : false,
+		listeners   : new Map(),
+		abort       : new AbortController(),
+		markerId    : 0,
+	};
+	context.diagnosticSource = text => language.diagnostics(text, context.settings.language, undefined, context.client);
+	return context;
+}
 
-	function assertAlive() {
-		if (destroyed) {
-			throw new Error('Editor destroyed');
+async function initializeEditor(context, definitions, javaAnalysis, value) {
+	context.client = context.language.createAnalysisClient(javaAnalysis);
+	await context.client.ready;
+	if (document.fonts) await loadEditorFont(context);
+	context.view = new Editor({
+		language    : context.language,
+		colorScheme : context.colorScheme.extension,
+		phrases     : LANGUAGES[context.settings.language].editorPhrase,
+		allowChanges: () => context.loading || context.programmatic || (!context.settings.readOnly && !context.settings.disabled),
+		onUpdate    : handleUpdate.bind(null, context),
+		onFontSizeChange(delta) {
+			context.api.setSettings({ fontSize: Math.min(64, Math.max(10, context.settings.fontSize + delta)) });
+		},
+		onLineHeightChange(delta) {
+			context.api.setSettings({ lineHeight: Math.min(195, Math.max(135, context.settings.lineHeight + delta)) });
+		},
+	}, context.root);
+	context.cm = context.view.view;
+	context.colorScheme.set(context.cm, context.settings.colorScheme);
+	context.view.setDefinitions(definitions);
+	registerEditorEvents(context);
+	context.api = createEditorAPI(context);
+	applySettings(context);
+	context.api.loadDocument(value);
+	if (context.settings.analysis) await context.api.analyzeNow();
+}
+
+async function loadEditorFont(context) {
+	// Resolve inherited CSS variables before requesting the configured font.
+	const probe = document.createElement('span');
+	probe.className = 'cm-editor';
+	probe.style.fontFamily = context.settings.fontFamily;
+	context.root.append(probe);
+	const fontFamily = getComputedStyle(probe).fontFamily;
+	probe.remove();
+	await document.fonts.load(`${context.settings.fontSize}px ${fontFamily}`);
+}
+
+function registerEditorEvents(context) {
+	for (const type of ['focus', 'blur']) {
+		context.cm.contentDOM.addEventListener(type, () => emit(context, type, {}), { signal: context.abort.signal });
+	}
+	for (const type of ['copy', 'cut']) {
+		context.cm.contentDOM.addEventListener(type, () => emit(context, type, { text: selectionText(context) }), { signal: context.abort.signal, capture: true });
+	}
+	context.root.addEventListener('compositionstart', () => {
+		context.composing = true;
+		setFormatState(context);
+		clearTimeout(context.timer);
+		context.view.closeCompletion();
+		context.view.composing = true;
+		context.cm.dom.classList.add('ime');
+	}, { signal: context.abort.signal });
+	context.root.addEventListener('compositionend', () => {
+		context.composing = false;
+		setFormatState(context);
+		context.view.composing = false;
+		context.cm.dom.classList.remove('ime');
+		scheduleAnalysis(context);
+	}, { signal: context.abort.signal });
+	context.observer = new ResizeObserver(() => {
+		if (!context.destroyed) context.view.refresh();
+	});
+	context.observer.observe(context.container);
+}
+
+// Shared editor state --------------------------------------------------------
+
+function assertAlive(context) {
+	if (context.destroyed) {
+		throw new Error('Editor destroyed');
+	}
+}
+
+function emit(context, type, data) {
+	for (const listener of context.listeners.get(type) || []) {
+		try {
+			listener(structuredClone(data));
+		} catch (error) {
+			console.error('opticm event listener failed', error);
 		}
 	}
+}
 
-	function emit(type, data) {
-		for (const listener of listeners.get(type) || []) {
-			try {
-				listener(structuredClone(data));
-			} catch (error) {
-				console.error('opticm event listener failed', error);
+function disposeEditor(context) {
+	if (context.destroyed) return;
+
+	context.destroyed = true;
+	clearTimeout(context.timer);
+	context.abort.abort();
+	context.observer?.disconnect();
+	context.colorScheme.destroy();
+	context.client?.destroy();
+	context.view?.destroy();
+	context.listeners.clear();
+	context.root.remove();
+	mounted.delete(context.container);
+}
+
+function setFormatState(context) {
+	context.view.autoFormat = context.settings.autoFormat && context.settings.formatting && !context.loading && !context.programmatic && !context.composing;
+}
+
+function applySettings(context) {
+	setFormatState(context);
+	if (context.settings.disabled) context.cm.contentDOM.blur();
+	context.root.inert = context.settings.disabled;
+	context.root.setAttribute('aria-disabled', String(context.settings.disabled));
+	context.view.setOptions(context.settings, LANGUAGES[context.settings.language].editorPhrase, context.settings.diagnostics ? context.diagnosticSource : null);
+}
+
+function scheduleAnalysis(context) {
+	clearTimeout(context.timer);
+	if (!context.settings.analysis || context.composing || context.destroyed) return;
+
+	context.timer = setTimeout(() => {
+		requestAnalysis(context).catch(error => {
+			if (!context.destroyed) {
+				emit(context, 'error', { message: error.message });
 			}
+		});
+	}, context.settings.analysisDelay);
+}
+
+async function requestAnalysis(context) {
+	assertAlive(context);
+	const result = await context.client.request(context.cm.state.doc.toString(), context.version);
+	if (result === null) return null;
+
+	const common   = createCommonAnalysis({ ...result.commonAnalysis, version: result.version });
+	const snapshot = { ...common, text: result.text };
+
+	if (!context.destroyed && result.version === context.version && context.settings.analysis) {
+		context.cm.dispatch({ effects: setCommonAnalysis.of(common) });
+		context.analysis = snapshot;
+		emit(context, 'analysis', snapshot);
+	}
+	return structuredClone(snapshot);
+}
+
+function handleUpdate(context, before, transactions) {
+	const transaction = transactions.at(-1);
+	if (!transaction) return;
+
+	const changed = transaction.docChanged || transaction.isUserEvent('load');
+	const { doc, selection } = transaction.state;
+
+	if (changed) {
+		context.version++;
+		context.analysis = null;
+		scheduleAnalysis(context);
+		if (!context.loading) {
+			emit(context, 'change', { origin: 'edit', source: changeSource(transaction), version: context.version, text: doc.toString() });
 		}
 	}
-
-	function dispose() {
-		if (destroyed) return;
-		destroyed = true;
-		clearTimeout(timer);
-		abort.abort();
-		observer?.disconnect();
-		colorScheme.destroy();
-		client?.destroy();
-		view?.destroy();
-		listeners.clear();
-		root.remove();
-		mounted.delete(container);
+	if (changed && !context.loading) {
+		emit(context, 'state', getEditorState(context));
 	}
+	if (changed || !selection.eq(before.selection)) {
+		emit(context, 'selection', {
+			ranges: selection.ranges.map(({ anchor, head }) => ({
+				anchor: positionAt(doc, anchor),
+				head  : positionAt(doc, head),
+			})),
+		});
+	}
+}
 
+function selectionText(context) {
+	const { doc, selection } = context.cm.state;
+	return selection.ranges.map(({ from, to }) => doc.sliceString(from, to)).join('\n');
+}
+
+function edit(context, fn) {
+	assertAlive(context);
+	context.programmatic = true;
+	setFormatState(context);
 	try {
-		client = language.createAnalysisClient(javaAnalysis);
-		await client.ready;
-		if (document.fonts) {
-			// Resolve inherited CSS variables before requesting the configured font.
-			const probe = document.createElement('span');
-			probe.className = 'cm-editor';
-			probe.style.fontFamily = settings.fontFamily;
-			root.append(probe);
-			const fontFamily = getComputedStyle(probe).fontFamily;
-			probe.remove();
-			await document.fonts.load(`${settings.fontSize}px ${fontFamily}`);
-		}
-		view = new Editor({
-			language,
-			colorScheme: colorScheme.extension,
-			phrases: LANGUAGES[settings.language].editorPhrase,
-			allowChanges: () => loading || programmatic || (!settings.readOnly && !settings.disabled),
-			onUpdate: handleUpdate,
-			onFontSizeChange(delta) {
-				api.setSettings({ fontSize: Math.min(64, Math.max(10, settings.fontSize + delta)) });
-			},
-			onLineHeightChange(delta) {
-				api.setSettings({ lineHeight: Math.min(195, Math.max(135, settings.lineHeight + delta)) });
-			},
-		}, root);
-		const cm = view.view;
-		colorScheme.set(cm, settings.colorScheme);
-		view.setDefinitions(initialDefinitions);
-
-		const state = () => ({
-			version,
-			readOnly : settings.readOnly,
-			disabled : settings.disabled,
-			canUndo  : view.historySize().undo > 0,
-			canRedo  : view.historySize().redo > 0,
-		});
-
-		function setFormatState() {
-			view.autoFormat = settings.autoFormat && settings.formatting && !loading && !programmatic && !composing;
-		}
-
-		function applySettings() {
-			setFormatState();
-			if (settings.disabled) cm.contentDOM.blur();
-			root.inert = settings.disabled;
-			root.setAttribute('aria-disabled', String(settings.disabled));
-			view.setOptions(settings, LANGUAGES[settings.language].editorPhrase, settings.diagnostics ? diagnosticSource : null);
-		}
-
-		function schedule() {
-			clearTimeout(timer);
-			if (!settings.analysis || composing || destroyed) return;
-			timer = setTimeout(() => {
-				requestAnalysis().catch(error => {
-					if (!destroyed) emit('error', { message: error.message });
-				});
-			}, settings.analysisDelay);
-		}
-
-		async function requestAnalysis() {
-			assertAlive();
-			const result = await client.request(cm.state.doc.toString(), version);
-			if (result === null) return null;
-			const common = createCommonAnalysis({ ...result.commonAnalysis, version: result.version });
-			const snapshot = { ...common, text: result.text };
-			if (!destroyed && result.version === version && settings.analysis) {
-				cm.dispatch({ effects: setCommonAnalysis.of(common) });
-				analysis = snapshot;
-				emit('analysis', snapshot);
-			}
-			return structuredClone(snapshot);
-		}
-
-		function handleUpdate(before, transactions) {
-			const transaction = transactions.at(-1);
-			if (!transaction) return;
-			const changed = transaction.docChanged || transaction.isUserEvent('load');
-			const { doc, selection } = transaction.state;
-			if (changed) {
-				version++;
-				analysis = null;
-				schedule();
-				if (!loading) emit('change', { origin: 'edit', source: changeSource(transaction), version, text: doc.toString() });
-			}
-			if (changed && !loading) emit('state', state());
-			if (changed || !selection.eq(before.selection)) {
-				emit('selection', {
-					ranges: selection.ranges.map(({ anchor, head }) => ({
-						anchor: positionAt(doc, anchor),
-						head  : positionAt(doc, head),
-					})),
-				});
-			}
-		}
-
-		for (const type of ['focus', 'blur']) {
-			cm.contentDOM.addEventListener(type, () => emit(type, {}), { signal: abort.signal });
-		}
-		for (const type of ['copy', 'cut']) {
-			cm.contentDOM.addEventListener(type, () => emit(type, { text: selectionText() }), { signal: abort.signal, capture: true });
-		}
-
-		function selectionText() {
-			const { doc, selection } = cm.state;
-			return selection.ranges.map(({ from, to }) => doc.sliceString(from, to)).join('\n');
-		}
-
-		root.addEventListener('compositionstart', () => {
-			composing = true;
-			setFormatState();
-			clearTimeout(timer);
-			view.closeCompletion();
-			view.composing = true;
-			cm.dom.classList.add('ime');
-		}, { signal: abort.signal });
-
-		root.addEventListener('compositionend', () => {
-			composing = false;
-			setFormatState();
-			view.composing = false;
-			cm.dom.classList.remove('ime');
-			schedule();
-		}, { signal: abort.signal });
-
-		observer = new ResizeObserver(() => {
-			if (!destroyed) view.refresh();
-		});
-		observer.observe(container);
-
-		function edit(fn) {
-			assertAlive();
-			programmatic = true;
-			setFormatState();
-			try {
-				fn();
-			} finally {
-				programmatic = false;
-				setFormatState();
-			}
-		}
-
-		// Public API ----------------------------------------------------------
-
-		const api = {
-			getValue() {
-				assertAlive();
-				return cm.state.doc.toString();
-			},
-			getLineCount() {
-				assertAlive();
-				return cm.state.doc.lines;
-			},
-			loadDocument(text) {
-				assertAlive();
-				loading = true;
-				setFormatState();
-				try {
-					view.loadDocument(String(text));
-				} finally {
-					loading = false;
-					setFormatState();
-				}
-				emit('change', { origin: 'load', version, text: cm.state.doc.toString() });
-				emit('state', state());
-				schedule();
-			},
-			replaceDocument(text) {
-				edit(() => cm.dispatch({ changes: { from: 0, to: cm.state.doc.length, insert: String(text) }, userEvent: 'api' }));
-			},
-			replaceRange(text, from, to = from) {
-				edit(() => {
-					const start = offsetAt(cm.state.doc, from), end = offsetAt(cm.state.doc, to);
-					cm.dispatch({ changes: { from: Math.min(start, end), to: Math.max(start, end), insert: String(text) }, userEvent: 'api' });
-				});
-			},
-			getSelection() {
-				assertAlive();
-				return selectionText();
-			},
-			setEasyLineSelectionMode(enabled) {
-				assertAlive();
-				view.setEasyLineSelectionMode(enabled);
-			},
-			setLineSelectionMode(enabled) {
-				api.setEasyLineSelectionMode(enabled);
-			},
-			replaceSelection(text) {
-				edit(() => {
-					const { state } = cm;
-					const insert = state.toText(String(text));
-					cm.dispatch(state.changeByRange(range => ({
-						changes: { from: range.from, to: range.to, insert },
-						range: EditorSelection.range(range.from, range.from + insert.length),
-					})), { userEvent: 'api' });
-				});
-			},
-			getState() {
-				assertAlive();
-				return state();
-			},
-			getSettings() {
-				assertAlive();
-				return { ...settings, gutterLineSelection: settings.easyLineSelection };
-			},
-			setSettings(patch) {
-				assertAlive();
-				validate(patch);
-				if ('codeLanguage' in patch && patch.codeLanguage !== settings.codeLanguage) {
-					throw new TypeError('codeLanguage can only be selected when creating an editor');
-				}
-				const wasAnalyzing = settings.analysis;
-				const delayChanged = Object.hasOwn(patch, 'analysisDelay') && patch.analysisDelay !== settings.analysisDelay;
-				settings = { ...settings, ...normalizeSettings(patch) };
-				colorScheme.set(cm, settings.colorScheme);
-				if (!settings.analysis) {
-					clearTimeout(timer);
-					analysis = null;
-					cm.dispatch({ effects: setCommonAnalysis.of(null) });
-				}
-				applySettings();
-				if (settings.analysis && (!wasAnalyzing || delayChanged)) schedule();
-				emit('settings', api.getSettings());
-				emit('state', state());
-			},
-			setDefinitions(defs) {
-				assertAlive();
-				if (!Array.isArray(defs)) {
-					throw new TypeError('definitions must be an array');
-				}
-				view.setDefinitions(structuredClone(defs));
-			},
-			getAnalysis() {
-				assertAlive();
-				return structuredClone(analysis);
-			},
-			analyzeNow() {
-				clearTimeout(timer);
-				return requestAnalysis();
-			},
-			on(type, listener) {
-				assertAlive();
-				if (typeof listener !== 'function') {
-					throw new TypeError('listener must be a function');
-				}
-				if (!listeners.has(type)) listeners.set(type, new Set());
-				listeners.get(type).add(listener);
-				return () => listeners.get(type)?.delete(listener);
-			},
-			execute(command) {
-				assertAlive();
-				const commands = ['undo', 'redo', 'cut', 'copy', 'paste', 'selectAll', 'toggleComment', 'format', 'find', 'findNext', 'replace', 'complete'];
-				if (!commands.includes(command)) {
-					throw new TypeError(`Unknown command: ${command}`);
-				}
-				if (settings.disabled) return;
-				if (settings.readOnly && ['undo', 'redo', 'cut', 'paste', 'toggleComment', 'format', 'replace', 'complete'].includes(command)) {
-					return;
-				}
-				if (['cut', 'copy', 'paste'].includes(command)) {
-					cm.focus();
-					document.execCommand(command);
-					return;
-				}
-				if (command === 'format' && !settings.formatting) return;
-				view[command]();
-			},
-			focus() {
-				assertAlive();
-				if (!settings.disabled) cm.focus();
-			},
-			blur() {
-				assertAlive();
-				cm.contentDOM.blur();
-			},
-			hasFocus() {
-				assertAlive();
-				return cm.hasFocus;
-			},
-			moveTo(position, { focus = true } = {}) {
-				assertAlive();
-				if (settings.disabled) return;
-				const anchor = offsetAt(cm.state.doc, position);
-				cm.dispatch({ selection: { anchor }, effects: EditorView.scrollIntoView(anchor, { yMargin: 32 }) });
-				if (focus) cm.focus();
-			},
-			highlightLine(line) {
-				assertAlive();
-				if (!Number.isInteger(line) || line < 0 || line >= cm.state.doc.lines) {
-					throw new RangeError('Invalid line');
-				}
-				const id = ++markerId;
-				view.highlightLine(id, line);
-				return id;
-			},
-			clearHighlight(id) {
-				assertAlive();
-				view.clearHighlight(id);
-			},
-			setHighlightedLines(lines) {
-				assertAlive();
-				view.setHighlightedLines(lines);
-			},
-			getFunctionLineNumber(line) {
-				assertAlive();
-				if (!Number.isInteger(line) || line < 0 || line >= cm.state.doc.lines) {
-					throw new RangeError('Invalid line');
-				}
-				return view.getSectionLineNumber(line);
-			},
-			refresh() {
-				assertAlive();
-				view.refresh();
-			},
-			destroy: dispose,
-		};
-		applySettings();
-		api.loadDocument(value);
-		if (settings.analysis) await api.analyzeNow();
-		return api;
-	} catch (error) {
-		dispose();
-		throw error;
+		fn();
+	} finally {
+		context.programmatic = false;
+		setFormatState(context);
 	}
+}
+
+function getEditorState(context) {
+	return {
+		version : context.version,
+		readOnly: context.settings.readOnly,
+		disabled: context.settings.disabled,
+		canUndo : context.view.historySize().undo > 0,
+		canRedo : context.view.historySize().redo > 0,
+	};
+}
+
+// Public API assembly --------------------------------------------------------
+
+function createEditorAPI(context) {
+	return {
+		...createDocumentAPI(context),
+		...createSelectionAPI(context),
+		...createSettingsAPI(context),
+		...createAnalysisAPI(context),
+		...createEventAPI(context),
+		...createCommandAPI(context),
+		...createHighlightAPI(context),
+		refresh() {
+			assertAlive(context);
+			context.view.refresh();
+		},
+		destroy: disposeEditor.bind(null, context),
+	};
+}
+
+function createDocumentAPI(context) {
+	return {
+		getValue() {
+			assertAlive(context);
+			return context.cm.state.doc.toString();
+		},
+		getLineCount() {
+			assertAlive(context);
+			return context.cm.state.doc.lines;
+		},
+		loadDocument(text) {
+			assertAlive(context);
+			context.loading = true;
+			setFormatState(context);
+			try {
+				context.view.loadDocument(String(text));
+			} finally {
+				context.loading = false;
+				setFormatState(context);
+			}
+			emit(context, 'change', { origin: 'load', version: context.version, text: context.cm.state.doc.toString() });
+			emit(context, 'state', getEditorState(context));
+			scheduleAnalysis(context);
+		},
+		replaceDocument(text) {
+			edit(context, () => context.cm.dispatch({ changes: { from: 0, to: context.cm.state.doc.length, insert: String(text) }, userEvent: 'api' }));
+		},
+		replaceRange(text, from, to = from) {
+			edit(context, () => {
+				const start = offsetAt(context.cm.state.doc, from), end = offsetAt(context.cm.state.doc, to);
+				context.cm.dispatch({ changes: { from: Math.min(start, end), to: Math.max(start, end), insert: String(text) }, userEvent: 'api' });
+			});
+		},
+	};
+}
+
+function createSelectionAPI(context) {
+	return {
+		getSelection() {
+			assertAlive(context);
+			return selectionText(context);
+		},
+		setEasyLineSelectionMode(enabled) {
+			assertAlive(context);
+			context.view.setEasyLineSelectionMode(enabled);
+		},
+		setLineSelectionMode(enabled) {
+			context.api.setEasyLineSelectionMode(enabled);
+		},
+		replaceSelection(text) {
+			edit(context, () => {
+				const { state } = context.cm;
+				const insert = state.toText(String(text));
+				context.cm.dispatch(state.changeByRange(range => ({
+					changes: { from: range.from, to: range.to, insert },
+					range: EditorSelection.range(range.from, range.from + insert.length),
+				})), { userEvent: 'api' });
+			});
+		},
+	};
+}
+
+function createSettingsAPI(context) {
+	return {
+		getState() {
+			assertAlive(context);
+			return getEditorState(context);
+		},
+		getSettings() {
+			assertAlive(context);
+			return { ...context.settings, gutterLineSelection: context.settings.easyLineSelection };
+		},
+		setSettings(patch) {
+			assertAlive(context);
+			validate(patch);
+			if ('codeLanguage' in patch && patch.codeLanguage !== context.settings.codeLanguage) {
+				throw new TypeError('codeLanguage can only be selected when creating an editor');
+			}
+			const wasAnalyzing = context.settings.analysis;
+			const delayChanged = Object.hasOwn(patch, 'analysisDelay') && patch.analysisDelay !== context.settings.analysisDelay;
+			context.settings = { ...context.settings, ...normalizeSettings(patch) };
+			context.colorScheme.set(context.cm, context.settings.colorScheme);
+			if (!context.settings.analysis) {
+				clearTimeout(context.timer);
+				context.analysis = null;
+				context.cm.dispatch({ effects: setCommonAnalysis.of(null) });
+			}
+			applySettings(context);
+			if (context.settings.analysis && (!wasAnalyzing || delayChanged)) scheduleAnalysis(context);
+			emit(context, 'settings', context.api.getSettings());
+			emit(context, 'state', getEditorState(context));
+		},
+		setDefinitions(defs) {
+			assertAlive(context);
+			if (!Array.isArray(defs)) {
+				throw new TypeError('definitions must be an array');
+			}
+			context.view.setDefinitions(structuredClone(defs));
+		},
+	};
+}
+
+function createAnalysisAPI(context) {
+	return {
+		getAnalysis() {
+			assertAlive(context);
+			return structuredClone(context.analysis);
+		},
+		analyzeNow() {
+			clearTimeout(context.timer);
+			return requestAnalysis(context);
+		},
+	};
+}
+
+function createEventAPI(context) {
+	return {
+		on(type, listener) {
+			assertAlive(context);
+			if (typeof listener !== 'function') {
+				throw new TypeError('listener must be a function');
+			}
+			if (!context.listeners.has(type)) context.listeners.set(type, new Set());
+			context.listeners.get(type).add(listener);
+			return () => context.listeners.get(type)?.delete(listener);
+		},
+	};
+}
+
+function createCommandAPI(context) {
+	return {
+		execute(command) {
+			assertAlive(context);
+			const commands = ['undo', 'redo', 'cut', 'copy', 'paste', 'selectAll', 'toggleComment', 'format', 'find', 'findNext', 'replace', 'complete'];
+			if (!commands.includes(command)) {
+				throw new TypeError(`Unknown command: ${command}`);
+			}
+			if (context.settings.disabled) return;
+
+			if (context.settings.readOnly && ['undo', 'redo', 'cut', 'paste', 'toggleComment', 'format', 'replace', 'complete'].includes(command)) {
+				return;
+			}
+			if (['cut', 'copy', 'paste'].includes(command)) {
+				context.cm.focus();
+				document.execCommand(command);
+				return;
+			}
+			if (command === 'format' && !context.settings.formatting) return;
+
+			context.view[command]();
+		},
+		focus() {
+			assertAlive(context);
+			if (!context.settings.disabled) context.cm.focus();
+		},
+		blur() {
+			assertAlive(context);
+			context.cm.contentDOM.blur();
+		},
+		hasFocus() {
+			assertAlive(context);
+			return context.cm.hasFocus;
+		},
+		moveTo(position, { focus = true } = {}) {
+			assertAlive(context);
+			if (context.settings.disabled) return;
+
+			const anchor = offsetAt(context.cm.state.doc, position);
+			context.cm.dispatch({ selection: { anchor }, effects: EditorView.scrollIntoView(anchor, { yMargin: 32 }) });
+			if (focus) {
+				context.cm.focus();
+			}
+		},
+	};
+}
+
+function createHighlightAPI(context) {
+	return {
+		highlightLine(line) {
+			assertAlive(context);
+			if (!Number.isInteger(line) || line < 0 || line >= context.cm.state.doc.lines) {
+				throw new RangeError('Invalid line');
+			}
+			const id = ++context.markerId;
+			context.view.highlightLine(id, line);
+			return id;
+		},
+		clearHighlight(id) {
+			assertAlive(context);
+			context.view.clearHighlight(id);
+		},
+		setHighlightedLines(lines) {
+			assertAlive(context);
+			context.view.setHighlightedLines(lines);
+		},
+		getFunctionLineNumber(line) {
+			assertAlive(context);
+			if (!Number.isInteger(line) || line < 0 || line >= context.cm.state.doc.lines) {
+				throw new RangeError('Invalid line');
+			}
+			return context.view.getSectionLineNumber(line);
+		},
+	};
 }
 
 function changeSource(transaction) {

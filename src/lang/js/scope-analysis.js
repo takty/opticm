@@ -14,9 +14,11 @@ export function analyzeReferences(ast) {
 
 	function bind(node, scope, evaluationScope = scope) {
 		if (!node) return;
+
 		switch (node.type) {
 			case 'Identifier':
 				if (node.name === '✖' || node.start >= node.end) return;
+
 				definitions.push(node);
 				scope.bindings.set(node.name, node);
 				break;
@@ -43,6 +45,7 @@ export function analyzeReferences(ast) {
 
 	function visit(node, scope) {
 		if (!node) return;
+
 		if (FUNCTIONS.has(node.type)) {
 			const parameters = createScope(scope);
 			if (node.type === 'FunctionDeclaration') {

@@ -138,6 +138,7 @@ export function preventOverlap(fn) {
 		pending    = true;
 
 		if (running) return;
+
 		running = true;
 
 		try {

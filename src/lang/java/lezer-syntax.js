@@ -54,6 +54,7 @@ export const lezerSyntax = {
 		tree.iterate({
 			enter(node) {
 				if (node.name !== 'Dimension') return;
+
 				const dimension = node.node;
 				let owner = dimension.parent;
 				if (owner?.name === 'VariableDeclarator') owner = owner.parent;
@@ -67,6 +68,7 @@ export const lezerSyntax = {
 					'MethodDeclaration',
 					'ForSpec',
 				].includes(owner.name)) return;
+
 				const type = owner.getChild('ArrayType') ?? owner;
 				const kind = type.getChild('PrimitiveType') ? 'keyword' : 'type';
 				for (let child = dimension.firstChild; child; child = child.nextSibling) {

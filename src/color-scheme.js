@@ -26,6 +26,7 @@ export function createColorScheme(root) {
 	function apply() {
 		const scheme = (mode === 'auto' ? preference?.matches : mode === 'dark') ? 'dark' : 'light';
 		if (root.dataset.opticmColorScheme === scheme) return;
+
 		root.dataset.opticmColorScheme = scheme;
 		view.dispatch({ effects: theme.reconfigure(scheme === 'dark' ? DARK_THEME : []) });
 		refreshStructure(view);
@@ -40,6 +41,7 @@ export function createColorScheme(root) {
 		extension: theme.of([]),
 		set(editorView, nextMode) {
 			if (mode === nextMode) return;
+
 			view = editorView;
 			mode = nextMode;
 			stopWatching();

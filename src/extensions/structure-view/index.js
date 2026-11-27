@@ -177,8 +177,8 @@ const structurePlugin = ViewPlugin.fromClass(class {
 			top       : frame.top - root.top,
 			width,
 			height,
-			charWidth  : view.defaultCharacterWidth,
-			lineHeight : view.defaultLineHeight,
+			charWidth : view.defaultCharacterWidth,
+			lineHeight: view.defaultLineHeight,
 			scrollTop,
 			scrollLeft,
 			viewport,
@@ -198,9 +198,10 @@ const structurePlugin = ViewPlugin.fromClass(class {
 			this.pendingDraw = null;
 			if (pending === null) return;
 
-			const { view } = this;
+			const { view }                  = this;
 			const { scrollTop, scrollLeft } = view.scrollDOM;
-			const { viewport } = view;
+			const { viewport }              = view;
+
 			const moved = pending.scrollTop !== scrollTop || pending.scrollLeft !== scrollLeft ||
 				pending.viewport.from !== viewport.from || pending.viewport.to !== viewport.to;
 			try {
@@ -253,6 +254,7 @@ const structurePlugin = ViewPlugin.fromClass(class {
 			)),
 		]);
 		if (drawing === this.lastDrawing) return;
+
 		drawStructure(this.canvas, data, scale);
 		this.lastDrawing = drawing;
 	}
@@ -480,6 +482,7 @@ function drawRange(ctx, it, charWidth, drawStyle, padding, band, transparentColo
 	const fadeColor      = transparentColor(it.fill);
 	const fillHorizontal = (x, y, width, radii) => {
 		if (width <= 0) return;
+
 		const gradient = ctx.createLinearGradient(x, y, x + width, y);
 		gradient.addColorStop(0, it.fill);
 		gradient.addColorStop(1, fadeColor);

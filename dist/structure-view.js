@@ -301,7 +301,7 @@ function extensionStyles(css) {
 }
 
 // .build/extensions/structure-view/style.css
-var style_default = ".cm-editor.cm-structure-view {\r\n	.cm-scroller {\r\n		z-index: auto;\r\n	}\r\n\r\n	.cm-content {\r\n		z-index: 1;\r\n	}\r\n\r\n	.cm-structure-overlay {\r\n		position: absolute;\r\n		z-index : 0;\r\n		overflow: hidden;\r\n\r\n		pointer-events: none;\r\n	}\r\n\r\n	.code-structure-view {\r\n		display: block;\r\n		width  : 100%;\r\n		height : 100%;\r\n	}\r\n}\r\n";
+var style_default = "/**\r\n * Structure canvas layout and overlay stacking\r\n *\r\n * @author Takuto Yanagida\r\n * @version 2026-11-28\r\n */\r\n\r\n.cm-editor.cm-structure-view {\r\n	.cm-scroller {\r\n		z-index: auto;\r\n	}\r\n\r\n	.cm-content {\r\n		z-index: 1;\r\n	}\r\n\r\n	.cm-structure-overlay {\r\n		position: absolute;\r\n		z-index : 0;\r\n		overflow: hidden;\r\n\r\n		pointer-events: none;\r\n	}\r\n\r\n	.code-structure-view {\r\n		display: block;\r\n		width  : 100%;\r\n		height : 100%;\r\n	}\r\n}\r\n";
 
 // .build/extensions/structure-view/index.js
 var setStructure = StateEffect.define();

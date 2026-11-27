@@ -97,6 +97,24 @@ export function positionAt(doc, offset) {
 
 export class Editor {
 	constructor({ language, colorScheme = [], phrases, onFontSizeChange, onLineHeightChange, onUpdate, allowChanges = () => true }, parent) {
+		this.#initializeState(language, phrases);
+		this.view = new EditorView({
+			parent,
+			extensions: this.#createExtensions(colorScheme, phrases, allowChanges),
+			dispatchTransactions: (transactions, view) => {
+				const before = view.state;
+				view.update(transactions);
+				onUpdate?.(before, transactions);
+				if (transactions.some(transaction => transaction.docChanged || transaction.selection || transaction.isUserEvent('load'))) {
+					this.afterEdit(transactions);
+				}
+			},
+		});
+		this.#registerEvents(onFontSizeChange, onLineHeightChange);
+		this.refresh();
+	}
+
+	#initializeState(language, phrases) {
 		this.language            = language;
 		this.enabled             = true;
 		this.readOnly            = false;
@@ -128,6 +146,55 @@ export class Editor {
 			gutterSelection: new Compartment(),
 		};
 		this.optionState = null;
+	}
+
+	#createExtensions(colorScheme, phrases, allowChanges) {
+		return [
+			...this.#createInitialOptionExtensions(colorScheme, phrases),
+			...this.#createEditingExtensions(allowChanges),
+			...this.#createVisualExtensions(),
+			this.#createCompletionExtension(),
+			EditorView.updateListener.of(update => {
+				if (update.geometryChanged || update.viewportChanged || update.docChanged) this.refresh();
+			}),
+		];
+	}
+
+	#createInitialOptionExtensions(colorScheme, phrases) {
+		return [
+			colorScheme,
+			this.options.font.of([]),
+			this.options.phrases.of(EditorState.phrases.of(phrases)),
+			this.options.wrapping.of([]),
+			this.options.structure.of(createStructureExtensions({
+				structureHighlight  : true,
+				declarationHighlight: true,
+				referenceHighlight  : true,
+			})),
+			this.options.syntax.of(createSyntaxExtensions({ syntaxHighlight: true, semanticHighlight: true })),
+			this.options.functionMarkers.of([]),
+			this.options.brackets.of(bracketMatchingExtension),
+			this.options.access.of([]),
+			this.options.diagnostics.of([]),
+		];
+	}
+
+	#createEditingExtensions(allowChanges) {
+		return [
+			this.language.extensions,
+			this.options.indentOnInput.of([]),
+			EditorState.tabSize.of(TAB_SIZE),
+			indentUnit.of('\t'),
+			EditorState.allowMultipleSelections.of(true),
+			EditorState.transactionFilter.of(transaction => !transaction.docChanged || allowChanges() ? transaction : []),
+			this.history.of(history({ newGroupDelay: 200 })),
+			this.#createKeyBindings(),
+			this.options.closeBrackets.of([]),
+			keymap.of([...searchKeymap, ...defaultKeymap, ...historyKeymap]),
+		];
+	}
+
+	#createKeyBindings() {
 		const customKeys = [
 			{ key: 'Ctrl-\\', run: () => this.complete() },
 			{ key: 'Ctrl-Tab', run: () => this.complete() },
@@ -137,85 +204,57 @@ export class Editor {
 			{ key: 'Tab', run: acceptCompletion },
 			{ key: 'Tab', run: view => !view.state.readOnly && insertTab(view), shift: indentLess },
 		];
-		this.view = new EditorView({
-			parent,
-			extensions: [
-				colorScheme,
-				this.options.font.of([]),
-				this.options.phrases.of(EditorState.phrases.of(phrases)),
-				this.options.wrapping.of([]),
-				this.options.structure.of(createStructureExtensions({
-					structureHighlight  : true,
-					declarationHighlight: true,
-					referenceHighlight  : true,
-				})),
-				this.options.syntax.of(createSyntaxExtensions({ syntaxHighlight: true, semanticHighlight: true })),
-				this.options.functionMarkers.of([]),
-				this.options.brackets.of(bracketMatchingExtension),
-				this.options.access.of([]),
-				this.options.diagnostics.of([]),
-				language.extensions,
-				this.options.indentOnInput.of([]),
-				EditorState.tabSize.of(TAB_SIZE),
-				indentUnit.of('\t'),
-				EditorState.allowMultipleSelections.of(true),
-				EditorState.transactionFilter.of(transaction => !transaction.docChanged || allowChanges() ? transaction : []),
-				this.history.of(history({ newGroupDelay: 200 })),
-				Prec.high(keymap.of([...customKeys, ...legacyKeymap])),
-				this.options.closeBrackets.of([]),
-				keymap.of([...searchKeymap, ...defaultKeymap, ...historyKeymap]),
-				fullLineSelection({ cursorBlinkRate: 530 }),
-				highlightActiveLine(),
-				highlightActiveLineGutter(),
-				selectionState,
-				highlightSelectionMatches(),
-				whitespaceHighlighting(),
-				EditorView.scrollMargins.of(() => ({ top: 32, bottom: 32 })),
-				EditorView.contentAttributes.of({ spellcheck: 'false' }),
-				EditorView.domEventHandlers({
-					copy: (_event, view) => hasNoSelection(view),
-					cut: (_event, view) => hasNoSelection(view),
-				}),
-				this.options.rulers.of(indentRulers),
-				standardGutterLineSelection,
-				this.options.gutterSelection.of([]),
-				highlightField,
-				staticLineHighlighting,
-				argumentHintField,
-				commonAnalysisState,
-				lintGutter(),
-				this.options.numbers.of(absoluteLineNumbers),
-				search(),
-				autocompletion({
-					activateOnTyping: false,
-					override        : [context => this.completeAt(context)],
-					icons           : false,
-					addToOptions    : [{
-						position: 10,
-						render  : (completion, _state, view) => {
-							if (!completion.className) return null;
-							const icon = view.dom.ownerDocument.createElement('span');
-							icon.className = completion.className;
-							return icon;
-						},
-					}],
-				}),
-				EditorView.updateListener.of(update => {
-					if (update.geometryChanged || update.viewportChanged || update.docChanged) this.refresh();
-				}),
-			],
-			dispatchTransactions: (transactions, view) => {
-				const before = view.state;
-				view.update(transactions);
-				onUpdate?.(before, transactions);
-				if (transactions.some(transaction => transaction.docChanged || transaction.selection || transaction.isUserEvent('load'))) {
-					this.afterEdit(transactions);
-				}
-			},
-		});
+		return Prec.high(keymap.of([...customKeys, ...legacyKeymap]));
+	}
 
+	#createVisualExtensions() {
+		return [
+			fullLineSelection({ cursorBlinkRate: 530 }),
+			highlightActiveLine(),
+			highlightActiveLineGutter(),
+			selectionState,
+			highlightSelectionMatches(),
+			whitespaceHighlighting(),
+			EditorView.scrollMargins.of(() => ({ top: 32, bottom: 32 })),
+			EditorView.contentAttributes.of({ spellcheck: 'false' }),
+			EditorView.domEventHandlers({
+				copy: (_event, view) => hasNoSelection(view),
+				cut: (_event, view) => hasNoSelection(view),
+			}),
+			this.options.rulers.of(indentRulers),
+			standardGutterLineSelection,
+			this.options.gutterSelection.of([]),
+			highlightField,
+			staticLineHighlighting,
+			argumentHintField,
+			commonAnalysisState,
+			lintGutter(),
+			this.options.numbers.of(absoluteLineNumbers),
+			search(),
+		];
+	}
+
+	#createCompletionExtension() {
+		return autocompletion({
+			activateOnTyping: false,
+			override        : [context => this.completeAt(context)],
+			icons           : false,
+			addToOptions    : [{
+				position: 10,
+				render  : (completion, _state, view) => {
+					if (!completion.className) return null;
+					const icon = view.dom.ownerDocument.createElement('span');
+					icon.className = completion.className;
+					return icon;
+				},
+			}],
+		});
+	}
+
+	#registerEvents(onFontSizeChange, onLineHeightChange) {
 		this.listen(this.view.dom, 'wheel', event => {
 			if (!this.enabled || !this.view.hasFocus || !event.ctrlKey || event.deltaY === 0) return;
+
 			event.preventDefault();
 			const direction = event.deltaY > 0 ? -1 : 1;
 			if (event.shiftKey) {
@@ -226,7 +265,6 @@ export class Editor {
 		}, { passive: false });
 		this.listen(this.view.contentDOM, 'keypress', event => this.scheduleCompletion(event));
 		this.listen(this.view.contentDOM, 'mousemove', () => { this.view.contentDOM.style.cursor = ''; });
-		this.refresh();
 	}
 
 	listen(target, type, handler, options = {}) {
@@ -242,67 +280,28 @@ export class Editor {
 		const reopenSearch = searchPanelOpen(view.state) && (this.phrases !== phrases || this.readOnly !== settings.readOnly);
 		if (reopenSearch) closeSearchPanel(view);
 
-		this.phrases              = phrases;
-		this.enabled              = !settings.disabled;
-		this.readOnly             = settings.readOnly;
-		this.autoIndent           = settings.autoIndent;
-		this.completion           = settings.completion;
+		this.phrases         = phrases;
+		this.enabled         = !settings.disabled;
+		this.readOnly        = settings.readOnly;
+		this.autoIndent      = settings.autoIndent;
+		this.completion      = settings.completion;
 		const sectionNumbers = settings.analysis && settings.functionLineNumbers && this.language.supportsFunctionSections;
-		this.functionMarkers      = settings.analysis && settings.functionScrollMarkers && this.language.supportsFunctionSections;
-		if (!this.canUseCompletion()) this.closeCompletion();
-		const previous = this.optionState ?? {};
-		const effects = [];
+		this.functionMarkers = settings.analysis && settings.functionScrollMarkers && this.language.supportsFunctionSections;
+		if (!this.canUseCompletion()) {
+			this.closeCompletion();
+		}
+		const previous           = this.optionState ?? {};
+		const effects            = [];
+		const diagnosticsChanged = previous.diagnosticSource !== diagnosticSource;
 		if (previous.autoIndent !== settings.autoIndent) {
 			effects.push(this.options.indentOnInput.reconfigure(settings.autoIndent ? indentOnInput() : []));
 		}
-		if (previous.fontFamily !== settings.fontFamily || previous.fontSize !== settings.fontSize ||
-			previous.lineHeight !== settings.lineHeight) {
-			effects.push(this.options.font.reconfigure(EditorView.theme({
-				'&': { fontFamily: settings.fontFamily, fontSize: settings.fontSize + 'px', lineHeight: settings.lineHeight + '%' },
-			})));
-		}
-		const diagnosticsChanged = previous.diagnosticSource !== diagnosticSource;
-		if (previous.phrases !== phrases) effects.push(this.options.phrases.reconfigure(EditorState.phrases.of(phrases)));
-		if (previous.lineWrapping !== settings.lineWrapping) {
-			effects.push(this.options.wrapping.reconfigure(settings.lineWrapping ? EditorView.lineWrapping : []));
-		}
-		if (previous.rulers !== settings.rulers) {
-			effects.push(this.options.rulers.reconfigure(settings.rulers ? indentRulers : []));
-		}
-		if (previous.easyLineSelection !== settings.easyLineSelection) {
-			effects.push(this.options.gutterSelection.reconfigure(settings.easyLineSelection ? easyLineSelection : []));
-		}
+		this.#addLayoutEffects(effects, settings, previous, phrases);
 		const { lineNumbers = true, lineNumberStart = 1 } = settings;
 		const numberMode = lineNumbers && (sectionNumbers ? 'function' : 'absolute');
-		if (previous.numberMode !== numberMode || previous.lineNumberStart !== lineNumberStart) {
-			effects.push(this.options.numbers.reconfigure(createLineNumberExtensions(numberMode, lineNumberStart)));
-		}
-		if (previous.structureHighlight !== settings.structureHighlight ||
-			previous.declarationHighlight !== settings.declarationHighlight || previous.referenceHighlight !== settings.referenceHighlight) {
-			effects.push(this.options.structure.reconfigure(createStructureExtensions(settings)));
-		}
-		if (previous.syntaxHighlight !== settings.syntaxHighlight ||
-			previous.semanticHighlight !== settings.semanticHighlight) {
-			effects.push(this.options.syntax.reconfigure(createSyntaxExtensions(settings)));
-		}
-		if (previous.functionMarkers !== this.functionMarkers) {
-			effects.push(this.options.functionMarkers.reconfigure(this.functionMarkers ? functionScrollMarkers : []));
-		}
+		this.#addHighlightEffects(effects, settings, previous, numberMode, lineNumberStart);
 		const bracketsEnabled = settings.bracketMatching && this.language.supportsBracketMatching;
-		if (previous.bracketsEnabled !== bracketsEnabled) {
-			effects.push(this.options.brackets.reconfigure(bracketsEnabled ? bracketMatchingExtension : []));
-		}
-		if (previous.closeBrackets !== settings.closeBrackets || previous.closeBraces !== settings.closeBraces) {
-			effects.push(this.options.closeBrackets.reconfigure(settings.closeBrackets
-				? this.language.closeBrackets(settings.closeBraces) : []));
-		}
-		if (previous.readOnly !== this.readOnly || previous.enabled !== this.enabled) {
-			effects.push(this.options.access.reconfigure([
-				EditorState.readOnly.of(this.readOnly || !this.enabled),
-				EditorView.editable.of(this.enabled),
-				EditorView.contentAttributes.of({ 'aria-readonly': String(this.readOnly || !this.enabled) }),
-			]));
-		}
+		this.#addAccessEffects(effects, settings, previous, bracketsEnabled);
 		if (diagnosticsChanged) {
 			effects.push(this.options.diagnostics.reconfigure(this.#createDiagnosticExtension(diagnosticSource)));
 		}
@@ -319,6 +318,59 @@ export class Editor {
 		});
 		if (reopenSearch && this.enabled) openSearchPanel(view);
 		this.refresh();
+	}
+
+	#addLayoutEffects(effects, settings, previous, phrases) {
+		if (previous.fontFamily !== settings.fontFamily || previous.fontSize !== settings.fontSize ||
+			previous.lineHeight !== settings.lineHeight) {
+			effects.push(this.options.font.reconfigure(EditorView.theme({
+				'&': { fontFamily: settings.fontFamily, fontSize: settings.fontSize + 'px', lineHeight: settings.lineHeight + '%' },
+			})));
+		}
+		if (previous.phrases !== phrases) effects.push(this.options.phrases.reconfigure(EditorState.phrases.of(phrases)));
+		if (previous.lineWrapping !== settings.lineWrapping) {
+			effects.push(this.options.wrapping.reconfigure(settings.lineWrapping ? EditorView.lineWrapping : []));
+		}
+		if (previous.rulers !== settings.rulers) {
+			effects.push(this.options.rulers.reconfigure(settings.rulers ? indentRulers : []));
+		}
+		if (previous.easyLineSelection !== settings.easyLineSelection) {
+			effects.push(this.options.gutterSelection.reconfigure(settings.easyLineSelection ? easyLineSelection : []));
+		}
+	}
+
+	#addHighlightEffects(effects, settings, previous, numberMode, lineNumberStart) {
+		if (previous.numberMode !== numberMode || previous.lineNumberStart !== lineNumberStart) {
+			effects.push(this.options.numbers.reconfigure(createLineNumberExtensions(numberMode, lineNumberStart)));
+		}
+		if (previous.structureHighlight !== settings.structureHighlight ||
+			previous.declarationHighlight !== settings.declarationHighlight || previous.referenceHighlight !== settings.referenceHighlight) {
+			effects.push(this.options.structure.reconfigure(createStructureExtensions(settings)));
+		}
+		if (previous.syntaxHighlight !== settings.syntaxHighlight ||
+			previous.semanticHighlight !== settings.semanticHighlight) {
+			effects.push(this.options.syntax.reconfigure(createSyntaxExtensions(settings)));
+		}
+		if (previous.functionMarkers !== this.functionMarkers) {
+			effects.push(this.options.functionMarkers.reconfigure(this.functionMarkers ? functionScrollMarkers : []));
+		}
+	}
+
+	#addAccessEffects(effects, settings, previous, bracketsEnabled) {
+		if (previous.bracketsEnabled !== bracketsEnabled) {
+			effects.push(this.options.brackets.reconfigure(bracketsEnabled ? bracketMatchingExtension : []));
+		}
+		if (previous.closeBrackets !== settings.closeBrackets || previous.closeBraces !== settings.closeBraces) {
+			effects.push(this.options.closeBrackets.reconfigure(settings.closeBrackets
+				? this.language.closeBrackets(settings.closeBraces) : []));
+		}
+		if (previous.readOnly !== this.readOnly || previous.enabled !== this.enabled) {
+			effects.push(this.options.access.reconfigure([
+				EditorState.readOnly.of(this.readOnly || !this.enabled),
+				EditorView.editable.of(this.enabled),
+				EditorView.contentAttributes.of({ 'aria-readonly': String(this.readOnly || !this.enabled) }),
+			]));
+		}
 	}
 
 	#createDiagnosticExtension(diagnosticSource) {
@@ -389,6 +441,7 @@ export class Editor {
 	scheduleCompletion(event) {
 		clearTimeout(this.completionTimer);
 		if (!this.canComplete() || event.isComposing || event.key.length !== 1) return;
+
 		const trigger = this.language.completionTrigger?.(event.key);
 		if (trigger) {
 			this.completionTimer = setTimeout(() => {
@@ -471,9 +524,11 @@ export class Editor {
 
 	afterEdit(transactions) {
 		if (this.abort.signal.aborted) return;
+
 		const transaction = transactions.at(-1);
 		const { view } = this;
 		if (view.state !== transaction.state) return;
+
 		if (view.hasFocus) {
 			view.contentDOM.style.cursor = view.dom.ownerDocument.defaultView
 				.getComputedStyle(view.dom)
@@ -550,6 +605,7 @@ export class Editor {
 			}
 		}
 		if (!changes.length && !collapse) return;
+
 		const selection = state.selection.main;
 		const changeSet = state.changes(changes);
 		view.dispatch({

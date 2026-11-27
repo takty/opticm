@@ -11,6 +11,7 @@ import { diagnoseJava } from './diagnostics.js';
 
 self.onmessage = async ({ data: { type, treeSitterWasmURL, javaWasmURL } }) => {
 	if (type !== 'initialize') return;
+
 	self.onmessage = null;
 	try {
 		await Parser.init({

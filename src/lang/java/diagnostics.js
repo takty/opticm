@@ -90,6 +90,7 @@ function collectDiagnostics(root, messages) {
 	});
 	const checkBody = node => {
 		if (!node || node.type === 'block' || node.hasError) return;
+
 		add(node, 'warning', messages.wrapInBraces);
 	};
 

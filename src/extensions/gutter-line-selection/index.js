@@ -119,9 +119,11 @@ const gutterSelection = ViewPlugin.fromClass(class {
 		}
 		const line = this.lineAt(event);
 		if (line === null) return;
+
 		event.preventDefault();
-		this.down = line;
+		this.down    = line;
 		this.dragged = false;
+
 		if (event.shiftKey) {
 			this.anchor ??= view.state.doc.lineAt(view.state.selection.main.head).number;
 			this.setMode(false);
@@ -134,13 +136,17 @@ const gutterSelection = ViewPlugin.fromClass(class {
 
 	mouseMove(event) {
 		const overGutter = event.target.closest('.cm-gutter-lint, .cm-lineNumbers, .cm-sectionNumbers');
-		const line = overGutter || (this.down !== null && event.buttons === 1) ? this.lineAt(event) : null;
+		const line       = overGutter || (this.down !== null && event.buttons === 1) ? this.lineAt(event) : null;
+
 		this.setHoveredGutterLine(overGutter ? line : null);
 		if (this.down === null || event.buttons !== 1) return;
+
 		if (line !== null) {
 			if (!this.dragged && line !== this.down) {
 				this.dragged = true;
-				if (!event.shiftKey) this.anchor = this.down;
+				if (!event.shiftKey) {
+					this.anchor = this.down;
+				}
 				this.setMode(false);
 			}
 			this.select(line);

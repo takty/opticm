@@ -307,7 +307,7 @@ function extensionStyles(css) {
 }
 
 // .build/extensions/static-line-highlighting/style.css
-var style_default = ".cm-editor .cm-content .cm-line.cm-opticm-highlighted-line:not(.error-line) {\n	background: var(--opticm-color-highlighted-line, linear-gradient(\n		to right,\n		var(--opticm-default-color-highlighted-line-start),\n		var(--opticm-default-color-highlighted-line-end)\n	));\n}\n\n.cm-editor .cm-gutter-lint .cm-gutterElement.cm-opticm-highlighted-line-number,\n.cm-editor :is(.cm-lineNumbers, .cm-sectionNumbers) .cm-gutterElement.cm-opticm-highlighted-line-number:not(:hover) {\n	background: var(--opticm-color-highlighted-line, var(--opticm-default-color-highlighted-line-end));\n}\n";
+var style_default = "/**\n * Static line highlights and matching gutter backgrounds\n *\n * @author Takuto Yanagida\n * @version 2026-11-28\n */\n\n.cm-editor .cm-content .cm-line.cm-opticm-highlighted-line:not(.error-line) {\n	background: var(--opticm-color-highlighted-line, linear-gradient(\n		to right,\n		var(--opticm-default-color-highlighted-line-start),\n		var(--opticm-default-color-highlighted-line-end)\n	));\n}\n\n.cm-editor .cm-gutter-lint .cm-gutterElement.cm-opticm-highlighted-line-number,\n.cm-editor :is(.cm-lineNumbers, .cm-sectionNumbers) .cm-gutterElement.cm-opticm-highlighted-line-number:not(:hover) {\n	background: var(--opticm-color-highlighted-line, var(--opticm-default-color-highlighted-line-end));\n}\n";
 
 // .build/extensions/static-line-highlighting/index.js
 var setHighlightedLines = StateEffect.define();

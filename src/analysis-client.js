@@ -27,6 +27,7 @@ export class AnalysisClient {
 				}
 				const pending = this.pending.get(data.id);
 				if (!pending) return;
+
 				this.pending.delete(data.id);
 				if (data.error) {
 					pending.reject(new Error(data.error));
@@ -55,6 +56,7 @@ export class AnalysisClient {
 
 	fail(error) {
 		if (this.failure) return;
+
 		this.failure = error;
 		clearTimeout(this.timeout);
 		this.rejectReady(error);

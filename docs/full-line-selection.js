@@ -299,7 +299,7 @@ function extensionStyles(css) {
 }
 
 // .build/extensions/full-line-selection/style.css
-var style_default = ".cm-editor.cm-full-line-selection > .cm-scroller {\r\n	& > .cm-selectionLayer .cm-selectionBackground {\r\n		display: none;\r\n	}\r\n\r\n	& > .cm-full-line-selectionLayer {\r\n		z-index: 2 !important;\r\n\r\n		pointer-events: none;\r\n		mix-blend-mode: var(--opticm-selection-layer-blend-mode, var(--opticm-default-selection-layer-blend-mode));\r\n	}\r\n}\r\n";
+var style_default = "/**\r\n * Full visual-line selection backgrounds\r\n *\r\n * @author Takuto Yanagida\r\n * @version 2026-11-28\r\n */\r\n\r\n.cm-editor.cm-full-line-selection > .cm-scroller {\r\n	& > .cm-selectionLayer .cm-selectionBackground {\r\n		display: none;\r\n	}\r\n\r\n	& > .cm-full-line-selectionLayer {\r\n		z-index: 2 !important;\r\n\r\n		pointer-events: none;\r\n		mix-blend-mode: var(--opticm-selection-layer-blend-mode, var(--opticm-default-selection-layer-blend-mode));\r\n	}\r\n}\r\n";
 
 // .build/extensions/full-line-selection/index.js
 var EPSILON = 0.01;
