@@ -28,7 +28,7 @@ const DEFAULT_SETTINGS = {
 	language            : 'en',
 	codeLanguage        : 'javascript',
 	colorScheme         : 'light',
-	fontFamily          : 'ui-monospace, monospace',
+	fontFamily          : 'menlo, ui-monospace, monospace',
 	fontSize            : 16,
 	lineHeight          : 165,
 	lineWrapping        : false,
